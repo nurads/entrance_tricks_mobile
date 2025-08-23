@@ -21,6 +21,9 @@ class MyApp extends StatelessWidget {
         GetPage(name: VIEWS.home.path, page: () => const Home()),
         GetPage(name: VIEWS.login.path, page: () => Login()),
         GetPage(name: VIEWS.register.path, page: () => Register()),
+        GetPage(name: VIEWS.verifyPhone.path, page: () => VerifyPhone()),
+        GetPage(name: VIEWS.subjectDetail.path, page: () => SubjectDetail()),
+        GetPage(name: VIEWS.chapterDetail.path, page: () => ChapterDetail()),
         // GetPage(
         //   name: VIEWS.forgotPassword.name,
         //   page: () => const ForgotPassword(),
