@@ -9,128 +9,121 @@ class NotesTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<ChapterDetailController>(
       builder: (controller) {
-        final notes = controller.chapterData['notes'] ?? [];
-
-        return ListView.builder(
-          padding: EdgeInsets.all(16),
-          itemCount: notes.length,
-          itemBuilder: (context, index) {
-            final note = notes[index];
-            return Card(
-              margin: EdgeInsets.only(bottom: 12),
-              child: ListTile(
-                leading: Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: _getFileColor(note['type']).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    _getFileIcon(note['type']),
-                    color: _getFileColor(note['type']),
-                    size: 30,
-                  ),
-                ),
-                title: Text(
-                  note['title'],
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${note['type']} • ${note['size']}',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    if (note['isDownloaded'])
-                      Container(
-                        margin: EdgeInsets.only(top: 4),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.green.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          'Downloaded',
-                          style: TextStyle(
-                            color: Colors.green,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: Icon(
-                        note['isDownloaded']
-                            ? Icons.check_circle
-                            : Icons.download,
-                      ),
-                      color: note['isDownloaded']
-                          ? Colors.green
-                          : Theme.of(context).colorScheme.primary,
-                      onPressed: note['isDownloaded']
-                          ? null
-                          : () => _downloadNote(note['id']),
-                      tooltip: note['isDownloaded'] ? 'Downloaded' : 'Download',
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.visibility),
-                      onPressed: () => _openNote(note['id'], note['type']),
-                      tooltip: 'View',
-                    ),
-                  ],
-                ),
-                onTap: () => _openNote(note['id'], note['type']),
-              ),
-            );
-          },
+        return Padding(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Notes Content
+              _buildNotesContent(context),
+              
+              Spacer(),
+              
+              // Download Notes Button
+              _buildDownloadButton(context),
+            ],
+          ),
         );
       },
     );
   }
 
-  IconData _getFileIcon(String type) {
-    switch (type.toLowerCase()) {
-      case 'pdf':
-        return Icons.picture_as_pdf;
-      case 'markdown':
-        return Icons.description;
-      default:
-        return Icons.description;
-    }
+  Widget _buildNotesContent(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Unit 1: Physics and Human Society (Ethiopia)',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        
+        SizedBox(height: 24),
+        
+        // Definition & Scope Section
+        _buildNotesSection(
+          context,
+          'Definition & Scope',
+          'Physics is the study of matter, energy, and their interaction. It explores the fundamental principles that govern the natural world and provides the foundation for understanding how things work in our daily lives.',
+        ),
+        
+        SizedBox(height: 20),
+        
+        // Branches & Connections Section
+        _buildNotesSection(
+          context,
+          'Branches & Connections',
+          'Physics encompasses various branches including mechanics, thermodynamics, electromagnetism, and quantum physics. It has historical development and strong connections to other scientific fields.',
+        ),
+        
+        SizedBox(height: 20),
+        
+        // Social Importance Section
+        _buildNotesSection(
+          context,
+          'Social Importance',
+          'Physics plays a crucial role in transportation, medical science, communication technologies, and environmental studies. It helps us understand and improve the world around us.',
+        ),
+      ],
+    );
   }
 
-  Color _getFileColor(String type) {
-    switch (type.toLowerCase()) {
-      case 'pdf':
-        return Colors.red;
-      case 'markdown':
-        return Colors.blue;
-      default:
-        return Colors.grey;
-    }
+  Widget _buildNotesSection(BuildContext context, String title, String content) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.blue[600],
+          ),
+        ),
+        
+        SizedBox(height: 8),
+        
+        Text(
+          content,
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.black87,
+            height: 1.5,
+          ),
+        ),
+      ],
+    );
   }
 
-  void _downloadNote(int noteId) {
-    Get.snackbar('Info', 'Note download will be implemented');
+  Widget _buildDownloadButton(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: () => _downloadNotes(),
+        icon: Icon(Icons.download, color: Colors.white),
+        label: Text(
+          'Download notes',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.blue[600],
+          padding: EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
+    );
   }
 
-  void _openNote(int noteId, String type) {
-    if (type.toLowerCase() == 'markdown') {
-      Get.snackbar('Info', 'Markdown note reader will be implemented');
-    } else {
-      Get.snackbar('Info', 'PDF note reader will be implemented');
-    }
+  void _downloadNotes() {
+    Get.snackbar('Info', 'Notes download will be implemented');
   }
 }

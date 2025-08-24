@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:entrance_tricks/views/news_detail_page.dart';
 
 class NewsController extends GetxController {
   bool _isLoading = true;
@@ -13,38 +14,54 @@ class NewsController extends GetxController {
     loadNews();
   }
 
-  void loadNews() async {
+  Future<void> loadNews() async {
     _isLoading = true;
     update();
 
     try {
       // Simulate API call
       await Future.delayed(Duration(seconds: 1));
-      
+
       _news = [
         {
           'id': 1,
-          'title': 'New Physics Chapter Added',
-          'excerpt': 'We have added a new chapter on Quantum Mechanics to help you prepare better.',
-          'date': '2024-01-15',
+          'title': 'Grade 12 Entrance Exam Result Announcement day',
+          'category': 'Education',
+          'timeAgo': '3 min ago',
+          'imageUrl': 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=400&h=200&fit=crop',
+          'content': 'Freshman Tricks has launched a feature that provides students with detailed information about the department they will be joining next, the university they will attend, and the freshman courses available to them. This service will continue to offer guidance and updates until official results are released, helping new students prepare and plan ahead for their academic journey. Here is the links "@freshman_tricks"',
         },
         {
           'id': 2,
-          'title': 'Mock Test Results Available',
-          'excerpt': 'Results for the last mock test are now available. Check your performance.',
-          'date': '2024-01-12',
+          'title': 'Freshman Tricks now provides info on your next department, university, and freshman courses until results are out.',
+          'category': 'Education',
+          'timeAgo': '1 hour ago',
+          'imageUrl': 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=400&h=200&fit=crop',
+          'content': 'Freshman Tricks has launched a feature that provides students with detailed information about the department they will be joining next, the university they will attend, and the freshman courses available to them. This service will continue to offer guidance and updates until official results are released, helping new students prepare and plan ahead for their academic journey. Here is the links "@freshman_tricks"',
         },
         {
           'id': 3,
-          'title': 'Scholarship Announcement',
-          'excerpt': 'New scholarship program launched for top performers in entrance exams.',
-          'date': '2024-01-10',
+          'title': 'New Physics Chapter: Quantum Mechanics',
+          'category': 'Education',
+          'timeAgo': '2 hours ago',
+          'imageUrl': 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=400&h=200&fit=crop',
+          'content': 'We have added comprehensive study materials for Quantum Mechanics including videos, notes, and practice questions.',
         },
         {
           'id': 4,
-          'title': 'App Update v2.1.0',
-          'excerpt': 'New features added including dark mode and better video player.',
-          'date': '2024-01-08',
+          'title': 'Scholarship Program 2024',
+          'category': 'Education',
+          'timeAgo': '1 day ago',
+          'imageUrl': 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=400&h=200&fit=crop',
+          'content': 'Applications are now open for our merit-based scholarship program. Top performers will receive up to 100% fee waiver.',
+        },
+        {
+          'id': 5,
+          'title': 'App Update: Dark Mode Available',
+          'category': 'Technology',
+          'timeAgo': '2 days ago',
+          'imageUrl': 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=400&h=200&fit=crop',
+          'content': 'The latest app update includes dark mode, improved video player, and better offline support.',
         },
       ];
     } catch (e) {
@@ -55,8 +72,12 @@ class NewsController extends GetxController {
     }
   }
 
-  void readNews(int newsId) {
-    // Navigate to news detail page
-    Get.snackbar('Info', 'News detail page will be implemented');
+  void openNewsDetail(int newsId) {
+    final news = _news.firstWhere((n) => n['id'] == newsId);
+    Get.to(() => NewsDetailPage(news: news));
+  }
+
+  void refreshNews() {
+    loadNews();
   }
 }

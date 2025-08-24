@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/controllers/main_navigation_controller.dart';
 import 'package:entrance_tricks/views/home_dashboard.dart';
-import 'package:entrance_tricks/views/subject_page.dart';
 import 'package:entrance_tricks/views/exam_page.dart';
 import 'package:entrance_tricks/views/news_page.dart';
 import 'package:entrance_tricks/views/profile_page.dart';
@@ -16,7 +15,6 @@ class Home extends StatelessWidget {
 
     final List<Widget> pages = [
       HomeDashboard(),
-      SubjectPage(),
       ExamPage(),
       NewsPage(),
       ProfilePage(),
@@ -33,10 +31,9 @@ class Home extends StatelessWidget {
           unselectedItemColor: Theme.of(context).colorScheme.onSurfaceVariant,
           items: [
             BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-            BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Subjects'),
-            BottomNavigationBarItem(icon: Icon(Icons.quiz), label: 'Exam'),
+            BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Exams'),
             BottomNavigationBarItem(icon: Icon(Icons.article), label: 'News'),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'My Profile'),
           ],
         ),
       ),

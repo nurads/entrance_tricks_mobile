@@ -30,7 +30,7 @@ class ChapterDetailController extends GetxController {
       await Future.delayed(Duration(seconds: 1));
 
       // Mock data
-      _chapterTitle = 'Mechanics - Chapter 1';
+      _chapterTitle = 'Chapter One';
       _chapterData = {
         'id': chapterId,
         'title': _chapterTitle,
