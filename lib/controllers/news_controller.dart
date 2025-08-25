@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:entrance_tricks/views/news_detail_page.dart';
+import 'package:entrance_tricks/views/news/news_detail_page.dart';
 
 class NewsController extends GetxController {
   bool _isLoading = true;

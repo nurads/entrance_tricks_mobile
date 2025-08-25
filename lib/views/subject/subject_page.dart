@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/controllers/subject_controller.dart';
+import 'package:entrance_tricks/views/subject/subject_detail.dart';
 
 class SubjectPage extends StatelessWidget {
   SubjectPage({super.key});

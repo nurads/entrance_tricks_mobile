@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/views/quiz_taking_page.dart';
+import 'package:entrance_tricks/controllers/exam_controller.dart';
+import 'package:entrance_tricks/views/quiz/quiz_taking_page.dart';
 
 class QuizDetailPage extends StatelessWidget {
   final Map<String, dynamic> quiz;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/controllers/exam_controller.dart';
-import 'package:entrance_tricks/views/exam_result_page.dart';
+import 'package:entrance_tricks/views/exam/exam_result_page.dart';
 
 class ExamDetailPage extends StatefulWidget {
   const ExamDetailPage({super.key});

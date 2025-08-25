@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 import 'package:entrance_tricks/views/views.dart';
-import 'package:entrance_tricks/views/subject_page.dart';
+import 'package:entrance_tricks/views/subject/subject_page.dart';
 import 'package:entrance_tricks/controllers/main_navigation_controller.dart';
 import 'package:entrance_tricks/controllers/notifications_controller.dart';
 

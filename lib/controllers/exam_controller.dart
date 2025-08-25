@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
-import 'package:entrance_tricks/views/views.dart';
-import 'package:entrance_tricks/views/exam_detail_page.dart';
+import 'package:entrance_tricks/views/exam/exam_detail_page.dart';
 
 class ExamController extends GetxController {
   bool _isLoading = true;
