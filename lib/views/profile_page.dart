@@ -248,9 +248,7 @@ class ProfilePage extends StatelessWidget {
               context,
               Icons.logout,
               "Logout",
-              () {
-                // TODO: Implement logout
-              },
+              () => controller.logout(),
             ),
           ],
         ],

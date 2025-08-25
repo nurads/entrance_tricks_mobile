@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:entrance_tricks/views/views.dart';
 
 class ProfileController extends GetxController {
   bool _isLoading = true;
@@ -95,7 +96,7 @@ class ProfileController extends GetxController {
   }
 
   void logout() {
-    // TODO: Implement logout functionality
-    Get.snackbar('Info', 'Logout functionality will be implemented');
+    // Navigate to login and clear navigation stack
+    Get.offAllNamed(VIEWS.login.path);
   }
 }

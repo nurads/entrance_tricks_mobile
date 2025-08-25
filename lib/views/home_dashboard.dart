@@ -3,11 +3,12 @@ import 'package:get/get.dart';
 import 'package:entrance_tricks/controllers/home_dashboard_controller.dart';
 import 'package:entrance_tricks/controllers/navigation_drawer_controller.dart';
 import 'package:entrance_tricks/controllers/notifications_controller.dart';
-import 'package:entrance_tricks/components/components.dart';
 import 'package:entrance_tricks/views/notifications_page.dart';
 
 class HomeDashboard extends StatelessWidget {
   HomeDashboard({super.key});
+
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +18,7 @@ class HomeDashboard extends StatelessWidget {
     
     return GetBuilder<HomeDashboardController>(
       builder: (controller) => Scaffold(
+        key: _scaffoldKey,
         backgroundColor: Colors.white,
         drawer: _buildNavigationDrawer(context),
         body: SafeArea(
@@ -50,7 +52,7 @@ class HomeDashboard extends StatelessWidget {
           // Hamburger Menu
           IconButton(
             onPressed: () {
-              Scaffold.of(context).openDrawer();
+              _scaffoldKey.currentState?.openDrawer();
             },
             icon: Icon(Icons.menu, color: Colors.black87),
             padding: EdgeInsets.zero,
@@ -367,37 +369,14 @@ class HomeDashboard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // App Logo and Name
-                  Row(
-                    children: [
-                      Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Text(
-                            'R',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.blue[600],
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 16),
-                      Text(
-                        'Entrance Tricks',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
+                  // App Logo Image
+                  Center(
+                    child: Image.asset(
+                      'assets/images/logo.png',
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.contain,
+                    ),
                   ),
                   
                   SizedBox(height: 20),
@@ -414,7 +393,7 @@ class HomeDashboard extends StatelessWidget {
                   SizedBox(height: 4),
                   
                   Text(
-                    'William Huffman',
+                    'William Huffman', // mock until backend wiring
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
