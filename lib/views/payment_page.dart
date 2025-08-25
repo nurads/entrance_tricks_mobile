@@ -6,231 +6,372 @@ class PaymentPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return _PaymentChoosePrice();
+  }
+}
+
+class _PaymentChoosePrice extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Payment Required'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () => Get.back(),
           mouseCursor: SystemMouseCursors.click,
         ),
+        title: Text('Payment Method'),
+        elevation: 0,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Payment Icon
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade100,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.payment,
-                  size: 60,
-                  color: Colors.blue.shade700,
-                ),
+      body: Padding(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 16),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade600,
+                borderRadius: BorderRadius.circular(12),
               ),
-              
-              SizedBox(height: 32),
-              
-              // Title
-              Text(
-                'Unlock Premium Content',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              
-              SizedBox(height: 16),
-              
-              // Description
-              Text(
-                'Subscribe to access all chapters, videos, and quizzes. Get unlimited learning resources for your entrance exam preparation.',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[600],
-                ),
-                textAlign: TextAlign.center,
-              ),
-              
-              SizedBox(height: 32),
-              
-              // Subscription Plans
-              _buildSubscriptionPlan(
-                context,
-                'Monthly Plan',
-                '\$9.99/month',
-                'Perfect for short-term preparation',
-                Icons.calendar_today,
-              ),
-              
-              SizedBox(height: 16),
-              
-              _buildSubscriptionPlan(
-                context,
-                'Yearly Plan',
-                '\$99.99/year',
-                'Best value for long-term preparation',
-                Icons.star,
-                isRecommended: true,
-              ),
-              
-              SizedBox(height: 32),
-              
-              // Subscribe Button
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: MouseRegion(
-                  cursor: SystemMouseCursors.click,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // TODO: Implement payment processing
-                      Get.snackbar(
-                        'Coming Soon',
-                        'Payment processing will be implemented in the future!',
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: Colors.orange,
-                        colorText: Colors.white,
-                      );
-                    },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: Text(
-                    'Subscribe Now',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+              child: Center(
+                child: Text(
+                  'Choose Price Of Class',
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
                 ),
               ),
             ),
-              
-              SizedBox(height: 16),
-              
-              // Terms
-              Text(
-                'By subscribing, you agree to our Terms of Service and Privacy Policy',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[500],
+            SizedBox(height: 16),
+            _PriceOption(title: 'For One Subject', price: '400 ETB / Year'),
+            SizedBox(height: 12),
+            _PriceOption(title: 'For Full Class', price: '2000 ETB / Year'),
+            Spacer(),
+            SizedBox(
+              height: 48,
+              child: ElevatedButton(
+                onPressed: () => Get.to(() => _PaymentMethodPage()),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue.shade700,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                textAlign: TextAlign.center,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('Next'),
+                    SizedBox(width: 8),
+                    Icon(Icons.arrow_forward, size: 18),
+                  ],
+                ),
               ),
-            ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PriceOption extends StatelessWidget {
+  final String title;
+  final String price;
+  const _PriceOption({required this.title, required this.price});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: TextStyle(color: Colors.black54)),
+        SizedBox(height: 8),
+        Container(
+          height: 44,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.grey.shade300),
           ),
+          padding: EdgeInsets.symmetric(horizontal: 12),
+          alignment: Alignment.centerLeft,
+          child: Text(price, style: TextStyle(color: Colors.black87)),
+        ),
+      ],
+    );
+  }
+}
+
+class _PaymentMethodPage extends StatefulWidget {
+  @override
+  State<_PaymentMethodPage> createState() => _PaymentMethodPageState();
+}
+
+class _PaymentMethodPageState extends State<_PaymentMethodPage> {
+  String _selected = 'bank';
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => Get.back(),
+          mouseCursor: SystemMouseCursors.click,
+        ),
+        title: Text('Payment Method'),
+        elevation: 0,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          children: [
+            _RadioTile(
+              title: 'Bank Transfer',
+              value: 'bank',
+              groupValue: _selected,
+              onChanged: (v) => setState(() => _selected = v),
+            ),
+            _RadioTile(
+              title: 'Telebirr',
+              value: 'telebirr',
+              groupValue: _selected,
+              onChanged: (v) => setState(() => _selected = v),
+            ),
+            _RadioTile(
+              title: 'Mobile Banking',
+              value: 'mobile',
+              groupValue: _selected,
+              onChanged: (v) => setState(() => _selected = v),
+            ),
+            Spacer(),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: () => Get.to(() => _PaymentOptionPage()),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue.shade700,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [Text('Next'), SizedBox(width: 8), Icon(Icons.arrow_forward, size: 18)],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RadioTile extends StatelessWidget {
+  final String title;
+  final String value;
+  final String groupValue;
+  final ValueChanged<String> onChanged;
+  const _RadioTile({required this.title, required this.value, required this.groupValue, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: RadioListTile<String>(
+        value: value,
+        groupValue: groupValue,
+        onChanged: (v) => onChanged(v!),
+        title: Text(title),
+      ),
+    );
+  }
+}
+
+class _PaymentOptionPage extends StatefulWidget {
+  @override
+  State<_PaymentOptionPage> createState() => _PaymentOptionPageState();
+}
+
+class _PaymentOptionPageState extends State<_PaymentOptionPage> {
+  final TextEditingController _name = TextEditingController();
+  final TextEditingController _account = TextEditingController();
+  String? _bank;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => Get.back(),
+          mouseCursor: SystemMouseCursors.click,
+        ),
+        title: Text('Payment Option'),
+        elevation: 0,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+      ),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text('Choose the payment Option'),
+            SizedBox(height: 8),
+            _DropdownField(
+              hint: 'Choose your bank',
+              value: _bank,
+              items: [
+                'Commercial Bank of Ethiopia',
+                'Abay Bank',
+                'Dashen Bank',
+                'Abyssinia Bank',
+                'Awash Bank',
+                'Amhara Bank',
+              ],
+              onChanged: (v) => setState(() => _bank = v),
+            ),
+            SizedBox(height: 16),
+            Text('Full Name'),
+            SizedBox(height: 6),
+            _TextField(controller: _name),
+            SizedBox(height: 12),
+            Text('Account'),
+            SizedBox(height: 6),
+            _TextField(controller: _account, keyboardType: TextInputType.number),
+            SizedBox(height: 16),
+            Text('Upload Receipt'),
+            SizedBox(height: 6),
+            _UploadPlaceholder(),
+            SizedBox(height: 24),
+            SizedBox(
+              height: 48,
+              child: ElevatedButton(
+                onPressed: _showSuccess,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue.shade700,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [Text('Enroll Now'), SizedBox(width: 8), Icon(Icons.arrow_forward, size: 18)],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildSubscriptionPlan(
-    BuildContext context,
-    String title,
-    String price,
-    String description,
-    IconData icon, {
-    bool isRecommended = false,
-  }) {
-    return Container(
-      padding: EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: isRecommended ? Colors.blue.shade50 : Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isRecommended ? Colors.blue.shade200 : Colors.grey.shade300,
-          width: 2,
+  void _showSuccess() {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.check_circle, color: Colors.blue, size: 56),
+              SizedBox(height: 12),
+              Text('Payment Success', style: TextStyle(fontWeight: FontWeight.bold)),
+              SizedBox(height: 6),
+              Text('Your successfully Sent, please wait till you receive Approval from Admin.', textAlign: TextAlign.center, style: TextStyle(color: Colors.black54)),
+              SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Get.back(),
+                  child: Text('OK'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-      child: Row(
-        children: [
-          Container(
-            padding: EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: isRecommended ? Colors.blue.shade100 : Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              icon,
-              color: isRecommended ? Colors.blue.shade700 : Colors.grey.shade600,
-              size: 24,
-            ),
-          ),
-          
-          SizedBox(width: 16),
-          
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    if (isRecommended) ...[
-                      SizedBox(width: 8),
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.orange,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          'RECOMMENDED',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-                SizedBox(height: 4),
-                Text(
-                  price,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: isRecommended ? Colors.blue.shade700 : Colors.black87,
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  description,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+      barrierDismissible: true,
+    );
+  }
+}
+
+class _DropdownField extends StatelessWidget {
+  final String hint;
+  final String? value;
+  final List<String> items;
+  final ValueChanged<String?> onChanged;
+  const _DropdownField({required this.hint, required this.value, required this.items, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      padding: EdgeInsets.symmetric(horizontal: 12),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          isExpanded: true,
+          hint: Text(hint),
+          value: value,
+          onChanged: onChanged,
+          items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+        ),
+      ),
+    );
+  }
+}
+
+class _TextField extends StatelessWidget {
+  final TextEditingController controller;
+  final TextInputType? keyboardType;
+  const _TextField({required this.controller, this.keyboardType});
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      decoration: InputDecoration(
+        isDense: true,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: Colors.blue.shade700)),
+      ),
+    );
+  }
+}
+
+class _UploadPlaceholder extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 120,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300, style: BorderStyle.solid),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.cloud_upload_outlined, color: Colors.grey.shade600),
+            SizedBox(height: 6),
+            Text('Click or drag file to this area to upload', style: TextStyle(color: Colors.black54, fontSize: 12)),
+            SizedBox(height: 6),
+            Text('Formats accepted are .jpg,.png and .pdf', style: TextStyle(color: Colors.black45, fontSize: 10)),
+          ],
+        ),
       ),
     );
   }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/controllers/subject_detail_controller.dart';
-import 'package:entrance_tricks/views/payment_page.dart';
 
 class SubjectDetail extends StatelessWidget {
   SubjectDetail({super.key});
@@ -177,10 +176,8 @@ class SubjectDetail extends StatelessWidget {
             GestureDetector(
               onTap: () {
                 if (isLocked) {
-                  // Navigate to payment page
-                  _navigateToPaymentPage();
+                  _showLockedDialog(context);
                 } else {
-                  // Navigate to chapter detail
                   controller.openChapter(chapter['id']);
                 }
               },
@@ -206,8 +203,54 @@ class SubjectDetail extends StatelessWidget {
     );
   }
 
-  void _navigateToPaymentPage() {
-    // Navigate to payment page
-    Get.toNamed('/payment');
+  void _showLockedDialog(BuildContext context) {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.lock_outline, color: Colors.blue),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Unit 2 Is Locked',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Could you go to payment and pay the payment before access',
+                style: TextStyle(color: Colors.black54),
+              ),
+              SizedBox(height: 16),
+              Align(
+                alignment: Alignment.centerRight,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Get.back();
+                    Get.toNamed('/payment');
+                  },
+                  icon: Icon(Icons.arrow_forward),
+                  label: Text('Go to Payment'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue.shade700,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      barrierDismissible: true,
+    );
   }
 }
