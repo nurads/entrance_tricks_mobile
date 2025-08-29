@@ -11,6 +11,13 @@ export 'profile_page.dart';
 export 'subject_page.dart';
 export 'search_page.dart';
 export 'notifications_page.dart';
+export 'payment_page.dart';
+export 'exam_detail_page.dart';
+export 'exam_result_page.dart';
+export 'news_detail_page.dart';
+export 'quiz_detail_page.dart';
+export 'quiz_taking_page.dart';
+export 'notifications_page.dart';
 
 enum VIEWS {
   home('/home'),

@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:entrance_tricks/views/views.dart';
+import 'package:entrance_tricks/views/subject_page.dart';
 import 'package:entrance_tricks/controllers/main_navigation_controller.dart';
 import 'package:entrance_tricks/controllers/notifications_controller.dart';
 
@@ -24,6 +25,9 @@ class HomeDashboardController extends GetxController {
 
   List<Map<String, dynamic>> _recentNews = [];
   List<Map<String, dynamic>> get recentNews => _recentNews;
+
+  List<Map<String, dynamic>> _grades = [];
+  List<Map<String, dynamic>> get grades => _grades;
 
   @override
   void onInit() {
@@ -91,6 +95,14 @@ class HomeDashboardController extends GetxController {
           'date': '2 weeks ago',
         },
       ];
+
+      _grades = [
+        {'id': 6, 'name': 'Grade 6', 'subjects': 5, 'chapters': 35},
+        {'id': 8, 'name': 'Grade 8', 'subjects': 6, 'chapters': 42},
+        {'id': 9, 'name': 'Grade 9', 'subjects': 7, 'chapters': 49},
+        {'id': 10, 'name': 'Grade 10', 'subjects': 7, 'chapters': 49},
+        {'id': 11, 'name': 'Grade 11', 'subjects': 8, 'chapters': 56},
+      ];
     } catch (e) {
       Get.snackbar('Error', 'Failed to load dashboard data');
     } finally {
@@ -139,6 +151,11 @@ class HomeDashboardController extends GetxController {
   void openNews(int newsId) {
     Get.snackbar('Info', 'Opening news $newsId');
     // Navigate to news detail
+  }
+
+  void selectGrade(int gradeId) {
+    // Navigate to subject page for the selected grade
+    Get.to(() => SubjectPage(), arguments: {'gradeId': gradeId});
   }
 
   void updateNotificationCount() {
