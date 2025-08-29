@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:entrance_tricks/controllers/home_dashboard_controller.dart';
 import 'package:entrance_tricks/controllers/navigation_drawer_controller.dart';
 import 'package:entrance_tricks/controllers/notifications_controller.dart';
-import 'package:entrance_tricks/views/notifications_page.dart';
+import 'package:entrance_tricks/views/common/notifications_page.dart';
 
 class HomeDashboard extends StatelessWidget {
   HomeDashboard({super.key});

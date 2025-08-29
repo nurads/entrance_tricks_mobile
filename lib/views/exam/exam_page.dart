@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/controllers/exam_controller.dart';
+import 'package:entrance_tricks/views/exam/exam_detail_page.dart';
 
 class ExamPage extends StatelessWidget {
   ExamPage({super.key});

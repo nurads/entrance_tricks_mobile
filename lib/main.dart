@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:entrance_tricks/views/home.dart';
+import 'package:entrance_tricks/views/home/home.dart';
 import 'package:entrance_tricks/views/views.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/components/components.dart';

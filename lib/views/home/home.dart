@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/controllers/main_navigation_controller.dart';
-import 'package:entrance_tricks/views/home_dashboard.dart';
-import 'package:entrance_tricks/views/exam_page.dart';
-import 'package:entrance_tricks/views/news_page.dart';
-import 'package:entrance_tricks/views/profile_page.dart';
+import 'package:entrance_tricks/views/home/home_dashboard.dart';
+import 'package:entrance_tricks/views/exam/exam_page.dart';
+import 'package:entrance_tricks/views/news/news_page.dart';
+import 'package:entrance_tricks/views/common/profile_page.dart';
 
 class Home extends StatelessWidget {
   const Home({super.key});

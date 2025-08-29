@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
-import 'package:entrance_tricks/views/views.dart';
-import 'package:entrance_tricks/views/subject_detail.dart';
+import 'package:entrance_tricks/views/subject/subject_detail.dart';
 
 class SubjectController extends GetxController {
   bool _isLoading = true;

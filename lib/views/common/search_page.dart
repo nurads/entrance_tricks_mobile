@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/controllers/search_controller.dart';
+import 'package:entrance_tricks/views/subject/subject_detail.dart';
 import 'package:entrance_tricks/components/components.dart';
 
 class SearchPage extends StatelessWidget {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/controllers/chapter_detail_controller.dart';
-import 'package:entrance_tricks/views/quiz_detail_page.dart';
+import 'package:entrance_tricks/views/quiz/quiz_detail_page.dart';
 
 class QuizTab extends StatelessWidget {
   QuizTab({super.key});
