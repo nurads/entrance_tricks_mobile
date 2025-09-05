@@ -21,7 +21,7 @@ class CustomTextField extends StatelessWidget {
   final List<TextInputFormatter>? inputFormatters;
   final EdgeInsetsGeometry? contentPadding;
   final FocusNode? focusNode;
-
+  final String? prefixText;
   const CustomTextField({
     super.key,
     this.label,
@@ -43,6 +43,7 @@ class CustomTextField extends StatelessWidget {
     this.inputFormatters,
     this.contentPadding,
     this.focusNode,
+    this.prefixText,
   });
 
   @override
@@ -65,6 +66,7 @@ class CustomTextField extends StatelessWidget {
         labelText: label,
         hintText: hint,
         helperText: helperText,
+        prefixText: prefixText,
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,
         contentPadding: contentPadding,
@@ -100,7 +102,8 @@ class PhoneTextField extends StatelessWidget {
       prefixIcon: Icon(Icons.phone),
       keyboardType: TextInputType.phone,
       textInputAction: TextInputAction.next,
-      maxLength: 9,
+      prefixText: prefix,
+      maxLength: 8,
       enabled: enabled,
       validator:
           validator ??
@@ -108,7 +111,7 @@ class PhoneTextField extends StatelessWidget {
             if (value == null || value.isEmpty) {
               return 'Phone number is required';
             }
-            if (value.length != 9) {
+            if (value.length != 8) {
               return 'Phone number must be 9 digits';
             }
             return null;

@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/controllers/home_dashboard_controller.dart';
 
 class NotificationsController extends GetxController {
   List<Map<String, dynamic>> _notifications = [];

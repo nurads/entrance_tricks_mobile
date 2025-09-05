@@ -1,8 +1,10 @@
 import 'package:get/get.dart';
 import 'package:entrance_tricks/views/views.dart';
-import 'package:entrance_tricks/views/subject/subject_page.dart';
 import 'package:entrance_tricks/controllers/main_navigation_controller.dart';
 import 'package:entrance_tricks/controllers/notifications_controller.dart';
+import 'package:entrance_tricks/models/models.dart';
+import 'package:entrance_tricks/services/subjects.dart';
+import 'package:entrance_tricks/utils/utils.dart';
 
 class HomeDashboardController extends GetxController {
   bool _isLoading = true;
@@ -26,8 +28,11 @@ class HomeDashboardController extends GetxController {
   List<Map<String, dynamic>> _recentNews = [];
   List<Map<String, dynamic>> get recentNews => _recentNews;
 
-  List<Map<String, dynamic>> _grades = [];
-  List<Map<String, dynamic>> get grades => _grades;
+  List<Subject> _subjects = [];
+  List<Subject> get subjects => _subjects;
+
+  // List<Map<String, dynamic>> _grades = [];
+  // List<Map<String, dynamic>> get grades => _grades;
 
   @override
   void onInit() {
@@ -41,7 +46,7 @@ class HomeDashboardController extends GetxController {
 
     try {
       // Simulate API calls
-      await Future.delayed(Duration(seconds: 1));
+      // await Future.delayed(Duration(seconds: 1));
 
       _userName = 'John Doe';
       _studyStreak = 15;
@@ -79,32 +84,31 @@ class HomeDashboardController extends GetxController {
         {
           'id': 1,
           'title': 'New Physics Chapter: Quantum Mechanics',
-          'excerpt': 'We have added comprehensive study materials for Quantum Mechanics including videos, notes, and practice questions.',
+          'excerpt':
+              'We have added comprehensive study materials for Quantum Mechanics including videos, notes, and practice questions.',
           'date': '2 days ago',
         },
         {
           'id': 2,
           'title': 'Scholarship Program 2024',
-          'excerpt': 'Applications are now open for our merit-based scholarship program. Top performers will receive up to 100% fee waiver.',
+          'excerpt':
+              'Applications are now open for our merit-based scholarship program. Top performers will receive up to 100% fee waiver.',
           'date': '1 week ago',
         },
         {
           'id': 3,
           'title': 'App Update: Dark Mode Available',
-          'excerpt': 'The latest app update includes dark mode, improved video player, and better offline support.',
+          'excerpt':
+              'The latest app update includes dark mode, improved video player, and better offline support.',
           'date': '2 weeks ago',
         },
       ];
 
-      _grades = [
-        {'id': 6, 'name': 'Grade 6', 'subjects': 5, 'chapters': 35},
-        {'id': 8, 'name': 'Grade 8', 'subjects': 6, 'chapters': 42},
-        {'id': 9, 'name': 'Grade 9', 'subjects': 7, 'chapters': 49},
-        {'id': 10, 'name': 'Grade 10', 'subjects': 7, 'chapters': 49},
-        {'id': 11, 'name': 'Grade 11', 'subjects': 8, 'chapters': 56},
-      ];
+      _subjects = await SubjectsService().getSubjects();
+      logger.i(_subjects.map((e) => e.icon).toList());
     } catch (e) {
       Get.snackbar('Error', 'Failed to load dashboard data');
+      logger.e(e);
     } finally {
       _isLoading = false;
       update();
@@ -153,9 +157,9 @@ class HomeDashboardController extends GetxController {
     // Navigate to news detail
   }
 
-  void selectGrade(int gradeId) {
+  void selectSubject(int subjectId) {
     // Navigate to subject page for the selected grade
-    Get.to(() => SubjectPage(), arguments: {'gradeId': gradeId});
+    Get.to(() => SubjectDetail(), arguments: {'subjectId': subjectId});
   }
 
   void updateNotificationCount() {

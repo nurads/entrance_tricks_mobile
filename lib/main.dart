@@ -1,11 +1,14 @@
+import 'package:entrance_tricks/services/session.dart';
 import 'package:flutter/material.dart';
 import 'package:entrance_tricks/views/home/home.dart';
 import 'package:entrance_tricks/views/views.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/components/components.dart';
+import 'package:entrance_tricks/utils/utils.dart';
 
-void main() {
+void main() async {
   // Remove debug banner
+  await initialize();
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
@@ -39,7 +42,7 @@ class MyApp extends StatelessWidget {
         //   page: () => const ResetPassword(),
         // ),
       ],
-      initialRoute: VIEWS.login.path,
+      initialRoute: session != null ? VIEWS.home.path : VIEWS.login.path,
     );
   }
 }

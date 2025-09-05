@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:entrance_tricks/views/views.dart';
+import 'package:entrance_tricks/services/session.dart';
 
 class ProfileController extends GetxController {
   bool _isLoading = true;
@@ -8,16 +9,17 @@ class ProfileController extends GetxController {
   bool _isEditMode = false;
   bool get isEditMode => _isEditMode;
 
-  String _userName = 'Eden Eden';
+  String _userName = session?.user.name ?? '';
   String get userName => _userName;
 
-  String _userClass = 'Grade 12';
+  String _userClass = session?.user.grade.name ?? '';
   String get userClass => _userClass;
 
-  String _userPhone = '0901010101';
+  String _userPhone = session?.user.phoneNumber ?? '';
   String get userPhone => _userPhone;
 
-  String _profileImageUrl = 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face';
+  String _profileImageUrl =
+      'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face';
   String get profileImageUrl => _profileImageUrl;
 
   Map<String, dynamic> _user = {};

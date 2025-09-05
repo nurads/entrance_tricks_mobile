@@ -12,6 +12,8 @@ class Login extends StatelessWidget {
     Get.put(LoginController());
     return Scaffold(
       body: SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
+        padding: EdgeInsets.all(20),
         child: GetBuilder<LoginController>(
           builder: (controller) => Form(
             key: controller.formKey,
@@ -36,23 +38,34 @@ class Login extends StatelessWidget {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
+                SizedBox(height: 30),
                 Padding(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
+                    horizontal: 10,
                     vertical: 10,
                   ),
                   child: PhoneTextField(controller: controller.phoneController),
                 ),
-                SizedBox(height: 20),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: PrimaryButton(
-                    text: 'Send OTP',
-                    onPressed: () => controller.login(),
-                    isLoading: controller.isLoading,
-                    icon: Icon(Icons.send_outlined),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 10,
+                  ),
+                  child: PasswordTextField(
+                    controller: controller.passwordController,
                   ),
                 ),
+                SizedBox(height: 30),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: PrimaryButton(
+                    text: 'Login',
+                    onPressed: () => controller.login(),
+                    isLoading: controller.isLoading,
+                    icon: Icon(Icons.login),
+                  ),
+                ),
+                SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -73,6 +86,20 @@ class Login extends StatelessWidget {
                       ),
                     ),
                   ],
+                ),
+                SizedBox(height: 20),
+                TextButton(
+                  onPressed: () {
+                    // Navigate to OTP-based login if needed
+                    Get.toNamed(VIEWS.verifyPhone.path);
+                  },
+                  child: Text(
+                    'Login with Telegram Bot instead',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
                 ),
               ],
             ),

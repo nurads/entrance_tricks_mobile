@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/controllers/on_boarding/register_controller.dart';
+import 'package:entrance_tricks/models/models.dart';
 
 class Register extends StatelessWidget {
   Register({super.key});
@@ -15,15 +16,17 @@ class Register extends StatelessWidget {
         elevation: 0,
       ),
       body: SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
+        padding: EdgeInsets.all(20),
         child: GetBuilder<RegisterController>(
           builder: (controller) => Form(
             key: controller.formKey,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
+            autovalidateMode: AutovalidateMode.onUnfocus,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(height: 50),
+                SizedBox(height: 10),
                 Image.asset('assets/images/logo.png'),
                 Text('Welcome', style: Theme.of(context).textTheme.titleLarge),
                 Text(
@@ -59,23 +62,92 @@ class Register extends StatelessWidget {
                     horizontal: 10,
                     vertical: 10,
                   ),
+                  child: DropdownButtonFormField<String>(
+                    initialValue: controller.selectedGrade?.name,
+                    decoration: InputDecoration(
+                      labelText: 'Grade',
+                      prefixIcon: Icon(Icons.school),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    items: controller.gradeOptions.map((Grade grade) {
+                      return DropdownMenuItem<String>(
+                        value: grade.name,
+                        child: Text(grade.name),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      controller.setSelectedGrade(
+                        controller.gradeOptions.firstWhere(
+                          (grade) => grade.name == newValue,
+                        ),
+                      );
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Grade is required';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+
+                if (controller.allowStreamSelection)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 10,
+                    ),
+                    child: DropdownButtonFormField<String>(
+                      initialValue: controller.selectedStream,
+                      decoration: InputDecoration(
+                        labelText: 'Stream',
+                        prefixIcon: Icon(Icons.category),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      items: controller.streamOptions.map((String stream) {
+                        return DropdownMenuItem<String>(
+                          value: stream,
+                          child: Text(stream),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        controller.setSelectedStream(newValue);
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Stream is required';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 10,
+                  ),
                   child: TextFormField(
                     controller: controller.phoneController,
                     decoration: InputDecoration(
                       labelText: 'Phone Number',
                       prefixIcon: Icon(Icons.phone),
+
                       prefix: Text('09'),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
                     keyboardType: TextInputType.phone,
-                    maxLength: 9,
+                    maxLength: 8,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Phone Number is required';
                       }
-                      if (value.length != 9) {
+                      if (value.length != 8) {
                         return 'Phone Number must be 9 digits';
                       }
                       return null;

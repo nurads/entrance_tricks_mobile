@@ -4,6 +4,8 @@ import 'package:entrance_tricks/controllers/home_dashboard_controller.dart';
 import 'package:entrance_tricks/controllers/navigation_drawer_controller.dart';
 import 'package:entrance_tricks/controllers/notifications_controller.dart';
 import 'package:entrance_tricks/views/common/notifications_page.dart';
+import "package:entrance_tricks/models/models.dart";
+import "package:entrance_tricks/utils/utils.dart";
 
 class HomeDashboard extends StatelessWidget {
   HomeDashboard({super.key});
@@ -15,7 +17,7 @@ class HomeDashboard extends StatelessWidget {
     Get.put(HomeDashboardController());
     Get.put(NavigationDrawerController());
     Get.put(NotificationsController());
-    
+
     return GetBuilder<HomeDashboardController>(
       builder: (controller) => Scaffold(
         key: _scaffoldKey,
@@ -26,17 +28,16 @@ class HomeDashboard extends StatelessWidget {
             children: [
               // Top Bar with Hamburger Menu and Notification Bell
               _buildTopBar(context, controller),
-              
+
               // Search Bar
-              _buildSearchBar(context),
-              
+              // _buildSearchBar(context),
+
               // Promotional Banner
               _buildPromotionalBanner(context),
-              
+
               // Grade Selection Section
-              Expanded(
-                child: _buildGradeSelection(context, controller),
-              ),
+              // Expanded(child: _buildGradeSelection(context, controller)),
+              Expanded(child: _buildSubjectSelection(context, controller)),
             ],
           ),
         ),
@@ -44,7 +45,10 @@ class HomeDashboard extends StatelessWidget {
     );
   }
 
-  Widget _buildTopBar(BuildContext context, HomeDashboardController controller) {
+  Widget _buildTopBar(
+    BuildContext context,
+    HomeDashboardController controller,
+  ) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
@@ -59,9 +63,9 @@ class HomeDashboard extends StatelessWidget {
             constraints: BoxConstraints(),
             mouseCursor: SystemMouseCursors.click,
           ),
-          
+
           Spacer(),
-          
+
           // Notification Bell with Badge
           GetBuilder<NotificationsController>(
             builder: (notificationsController) => Stack(
@@ -70,7 +74,10 @@ class HomeDashboard extends StatelessWidget {
                   onPressed: () {
                     Get.to(() => NotificationsPage());
                   },
-                  icon: Icon(Icons.notifications_outlined, color: Colors.black87),
+                  icon: Icon(
+                    Icons.notifications_outlined,
+                    color: Colors.black87,
+                  ),
                   padding: EdgeInsets.zero,
                   constraints: BoxConstraints(),
                   mouseCursor: SystemMouseCursors.click,
@@ -106,25 +113,25 @@ class HomeDashboard extends StatelessWidget {
     );
   }
 
-  Widget _buildSearchBar(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: TextField(
-        decoration: InputDecoration(
-          hintText: 'Search..',
-          hintStyle: TextStyle(color: Colors.grey[600]),
-          prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
-          filled: true,
-          fillColor: Colors.grey[100],
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(25),
-            borderSide: BorderSide.none,
-          ),
-          contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        ),
-      ),
-    );
-  }
+  // Widget _buildSearchBar(BuildContext context) {
+  //   return Container(
+  //     margin: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+  //     child: TextField(
+  //       decoration: InputDecoration(
+  //         hintText: 'Search..',
+  //         hintStyle: TextStyle(color: Colors.grey[600]),
+  //         prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
+  //         filled: true,
+  //         fillColor: Colors.grey[100],
+  //         border: OutlineInputBorder(
+  //           borderRadius: BorderRadius.circular(25),
+  //           borderSide: BorderSide.none,
+  //         ),
+  //         contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _buildPromotionalBanner(BuildContext context) {
     return Container(
@@ -168,7 +175,10 @@ class HomeDashboard extends StatelessWidget {
                   child: MouseRegion(
                     cursor: SystemMouseCursors.click,
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.blue.shade300,
                         borderRadius: BorderRadius.circular(25),
@@ -194,38 +204,38 @@ class HomeDashboard extends StatelessWidget {
               color: Colors.white.withOpacity(0.2),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Icon(
-              Icons.person,
-              size: 40,
-              color: Colors.white,
-            ),
+            child: Icon(Icons.person, size: 40, color: Colors.white),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildGradeSelection(BuildContext context, HomeDashboardController controller) {
+  Widget _buildSubjectSelection(
+    BuildContext context,
+    HomeDashboardController controller,
+  ) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'What Grade Are You?',
+            'Subject Selection',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color: Colors.black87,
             ),
           ),
-          SizedBox(height: 20),
+          SizedBox(height: 10),
           Expanded(
             child: ListView.builder(
-              itemCount: controller.grades.length,
+              physics: BouncingScrollPhysics(),
+              itemCount: controller.subjects.length,
               itemBuilder: (context, index) {
-                final grade = controller.grades[index];
-                return _buildGradeCard(context, grade, controller);
+                final subject = controller.subjects[index];
+                return _buildSubjectCard(context, subject, controller);
               },
             ),
           ),
@@ -234,87 +244,163 @@ class HomeDashboard extends StatelessWidget {
     );
   }
 
-  Widget _buildGradeCard(BuildContext context, Map<String, dynamic> grade, HomeDashboardController controller) {
+  // Widget _buildGradeSelection(
+  //   BuildContext context,
+  //   HomeDashboardController controller,
+  // ) {
+  //   return Padding(
+  //     padding: EdgeInsets.symmetric(horizontal: 20),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Text(
+  //           'What Grade Are You?',
+  //           style: TextStyle(
+  //             fontSize: 20,
+  //             fontWeight: FontWeight.bold,
+  //             color: Colors.black87,
+  //           ),
+  //         ),
+  //         SizedBox(height: 20),
+  //         Expanded(
+  //           child: ListView.builder(
+  //             physics: BouncingScrollPhysics(),
+  //             itemCount: controller.grades.length,
+  //             itemBuilder: (context, index) {
+  //               final grade = controller.grades[index];
+  //               return _buildSubjectCard(context, grade, controller);
+  //             },
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+
+  Widget _buildSubjectCard(
+    BuildContext context,
+    Subject subject,
+    HomeDashboardController controller,
+  ) {
     return Container(
       margin: EdgeInsets.only(bottom: 16),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => controller.selectGrade(grade['id']),
+          onTap: () => controller.selectSubject(subject.id),
           borderRadius: BorderRadius.circular(16),
           child: MouseRegion(
             cursor: SystemMouseCursors.click,
             child: Container(
-            padding: EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: Colors.grey.withOpacity(0.2),
-                width: 1,
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Colors.grey.withOpacity(0.2),
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  ),
+                ],
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
-                  blurRadius: 10,
-                  offset: Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                // Grade Icon
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: _getGradeIconColor(grade['name']),
-                    borderRadius: BorderRadius.circular(16),
+              child: Row(
+                children: [
+                  // Grade Icon
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: _getGradeIconColor(subject.title),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: subject.icon != null && subject.icon!.isNotEmpty
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: Image.network(
+                              subject.icon!,
+                              width: 60,
+                              height: 60,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                logger.e(error);
+                                return Icon(
+                                  _getGradeIcon(subject.title),
+                                  size: 30,
+                                  color: Colors.white,
+                                );
+                              },
+                              loadingBuilder:
+                                  (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Center(
+                                      child: CircularProgressIndicator(
+                                        value:
+                                            loadingProgress
+                                                    .expectedTotalBytes !=
+                                                null
+                                            ? loadingProgress
+                                                      .cumulativeBytesLoaded /
+                                                  loadingProgress
+                                                      .expectedTotalBytes!
+                                            : null,
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Colors.white,
+                                            ),
+                                      ),
+                                    );
+                                  },
+                            ),
+                          )
+                        : Icon(
+                            _getGradeIcon(subject.title),
+                            size: 30,
+                            color: Colors.white,
+                          ),
                   ),
-                  child: Icon(
-                    _getGradeIcon(grade['name']),
-                    size: 30,
-                    color: Colors.white,
-                  ),
-                ),
-                
-                SizedBox(width: 20),
-                
-                // Grade Content
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        grade['name'],
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+
+                  SizedBox(width: 20),
+                  // Grade Content
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          subject.title,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        '${grade['subjects']} Subjects • ${grade['chapters']} Chapters',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
+                        SizedBox(height: 4),
+                        Text(
+                          '${subject.chapters?.length ?? 0} Chapters',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[600],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                
-                // Arrow Icon
-                Icon(
-                  Icons.arrow_forward_ios,
-                  color: Colors.grey[400],
-                  size: 20,
-                ),
-              ],
+
+                  // Arrow Icon
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    color: Colors.grey[400],
+                    size: 20,
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
         ),
       ),
     );
@@ -362,10 +448,13 @@ class HomeDashboard extends StatelessWidget {
           children: [
             // Drawer Header
             Container(
-              padding: EdgeInsets.only(top: 50, left: 20, right: 20, bottom: 20),
-              decoration: BoxDecoration(
-                color: Colors.blue[600],
+              padding: EdgeInsets.only(
+                top: 50,
+                left: 20,
+                right: 20,
+                bottom: 20,
               ),
+              decoration: BoxDecoration(color: Colors.blue[600]),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -378,20 +467,17 @@ class HomeDashboard extends StatelessWidget {
                       fit: BoxFit.contain,
                     ),
                   ),
-                  
+
                   SizedBox(height: 20),
-                  
+
                   // Welcome Message
                   Text(
                     'Welcome',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.white70,
-                    ),
+                    style: TextStyle(fontSize: 16, color: Colors.white70),
                   ),
-                  
+
                   SizedBox(height: 4),
-                  
+
                   Text(
                     'William Huffman', // mock until backend wiring
                     style: TextStyle(
@@ -403,7 +489,7 @@ class HomeDashboard extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             // Drawer Menu Items
             Expanded(
               child: ListView(
@@ -420,7 +506,8 @@ class HomeDashboard extends StatelessWidget {
                     icon: Icons.headset,
                     title: 'Support',
                     onTap: () {
-                      Get.find<NavigationDrawerController>().navigateToSupport();
+                      Get.find<NavigationDrawerController>()
+                          .navigateToSupport();
                     },
                   ),
                   _buildDrawerMenuItem(
@@ -434,7 +521,8 @@ class HomeDashboard extends StatelessWidget {
                     icon: Icons.person,
                     title: 'Contact Us',
                     onTap: () {
-                      Get.find<NavigationDrawerController>().navigateToContactUs();
+                      Get.find<NavigationDrawerController>()
+                          .navigateToContactUs();
                     },
                   ),
                   Divider(height: 1, color: Colors.grey[300]),
@@ -460,11 +548,7 @@ class HomeDashboard extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     return ListTile(
-      leading: Icon(
-        icon,
-        color: Colors.grey[700],
-        size: 24,
-      ),
+      leading: Icon(icon, color: Colors.grey[700], size: 24),
       title: Text(
         title,
         style: TextStyle(

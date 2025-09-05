@@ -1,10 +1,16 @@
+import 'package:entrance_tricks/utils/storages/base.dart';
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
 import 'package:get/get.dart';
+import 'package:entrance_tricks/services/services.dart';
+import 'package:entrance_tricks/services/api/exceptions.dart';
 import 'package:entrance_tricks/views/views.dart';
+import 'package:entrance_tricks/models/session.dart';
 
 class LoginController extends GetxController {
   final formKey = GlobalKey<FormState>();
   final phoneController = TextEditingController();
+  final passwordController = TextEditingController();
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -14,19 +20,46 @@ class LoginController extends GetxController {
       _setLoading(true);
 
       try {
-        // Simulate API call
-        await Future.delayed(Duration(seconds: 2));
+        final phone = '09${phoneController.text}';
+        final password = passwordController.text;
 
-        // Navigate to verify phone page
-        Get.toNamed(
-          VIEWS.verifyPhone.path,
-          arguments: {'phone': '09${phoneController.text}'},
+        final response = await UserService().loginUser(phone, password);
+
+        BaseSessionController().login(
+          Session(jwt: response.jwt, user: response.user),
+        );
+        Get.snackbar(
+          'Success',
+          'Login successful!',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+
+        Get.offAllNamed(VIEWS.home.path);
+      } on DioException catch (e) {
+        Get.snackbar(
+          'Login Failed',
+          e.message ?? 'Failed to login',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      } on ApiException catch (e) {
+        Get.snackbar(
+          'Login Failed',
+          e.message,
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
         );
       } catch (e) {
         Get.snackbar(
-          'Error',
-          'Failed to send OTP. Please try again.',
-          snackPosition: SnackPosition.BOTTOM,
+          'Login Failed',
+          e.toString(),
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
         );
       } finally {
         _setLoading(false);
@@ -42,6 +75,7 @@ class LoginController extends GetxController {
   @override
   void onClose() {
     phoneController.dispose();
+    passwordController.dispose();
     super.onClose();
   }
 }

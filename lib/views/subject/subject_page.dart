@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/controllers/subject_controller.dart';
-import 'package:entrance_tricks/views/subject/subject_detail.dart';
+import 'package:entrance_tricks/models/models.dart';
 
 class SubjectPage extends StatelessWidget {
   SubjectPage({super.key});
@@ -17,11 +17,9 @@ class SubjectPage extends StatelessWidget {
             children: [
               // Top Bar with Back Arrow and Grade Name
               _buildTopBar(context, controller),
-              
+
               // Subject List Section
-              Expanded(
-                child: _buildSubjectList(context, controller),
-              ),
+              Expanded(child: _buildSubjectList(context, controller)),
             ],
           ),
         ),
@@ -32,7 +30,7 @@ class SubjectPage extends StatelessWidget {
   Widget _buildTopBar(BuildContext context, SubjectController controller) {
     final gradeId = Get.arguments?['gradeId'] ?? 9;
     final gradeName = 'Grade $gradeId';
-    
+
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
@@ -48,17 +46,13 @@ class SubjectPage extends StatelessWidget {
                   color: Colors.blue,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  Icons.arrow_back,
-                  color: Colors.white,
-                  size: 20,
-                ),
+                child: Icon(Icons.arrow_back, color: Colors.white, size: 20),
               ),
             ),
           ),
-          
+
           SizedBox(width: 16),
-          
+
           // Grade Name
           Text(
             gradeName,
@@ -112,9 +106,13 @@ class SubjectPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSubjectCard(BuildContext context, Map<String, dynamic> subject, SubjectController controller) {
+  Widget _buildSubjectCard(
+    BuildContext context,
+    Subject subject,
+    SubjectController controller,
+  ) {
     return GestureDetector(
-      onTap: () => controller.navigateToSubjectDetail(subject['id']),
+      onTap: () => controller.navigateToSubjectDetail(subject.id),
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         child: Container(
@@ -139,20 +137,20 @@ class SubjectPage extends StatelessWidget {
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
-                    color: _getSubjectIconColor(subject['name']),
+                    color: _getSubjectIconColor(subject.title),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Icon(
-                    _getSubjectIcon(subject['name']),
+                    _getSubjectIcon(subject.title),
                     size: 30,
                     color: Colors.white,
                   ),
                 ),
                 SizedBox(height: 16),
-                
+
                 // Subject Name
                 Text(
-                  subject['name'],
+                  subject.title,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -161,14 +159,11 @@ class SubjectPage extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 8),
-                
+
                 // Chapters Count
                 Text(
-                  '${subject['chapters']} Chapters',
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 12,
-                  ),
+                  '${subject.chapters?.length ?? 0} Chapters',
+                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
                 ),
               ],
             ),
