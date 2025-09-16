@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/controllers/profile_controller.dart';
+import 'package:entrance_tricks/services/services.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -8,6 +9,7 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Get.put(ProfileController());
+
     return GetBuilder<ProfileController>(
       builder: (controller) => Scaffold(
         backgroundColor: Colors.grey[50],
@@ -31,25 +33,17 @@ class ProfilePage extends StatelessWidget {
     BuildContext context,
     ProfileController controller,
   ) {
+    final authService = Get.find<AuthService>();
     return SliverAppBar(
       expandedHeight: 280,
       floating: false,
       pinned: true,
       backgroundColor: Colors.blue[600],
       elevation: 0,
-      leading: controller.isEditMode
-          ? IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => controller.toggleEditMode(),
-            )
-          : null,
       actions: [
         IconButton(
-          icon: Icon(
-            controller.isEditMode ? Icons.check : Icons.edit,
-            color: Colors.white,
-          ),
-          onPressed: () => controller.toggleEditMode(),
+          icon: Icon(Icons.edit, color: Colors.white),
+          onPressed: () => controller.navigateToEditProfile(),
         ),
         SizedBox(width: 8),
       ],
@@ -67,69 +61,48 @@ class ProfilePage extends StatelessWidget {
               ),
             ),
 
-            // Profile picture
+            // Profile picture with modern styling
             Positioned(
               bottom: 20,
               left: 0,
               right: 0,
               child: Column(
                 children: [
-                  Stack(
-                    children: [
-                      Container(
-                        width: 120,
-                        height: 120,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 4),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 15,
-                              offset: Offset(0, 5),
-                            ),
-                          ],
+                  Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 4),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.3),
+                          blurRadius: 20,
+                          offset: Offset(0, 8),
                         ),
-                        child: ClipOval(
-                          child: Container(
-                            color: Colors.grey[300],
-                            child: Icon(
-                              Icons.person,
-                              size: 60,
-                              color: Colors.grey[600],
-                            ),
+                        BoxShadow(
+                          color: Colors.blue.withValues(alpha: 0.2),
+                          blurRadius: 30,
+                          offset: Offset(0, 12),
+                        ),
+                      ],
+                    ),
+                    child: ClipOval(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [Colors.blue[100]!, Colors.blue[200]!],
                           ),
+                        ),
+                        child: Icon(
+                          Icons.person,
+                          size: 60,
+                          color: Colors.blue[700],
                         ),
                       ),
-
-                      // Edit icon overlay
-                      if (controller.isEditMode)
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              color: Colors.blue[600],
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 3),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
-                                  blurRadius: 8,
-                                  offset: Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Icon(
-                              Icons.camera_alt,
-                              color: Colors.white,
-                              size: 18,
-                            ),
-                          ),
-                        ),
-                    ],
+                    ),
                   ),
                   SizedBox(height: 12),
                   Text(
@@ -144,7 +117,7 @@ class ProfilePage extends StatelessWidget {
                     controller.userClass,
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                     ),
                   ),
                 ],
@@ -160,6 +133,7 @@ class ProfilePage extends StatelessWidget {
     BuildContext context,
     ProfileController controller,
   ) {
+    final authService = Get.find<AuthService>();
     return Container(
       padding: EdgeInsets.all(20),
       child: Column(
@@ -181,8 +155,6 @@ class ProfilePage extends StatelessWidget {
             Icons.person_outline,
             "Full Name",
             controller.userName,
-            controller.isEditMode,
-            (value) => controller.updateUserName(value),
           ),
 
           SizedBox(height: 20),
@@ -191,9 +163,7 @@ class ProfilePage extends StatelessWidget {
             context,
             Icons.school_outlined,
             "Class/Grade",
-            controller.userClass,
-            controller.isEditMode,
-            (value) => controller.updateUserClass(value),
+            authService.user.value?.grade.name ?? '',
           ),
 
           SizedBox(height: 20),
@@ -202,174 +172,71 @@ class ProfilePage extends StatelessWidget {
             context,
             Icons.phone_outlined,
             "Phone Number",
-            controller.userPhone,
-            controller.isEditMode,
-            (value) => controller.updateUserPhone(value),
+            authService.user.value?.phoneNumber ?? '',
           ),
 
           SizedBox(height: 40),
 
           // Action Buttons
-          if (!controller.isEditMode) ...[
-            Text(
-              'Account',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
-              ),
+          Text(
+            'Account',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[800],
             ),
-            SizedBox(height: 20),
+          ),
+          SizedBox(height: 20),
 
-            _buildActionButton(
-              context,
-              Icons.settings_outlined,
-              "Settings",
-              "Manage your app preferences",
-              () => controller.openSettings(),
-            ),
+          _buildActionButton(
+            context,
+            Icons.help_outline,
+            "Help & Support",
+            "Get help and contact support",
+            () => controller.openSupport(),
+          ),
 
-            SizedBox(height: 12),
+          SizedBox(height: 12),
 
-            _buildActionButton(
-              context,
-              Icons.help_outline,
-              "Help & Support",
-              "Get help and contact support",
-              () => controller.openSupport(),
-            ),
+          _buildActionButton(
+            context,
+            Icons.info_outline,
+            "App Information",
+            "Learn more about the app",
+            () => controller.openAppInfo(),
+          ),
 
-            SizedBox(height: 12),
+          SizedBox(height: 32),
 
-            _buildActionButton(
-              context,
-              Icons.info_outline,
-              "About",
-              "Learn more about the app",
-              () => controller.openAbout(),
-            ),
-
-            SizedBox(height: 32),
-
-            // Logout Button
-            Container(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () => controller.logout(),
-                icon: Icon(Icons.logout, color: Colors.white),
-                label: Text(
-                  'Logout',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red[600],
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 2,
+          // Logout Button
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () => controller.logout(),
+              icon: Icon(Icons.logout, color: Colors.white),
+              label: Text(
+                'Logout',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red[600],
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 2,
+              ),
             ),
-          ],
+          ),
 
           SizedBox(height: 20),
         ],
       ),
-    );
-  }
-
-  Widget _buildStatsSection(
-    BuildContext context,
-    ProfileController controller,
-  ) {
-    return Container(
-      padding: EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _buildStatCard(
-              context,
-              Icons.quiz_outlined,
-              '${controller.user['totalExams'] ?? 0}',
-              'Exams Taken',
-              Colors.blue[600]!,
-            ),
-          ),
-          SizedBox(width: 16),
-          Expanded(
-            child: _buildStatCard(
-              context,
-              Icons.trending_up_outlined,
-              '${controller.user['averageScore'] ?? 0}%',
-              'Avg Score',
-              Colors.green[600]!,
-            ),
-          ),
-          SizedBox(width: 16),
-          Expanded(
-            child: _buildStatCard(
-              context,
-              Icons.play_circle_outline,
-              '${controller.user['videosWatched'] ?? 0}',
-              'Videos',
-              Colors.orange[600]!,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatCard(
-    BuildContext context,
-    IconData icon,
-    String value,
-    String label,
-    Color color,
-  ) {
-    return Column(
-      children: [
-        Container(
-          width: 50,
-          height: 50,
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, color: color, size: 24),
-        ),
-        SizedBox(height: 8),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.grey[800],
-          ),
-        ),
-        Text(
-          label,
-          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-          textAlign: TextAlign.center,
-        ),
-      ],
     );
   }
 
@@ -378,21 +245,16 @@ class ProfilePage extends StatelessWidget {
     IconData icon,
     String label,
     String value,
-    bool isEditMode,
-    Function(String) onChanged,
   ) {
     return Container(
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isEditMode ? Colors.blue[300]! : Colors.grey[200]!,
-          width: isEditMode ? 2 : 1,
-        ),
+        border: Border.all(color: Colors.grey[200]!, width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 8,
             offset: Offset(0, 2),
           ),
@@ -416,31 +278,14 @@ class ProfilePage extends StatelessWidget {
             ],
           ),
           SizedBox(height: 12),
-          if (isEditMode)
-            TextField(
-              controller: TextEditingController(text: value),
-              onChanged: onChanged,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey[800],
-              ),
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.zero,
-                hintText: 'Enter $label',
-                hintStyle: TextStyle(color: Colors.grey[400], fontSize: 16),
-              ),
-            )
-          else
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey[800],
-              ),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey[800],
             ),
+          ),
         ],
       ),
     );
@@ -459,7 +304,7 @@ class ProfilePage extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 8,
             offset: Offset(0, 2),
           ),

@@ -1,0 +1,41 @@
+import 'package:entrance_tricks/models/models.dart';
+import 'package:entrance_tricks/utils/storages/storages.dart';
+import 'package:entrance_tricks/utils/utils.dart';
+import 'package:get/get.dart';
+
+class AuthService extends GetxService {
+  final HiveAuthStorage _hiveAuthStorage = HiveAuthStorage();
+  final HiveUserStorage _hiveUserStorage = HiveUserStorage();
+
+  Rx<AuthToken?> authToken = Rx<AuthToken?>(null);
+  Rx<User?> user = Rx<User?>(null);
+
+  @override
+  Future<void> onInit() async {
+    await loadUser();
+    super.onInit();
+  }
+
+  Future<void> saveAuthToken(AuthToken authToken) async {
+    await _hiveAuthStorage.setAuthToken(authToken);
+    this.authToken.value = authToken;
+  }
+
+  Future<void> saveUser(User user) async {
+    this.user.value = user;
+    logger.i('Saving user to hive ${user.grade.name}');
+    await _hiveUserStorage.setUser(user);
+  }
+
+  Future<void> loadUser() async {
+    authToken.value = await _hiveAuthStorage.getAuthToken();
+    user.value = await _hiveUserStorage.getUser();
+  }
+
+  Future<void> logout() async {
+    await _hiveAuthStorage.clear();
+    await _hiveUserStorage.clear();
+    authToken.value = null;
+    user.value = null;
+  }
+}

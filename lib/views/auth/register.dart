@@ -93,38 +93,38 @@ class Register extends StatelessWidget {
                   ),
                 ),
 
-                if (controller.allowStreamSelection)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 10,
-                    ),
-                    child: DropdownButtonFormField<String>(
-                      initialValue: controller.selectedStream,
-                      decoration: InputDecoration(
-                        labelText: 'Stream',
-                        prefixIcon: Icon(Icons.category),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      items: controller.streamOptions.map((String stream) {
-                        return DropdownMenuItem<String>(
-                          value: stream,
-                          child: Text(stream),
-                        );
-                      }).toList(),
-                      onChanged: (String? newValue) {
-                        controller.setSelectedStream(newValue);
-                      },
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Stream is required';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
+                // if (controller.allowStreamSelection)
+                //   Padding(
+                //     padding: const EdgeInsets.symmetric(
+                //       horizontal: 10,
+                //       vertical: 10,
+                //     ),
+                //     child: DropdownButtonFormField<String>(
+                //       initialValue: controller.selectedStream,
+                //       decoration: InputDecoration(
+                //         labelText: 'Stream',
+                //         prefixIcon: Icon(Icons.category),
+                //         border: OutlineInputBorder(
+                //           borderRadius: BorderRadius.circular(10),
+                //         ),
+                //       ),
+                //       items: controller.streamOptions.map((String stream) {
+                //         return DropdownMenuItem<String>(
+                //           value: stream,
+                //           child: Text(stream),
+                //         );
+                //       }).toList(),
+                //       onChanged: (String? newValue) {
+                //         controller.setSelectedStream(newValue);
+                //       },
+                //       validator: (value) {
+                //         if (value == null || value.isEmpty) {
+                //           return 'Stream is required';
+                //         }
+                //         return null;
+                //       },
+                //     ),
+                //   ),
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,

@@ -19,3 +19,17 @@ final logger = Logger(
         DateTimeFormat.dateAndTime, // Should each log print contain a timestamp
   ),
 );
+
+String toAgoDate(DateTime date) {
+  final now = DateTime.now();
+  final diff = now.difference(date);
+  if (diff.inMinutes < 1) {
+    return 'just now';
+  } else if (diff.inHours < 1) {
+    return '${diff.inMinutes}m';
+  } else if (diff.inDays < 1) {
+    return '${diff.inHours}h';
+  } else {
+    return '${diff.inDays}d';
+  }
+}

@@ -1,5 +1,10 @@
 export 'api/api.dart';
-export 'user.dart';
-export 'subjects.dart';
-export 'grades.dart';
-export 'chapters.dart';
+export 'api/user.dart';
+export 'api/subjects.dart';
+export 'api/grades.dart';
+export 'api/chapters.dart';
+export 'api/exams.dart';
+export 'api/payments.dart';
+export 'auth.dart';
+export 'core.dart';
+export 'api/news.dart';

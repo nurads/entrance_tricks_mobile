@@ -1,27 +1,33 @@
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:entrance_tricks/models/models.dart';
+import 'package:entrance_tricks/utils/utils.dart';
 part 'subject.g.dart';
 
 @JsonSerializable()
 class Subject {
   final int id;
-  final String title;
+  final String name;
   final String? icon;
   final String? description;
-  final String createdAt;
-  final String updatedAt;
+  @JsonKey(name: 'created_at')
+  final DateTime createdAt;
+  @JsonKey(name: 'updated_at')
+  final DateTime updatedAt;
+  @JsonKey(name: 'is_locked')
+  final bool isLocked;
 
-  final List<Chapter>? chapters;
+  final List<Chapter> chapters;
 
   Subject({
     required this.id,
-    required this.title,
+    required this.name,
     this.icon,
     this.description,
     required this.createdAt,
     required this.updatedAt,
-    this.chapters,
+    this.chapters = const [],
+    this.isLocked = true,
   });
 
   factory Subject.fromJson(Map<String, dynamic> json) =>
@@ -35,17 +41,18 @@ class SubjectTypeAdapter implements TypeAdapter<Subject> {
     final json = reader.read() as Map<dynamic, dynamic>;
     return Subject(
       id: json['id'],
-      title: json['title'],
+      name: json['name'],
       icon: json['icon'],
       description: json['description'],
-      createdAt: json['createdAt'],
-      updatedAt: json['updatedAt'],
-      chapters: json['chapters'],
+      createdAt: DateTime.parse(json['created_at']),
+      updatedAt: DateTime.parse(json['updated_at']),
+      chapters: (json['chapters'] as List).cast<Chapter>(),
+      isLocked: json['is_locked'] ?? true,
     );
   }
 
   @override
-  int get typeId => 14;
+  int get typeId => 7;
 
   @override
   void write(BinaryWriter writer, Subject obj) {

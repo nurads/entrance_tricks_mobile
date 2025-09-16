@@ -1,7 +1,12 @@
 export 'user.dart';
 export 'exam.dart';
 export 'grade.dart';
-export 'response.dart';
 export 'subject.dart';
 export 'chapter.dart';
 export 'session.dart';
+export 'payment.dart';
+export 'question.dart';
+export 'video.dart';
+export 'note.dart';
+export 'news.dart';
+export 'config.dart';

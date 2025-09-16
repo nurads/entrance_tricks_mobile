@@ -6,12 +6,11 @@ part 'chapter.g.dart';
 @JsonSerializable()
 class Chapter {
   final int id;
+  @JsonKey(name: 'chapter_number')
   final int chapterNumber;
-  final String title;
+  final int subject;
+  final String name;
   final String? description;
-  final String createdAt;
-  final String updatedAt;
-  final bool isLocked;
   final List notes;
   final List quizzes;
   final List videos;
@@ -19,11 +18,9 @@ class Chapter {
   Chapter({
     required this.id,
     required this.chapterNumber,
-    required this.title,
+    required this.subject,
+    required this.name,
     required this.description,
-    required this.createdAt,
-    required this.updatedAt,
-    this.isLocked = false,
     this.notes = const [],
     this.quizzes = const [],
     this.videos = const [],
@@ -41,11 +38,9 @@ class ChapterTypeAdapter implements TypeAdapter<Chapter> {
     return Chapter(
       id: json['id'],
       chapterNumber: json['chapterNumber'] ?? 1,
-      title: json['title'],
+      subject: json['subject'] ?? 1,
+      name: json['name'],
       description: json['description'],
-      createdAt: json['createdAt'],
-      updatedAt: json['updatedAt'],
-      isLocked: json['isLocked'] ?? false,
       notes: json['notes'] ?? [],
       quizzes: json['quizzes'] ?? [],
       videos: json['videos'] ?? [],
@@ -53,7 +48,7 @@ class ChapterTypeAdapter implements TypeAdapter<Chapter> {
   }
 
   @override
-  int get typeId => 15;
+  int get typeId => 1;
 
   @override
   void write(BinaryWriter writer, Chapter obj) {

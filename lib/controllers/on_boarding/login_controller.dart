@@ -1,13 +1,12 @@
-import 'package:entrance_tricks/utils/storages/base.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/services/services.dart';
 import 'package:entrance_tricks/services/api/exceptions.dart';
 import 'package:entrance_tricks/views/views.dart';
-import 'package:entrance_tricks/models/session.dart';
 
 class LoginController extends GetxController {
+  final authService = Get.find<AuthService>();
   final formKey = GlobalKey<FormState>();
   final phoneController = TextEditingController();
   final passwordController = TextEditingController();
@@ -20,14 +19,14 @@ class LoginController extends GetxController {
       _setLoading(true);
 
       try {
-        final phone = '09${phoneController.text}';
+        final phone = '9${phoneController.text}';
         final password = passwordController.text;
 
         final response = await UserService().loginUser(phone, password);
 
-        BaseSessionController().login(
-          Session(jwt: response.jwt, user: response.user),
-        );
+        authService.saveAuthToken(response.tokens);
+        authService.saveUser(response.user);
+
         Get.snackbar(
           'Success',
           'Login successful!',

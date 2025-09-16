@@ -17,7 +17,6 @@ class RegisterController extends GetxController {
 
   Grade? _selectedGrade;
   Grade? get selectedGrade => _selectedGrade;
-  List<String> streams = ['natural', 'social', 'humanities'];
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
@@ -37,9 +36,6 @@ class RegisterController extends GetxController {
 
   // Grade options
   List<Grade> gradeOptions = [];
-
-  // Stream options
-  List<String> streamOptions = ['natural', 'social'];
 
   void setSelectedGrade(Grade? grade) {
     _selectedGrade = grade;
@@ -68,9 +64,15 @@ class RegisterController extends GetxController {
   }
 
   void loadGrades() async {
-    gradeOptions = await GradeService().getGrades();
-    gradeOptions.sort((a, b) => a.name.compareTo(b.name));
-    update();
+    try {
+      gradeOptions = await GradeService().getGrades();
+      gradeOptions.sort((a, b) => a.name.compareTo(b.name));
+      update();
+    } catch (e) {
+      {
+        Get.snackbar('Error', 'Failed to load grades');
+      }
+    }
   }
 
   void toggleConfirmPasswordVisibility() {
@@ -87,10 +89,9 @@ class RegisterController extends GetxController {
         // await Future.delayed(Duration(seconds: 2));
         final response = await UserService().registerUser(
           nameController.text,
-          '09${phoneController.text}',
+          '9${phoneController.text}',
           passwordController.text,
-          selectedGrade?.id.toString() ?? '',
-          selectedStream,
+          selectedGrade?.id ?? 0,
         );
 
         logger.i(response);
@@ -104,10 +105,10 @@ class RegisterController extends GetxController {
         );
 
         // Navigate to verify phone page
-        Get.toNamed(
-          VIEWS.verifyPhone.path,
-          arguments: {'phone': '09${phoneController.text}'},
-        );
+        // Get.toNamed(
+        //   VIEWS.verifyPhone.path,
+        //   arguments: {'phone': '09${phoneController.text}'},
+        // );
       } on DioException catch (e) {
         Get.snackbar(
           'Registration Failed',

@@ -137,11 +137,11 @@ class SubjectPage extends StatelessWidget {
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
-                    color: _getSubjectIconColor(subject.title),
+                    color: _getSubjectIconColor(subject.name),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Icon(
-                    _getSubjectIcon(subject.title),
+                    _getSubjectIcon(subject.name),
                     size: 30,
                     color: Colors.white,
                   ),
@@ -150,7 +150,7 @@ class SubjectPage extends StatelessWidget {
 
                 // Subject Name
                 Text(
-                  subject.title,
+                  subject.name,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,

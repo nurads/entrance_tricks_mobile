@@ -28,8 +28,10 @@ class BaseApiClient {
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
-          // Add bearer token to all requests by default
-          if (accessToken.isNotEmpty) {
+          // Only add bearer token if explicitly requested via headers
+          // Check if Authorization header is explicitly set to use token
+          if (options.headers.containsKey('Authorization') &&
+              options.headers['Authorization'] == 'Bearer') {
             options.headers['Authorization'] = 'Bearer $accessToken';
           }
           handler.next(options);
@@ -47,16 +49,16 @@ class BaseApiClient {
                 colorText: Colors.white,
               );
 
-              Get.offAllNamed(VIEWS.login.path);
-              // final newToken = await _refreshToken();
-              // if (newToken != null) {
-              //   // Retry the original request with new token
-              //   final originalRequest = error.requestOptions;
-              //   originalRequest.headers['Authorization'] = 'Bearer $newToken';
-              //   final response = await dio.fetch(originalRequest);
-              //   handler.resolve(response);
-              //   return;
-              // }
+              // Get.offAllNamed(VIEWS.login.path);
+              final newToken = await _refreshToken();
+              if (newToken != null) {
+                // Retry the original request with new token
+                final originalRequest = error.requestOptions;
+                originalRequest.headers['Authorization'] = 'Bearer $newToken';
+                final response = await dio.fetch(originalRequest);
+                handler.resolve(response);
+                return;
+              }
             } catch (e) {
               // Token refresh failed, proceed with error
             }
@@ -90,7 +92,7 @@ class BaseApiClient {
   }
 
   // Set authentication tokens
-  void setTokens(String access, String refresh) {
+  static void setTokens(String access, String refresh) {
     accessToken = access;
     refreshToken = refresh;
   }
@@ -101,15 +103,15 @@ class BaseApiClient {
     refreshToken = '';
   }
 
-  // GET request (authenticated by default)
+  // GET request (unauthenticated by default)
   Future<Response> get(
     String path, {
     Map<String, dynamic>? queryParameters,
-    bool authenticated = true,
+    bool authenticated = false,
   }) async {
     final options = Options();
-    if (!authenticated) {
-      options.headers = {'Authorization': ''};
+    if (authenticated) {
+      options.headers = {'Authorization': 'Bearer'};
     }
 
     final response = await dio.get(
@@ -117,19 +119,20 @@ class BaseApiClient {
       queryParameters: queryParameters,
       options: options,
     );
+
     return response;
   }
 
-  // POST request (authenticated by default)
+  // POST request (unauthenticated by default)
   Future<Response> post(
     String path, {
     dynamic data,
     Map<String, dynamic>? queryParameters,
-    bool authenticated = true,
+    bool authenticated = false,
   }) async {
     final options = Options();
-    if (!authenticated) {
-      options.headers = {'Authorization': ''};
+    if (authenticated) {
+      options.headers = {'Authorization': 'Bearer'};
     }
 
     final response = await dio.post(
@@ -141,16 +144,16 @@ class BaseApiClient {
     return response;
   }
 
-  // PUT request (authenticated by default)
+  // PUT request (unauthenticated by default)
   Future<Response> put(
     String path, {
     dynamic data,
     Map<String, dynamic>? queryParameters,
-    bool authenticated = true,
+    bool authenticated = false,
   }) async {
     final options = Options();
-    if (!authenticated) {
-      options.headers = {'Authorization': ''};
+    if (authenticated) {
+      options.headers = {'Authorization': 'Bearer'};
     }
 
     final response = await dio.put(
@@ -162,15 +165,15 @@ class BaseApiClient {
     return response;
   }
 
-  // DELETE request (authenticated by default)
+  // DELETE request (unauthenticated by default)
   Future<Response> delete(
     String path, {
     Map<String, dynamic>? queryParameters,
-    bool authenticated = true,
+    bool authenticated = false,
   }) async {
     final options = Options();
-    if (!authenticated) {
-      options.headers = {'Authorization': ''};
+    if (authenticated) {
+      options.headers = {'Authorization': 'Bearer'};
     }
 
     final response = await dio.delete(
@@ -181,16 +184,16 @@ class BaseApiClient {
     return response;
   }
 
-  // PATCH request (authenticated by default)
+  // PATCH request (unauthenticated by default)
   Future<Response> patch(
     String path, {
     dynamic data,
     Map<String, dynamic>? queryParameters,
-    bool authenticated = true,
+    bool authenticated = false,
   }) async {
     final options = Options();
-    if (!authenticated) {
-      options.headers = {'Authorization': ''};
+    if (authenticated) {
+      options.headers = {'Authorization': 'Bearer'};
     }
 
     final response = await dio.patch(
@@ -209,7 +212,7 @@ class BaseApiClient {
     String fieldName = 'file',
     Map<String, dynamic>? additionalData,
     Map<String, dynamic>? queryParameters,
-    bool authenticated = true,
+    bool authenticated = false,
     ProgressCallback? onSendProgress,
   }) async {
     final file = File(filePath);
@@ -218,8 +221,8 @@ class BaseApiClient {
     }
 
     final options = Options();
-    if (!authenticated) {
-      options.headers = {'Authorization': ''};
+    if (authenticated) {
+      options.headers = {'Authorization': 'Bearer'};
     }
 
     // Create form data
@@ -248,12 +251,12 @@ class BaseApiClient {
     String fieldName = 'files',
     Map<String, dynamic>? additionalData,
     Map<String, dynamic>? queryParameters,
-    bool authenticated = true,
+    bool authenticated = false,
     ProgressCallback? onSendProgress,
   }) async {
     final options = Options();
-    if (!authenticated) {
-      options.headers = {'Authorization': ''};
+    if (authenticated) {
+      options.headers = {'Authorization': 'Bearer'};
     }
 
     // Create form data with multiple files
@@ -294,12 +297,12 @@ class BaseApiClient {
     String fieldName = 'file',
     Map<String, dynamic>? additionalData,
     Map<String, dynamic>? queryParameters,
-    bool authenticated = true,
+    bool authenticated = false,
     ProgressCallback? onSendProgress,
   }) async {
     final options = Options();
-    if (!authenticated) {
-      options.headers = {'Authorization': ''};
+    if (authenticated) {
+      options.headers = {'Authorization': 'Bearer'};
     }
 
     final formData = FormData.fromMap({

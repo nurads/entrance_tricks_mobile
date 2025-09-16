@@ -8,10 +8,14 @@ export 'subject/chapter_detail.dart';
 export 'exam/exam_page.dart';
 export 'news/news_page.dart';
 export 'common/profile_page.dart';
+export 'common/edit_profile_page.dart';
 export 'subject/subject_page.dart';
 export 'common/search_page.dart';
 export 'common/notifications_page.dart';
 export 'payment/payment_page.dart';
+export 'payment_methods_screen.dart';
+export 'receipt_upload_screen.dart';
+export 'payment_history_screen.dart';
 export 'exam/exam_detail_page.dart';
 export 'exam/exam_result_page.dart';
 export 'news/news_detail_page.dart';
@@ -27,7 +31,11 @@ enum VIEWS {
   verifyEmail('/verifyEmail'),
   resetPassword('/resetPassword'),
   subjectDetail('/subject-detail'),
-  chapterDetail('/chapter-detail');
+  chapterDetail('/chapter-detail'),
+  paymentMethods('/payment/methods'),
+  receiptUpload('/payment/receipt'),
+  paymentHistory('/payment/history'),
+  editProfile('/edit-profile');
 
   final String path;
 

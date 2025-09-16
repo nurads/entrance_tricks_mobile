@@ -3,27 +3,19 @@ import 'package:entrance_tricks/views/views.dart';
 import 'package:entrance_tricks/controllers/main_navigation_controller.dart';
 import 'package:entrance_tricks/controllers/notifications_controller.dart';
 import 'package:entrance_tricks/models/models.dart';
-import 'package:entrance_tricks/services/subjects.dart';
+import 'package:entrance_tricks/services/api/subjects.dart';
+import 'package:entrance_tricks/services/services.dart';
 import 'package:entrance_tricks/utils/utils.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
+import 'package:entrance_tricks/services/services.dart';
 
 class HomeDashboardController extends GetxController {
   bool _isLoading = true;
   bool get isLoading => _isLoading;
-
-  String _userName = 'Student';
-  String get userName => _userName;
-
   int _notificationCount = 3;
   int get notificationCount => _notificationCount;
 
-  int _studyStreak = 7;
-  int get studyStreak => _studyStreak;
-
-  int _completedExams = 12;
-  int get completedExams => _completedExams;
-
-  List<Map<String, dynamic>> _recentExams = [];
-  List<Map<String, dynamic>> get recentExams => _recentExams;
+  final CoreService _coreService = Get.find<CoreService>();
 
   List<Map<String, dynamic>> _recentNews = [];
   List<Map<String, dynamic>> get recentNews => _recentNews;
@@ -31,13 +23,45 @@ class HomeDashboardController extends GetxController {
   List<Subject> _subjects = [];
   List<Subject> get subjects => _subjects;
 
-  // List<Map<String, dynamic>> _grades = [];
-  // List<Map<String, dynamic>> get grades => _grades;
-
   @override
   void onInit() {
     super.onInit();
-    loadDashboardData();
+
+    loadSubjects();
+
+    InternetConnection().onStatusChange.listen((event) {
+      logger.i('Internet status changed: ${event}');
+      if (event == InternetStatus.connected) {
+        loadSubjects();
+      }
+    });
+  }
+
+  Future<void> loadSubjects() async {
+    _isLoading = true;
+    update();
+    if (_coreService.hasInternet) {
+      try {
+        logger.i('Loading subjects from api');
+        final gradeId = _coreService.authService.user.value?.grade.id;
+        _subjects = await SubjectsService().getSubjects(gradeId ?? 0);
+        _coreService.setSubjects(_subjects);
+      } catch (e) {
+        logger.i('Loading subjects from storage');
+        logger.e(e);
+        logger.i(_coreService.subjects);
+        _subjects = _coreService.subjects;
+      } finally {
+        _isLoading = false;
+        update();
+      }
+    } else {
+      logger.i('No internet');
+      _subjects = _coreService.subjects;
+      logger.i(_subjects);
+      _isLoading = false;
+      update();
+    }
   }
 
   Future<void> loadDashboardData() async {
@@ -45,41 +69,6 @@ class HomeDashboardController extends GetxController {
     update();
 
     try {
-      // Simulate API calls
-      // await Future.delayed(Duration(seconds: 1));
-
-      _userName = 'John Doe';
-      _studyStreak = 15;
-      _completedExams = 8;
-      _notificationCount = 5;
-
-      _recentExams = [
-        {
-          'id': 1,
-          'title': 'Physics Mock Test 2',
-          'questions': 30,
-          'duration': 60,
-          'status': 'Available',
-          'score': null,
-        },
-        {
-          'id': 2,
-          'title': 'Chemistry Quiz 1',
-          'questions': 15,
-          'duration': 30,
-          'status': 'Completed',
-          'score': 85,
-        },
-        {
-          'id': 3,
-          'title': 'Mathematics Practice',
-          'questions': 25,
-          'duration': 45,
-          'status': 'In Progress',
-          'score': null,
-        },
-      ];
-
       _recentNews = [
         {
           'id': 1,
@@ -104,7 +93,7 @@ class HomeDashboardController extends GetxController {
         },
       ];
 
-      _subjects = await SubjectsService().getSubjects();
+      _subjects = await SubjectsService().getSubjects(1);
       logger.i(_subjects.map((e) => e.icon).toList());
     } catch (e) {
       Get.snackbar('Error', 'Failed to load dashboard data');
@@ -122,10 +111,6 @@ class HomeDashboardController extends GetxController {
       'Dashboard data updated successfully',
       snackPosition: SnackPosition.BOTTOM,
     );
-  }
-
-  void showSearch() {
-    Get.to(() => SearchPage());
   }
 
   void openNotifications() {

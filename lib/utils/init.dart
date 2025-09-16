@@ -1,35 +1,30 @@
-import 'package:entrance_tricks/models/models.dart';
-import 'package:entrance_tricks/utils/storages/auth.dart';
-import 'package:entrance_tricks/utils/storages/base.dart';
+import 'package:entrance_tricks/services/api/api.dart';
+import 'package:entrance_tricks/utils/storages/storages.dart';
 import 'package:entrance_tricks/utils/utils.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:entrance_tricks/models/session.dart';
-import 'package:entrance_tricks/services/session.dart';
+import 'package:get/get.dart';
+import 'package:entrance_tricks/services/auth.dart';
+import 'package:entrance_tricks/services/core.dart';
+import 'package:entrance_tricks/services/api/grades.dart';
 
 Future<void> initialize() async {
   // Hive Box Initilizer
   await Hive.initFlutter();
-  // Hive.registerAdapter<AuthToken>(AuthTokenTypeAdapter());
-  Hive.registerAdapter<Session>(SessionTypeAdapter());
-  Hive.registerAdapter<User>(UserTypeAdapter());
-  Hive.registerAdapter<Grade>(GradeTypeAdapter());
-  Hive.registerAdapter<Subject>(SubjectTypeAdapter());
-  Hive.registerAdapter<Chapter>(ChapterTypeAdapter());
-  // await Hive.deleteBoxFromDisk('baseStorage');
-  await Hive.openBox<AuthToken>(authTokenStorage);
-  await Hive.openBox<dynamic>('baseStorage');
-  await Hive.openBox<Session>(sessionStorage);
+  await HiveChaptersStorage().init();
+  await HiveSubjectsStorage().init();
+  await HiveVideoStorage().init();
+  await HiveAuthStorage().init();
+  await HiveUserStorage().init();
+  await HiveExamStorage().init();
+  await HiveQuestionStorage().init();
+  await HiveNoteStorage().init();
+  Get.put(AuthService());
+  Get.put(CoreService());
+  Get.put(GradeService());
 
-  // Network Initilizer
+  final authToken = await HiveAuthStorage().getAuthToken();
 
-  sessionController.listenSession((session) {
-    session = session;
-  });
+  BaseApiClient.setTokens(authToken?.access ?? '', authToken?.refresh ?? '');
 
-  session = sessionController.getSession();
-
-  // logger.i(session);
-
-  // await ApiClient().initilize();
   logger.i('Initilizing The application');
 }

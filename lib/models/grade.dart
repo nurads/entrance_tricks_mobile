@@ -22,7 +22,7 @@ class GradeTypeAdapter implements TypeAdapter<Grade> {
   }
 
   @override
-  int get typeId => 16;
+  int get typeId => 3;
 
   @override
   void write(BinaryWriter writer, Grade obj) {

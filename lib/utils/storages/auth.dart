@@ -1,128 +1,84 @@
 import 'package:entrance_tricks/models/models.dart';
-import 'package:entrance_tricks/utils/constants/constants.dart';
+import 'package:entrance_tricks/utils/storages/base.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:path_provider/path_provider.dart';
 
-// import 'localization_manager.dart'; // For RxBool (if you're using GetX)
+class HiveAuthStorage extends BaseObjectStorage<AuthToken> {
+  final String _boxName = 'authTokenStorage';
 
-abstract class AuthStorage {
-  Future<AuthToken?> readTokens();
-  Future<void> writeTokens(AuthToken pair);
-  Future<void> clear();
-  void listen(void Function(BoxEvent) boxEvenHandler);
-}
-
-class HiveAuthStorage extends AuthStorage {
   @override
-  Future<AuthToken?> readTokens() async {
-    final box = Hive.box<AuthToken>(authTokenStorage);
-    return box.get(authTokenStorage);
+  Future<void> init() async {
+    Hive.registerAdapter<Grade>(GradeTypeAdapter());
+    Hive.registerAdapter<AuthToken>(AuthTokenTypeAdapter());
+    await Hive.openBox<AuthToken>(_boxName);
   }
 
   @override
-  Future<void> writeTokens(AuthToken pair) {
-    final box = Hive.box<AuthToken>(authTokenStorage);
-    return box.put(authTokenStorage, pair);
-  }
-
-  @override
-  void listen(void Function(BoxEvent event) boxEvenHandler) {
-    final box = Hive.box<AuthToken>(authTokenStorage);
-    box.watch(key: authTokenStorage).listen(boxEvenHandler);
+  void listen(void Function(AuthToken) callback, String key) {
+    final box = Hive.box<AuthToken>(_boxName);
+    box.watch(key: key).listen((event) => callback(event.value));
   }
 
   @override
   Future<void> clear() {
-    final box = Hive.box<AuthToken>(authTokenStorage);
-    return box.delete(authTokenStorage);
+    final box = Hive.box<AuthToken>(_boxName);
+    return box.clear();
+  }
+
+  @override
+  Future<AuthToken?> read(String key) async {
+    return Hive.box<AuthToken>(_boxName).get(key);
+  }
+
+  @override
+  Future<void> write(String key, AuthToken value) {
+    return Hive.box<AuthToken>(_boxName).put(key, value);
+  }
+
+  Future<AuthToken?> getAuthToken() async {
+    return Hive.box<AuthToken>(_boxName).get('authToken');
+  }
+
+  Future<void> setAuthToken(AuthToken authToken) {
+    return Hive.box<AuthToken>(_boxName).put('authToken', authToken);
   }
 }
 
-class AuthTokenTypeAdapter implements TypeAdapter<AuthToken> {
-  @override
-  read(BinaryReader reader) {
-    final json = reader.read() as Map<String, dynamic>;
-    return AuthToken.fromJson(json);
-  }
+class HiveUserStorage extends BaseObjectStorage<User> {
+  final String _boxName = 'userStorage';
 
   @override
-  int get typeId => 10;
+  Future<void> init() async {
+    Hive.registerAdapter<User>(UserTypeAdapter());
+    await Hive.openBox<User>(_boxName);
+  }
 
   @override
-  void write(BinaryWriter writer, obj) {
-    writer.write(obj.toJson());
-  }
-}
-
-class ConfigPreference {
-  // Prevent instantiation
-  ConfigPreference._();
-
-  static const String _preferencesBox = 'preferences';
-  static const String _currentLocalKey = 'current_local';
-  static const String _lightThemeKey = 'is_theme_light';
-  static const String _isFirstLaunchKey = 'is_first_launch';
-  static const String _accessTokenKey = 'access_token';
-
-  static RxBool hasConnection = true.obs;
-
-  // Initialize Hive
-  static Future<void> init() async {
-    final directory = await getApplicationDocumentsDirectory();
-    await Hive.initFlutter(directory.path);
-    await Hive.openBox<dynamic>(_preferencesBox);
+  Future<void> clear() {
+    return Hive.box<User>(_boxName).clear();
   }
 
-  // Get Hive box
-  static Box<dynamic> _getBox() {
-    return Hive.box(_preferencesBox);
+  @override
+  void listen(void Function(User p1) callback, String key) {
+    Hive.box<User>(
+      _boxName,
+    ).watch(key: key).listen((event) => callback(event.value));
   }
 
-  // Set theme to light/dark
-  static Future<void> setThemeIsLight(bool lightTheme) async {
-    await _getBox().put(_lightThemeKey, lightTheme);
+  @override
+  Future<User?> read(String key) async {
+    return Hive.box<User>(_boxName).get(key);
   }
 
-  // Get current theme (light or dark)
-  static bool getThemeIsLight() {
-    return _getBox().get(_lightThemeKey, defaultValue: true) as bool;
+  @override
+  Future<void> write(String key, User value) {
+    return Hive.box<User>(_boxName).put(key, value);
   }
 
-  // Save current language
-  static Future<void> setCurrentLanguage(String languageCode) async {
-    await _getBox().put(_currentLocalKey, languageCode);
+  Future<User?> getUser() async {
+    return Hive.box<User>(_boxName).get('user');
   }
 
-  // Get current language
-  static Locale getCurrentLocal() {
-    String? langCode = _getBox().get(_currentLocalKey) as String?;
-    return langCode == null ? const Locale('en') : Locale(langCode);
-  }
-
-  // Check if it's the first launch
-  static bool isFirstLaunch() {
-    return _getBox().get(_isFirstLaunchKey, defaultValue: true) as bool;
-  }
-
-  // Mark the app as launched
-  static Future<void> markAppLaunched() async {
-    await _getBox().put(_isFirstLaunchKey, false);
-  }
-
-  // Store access token
-  static Future<void> storeAccessToken(String accessToken) async {
-    await _getBox().put(_accessTokenKey, accessToken);
-  }
-
-  // Get access token
-  static String? getAccessToken() {
-    return _getBox().get(_accessTokenKey) as String?;
-  }
-
-  // Clear all stored data
-  static Future<void> clear() async {
-    await _getBox().clear();
+  Future<void> setUser(User user) {
+    return Hive.box<User>(_boxName).put('user', user);
   }
 }

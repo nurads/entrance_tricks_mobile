@@ -8,12 +8,10 @@ part of 'chapter.dart';
 
 Chapter _$ChapterFromJson(Map<String, dynamic> json) => Chapter(
   id: (json['id'] as num).toInt(),
-  chapterNumber: (json['chapterNumber'] as num).toInt(),
-  title: json['title'] as String,
+  chapterNumber: (json['chapter_number'] as num).toInt(),
+  subject: (json['subject'] as num).toInt(),
+  name: json['name'] as String,
   description: json['description'] as String?,
-  createdAt: json['createdAt'] as String,
-  updatedAt: json['updatedAt'] as String,
-  isLocked: json['isLocked'] as bool? ?? false,
   notes: json['notes'] as List<dynamic>? ?? const [],
   quizzes: json['quizzes'] as List<dynamic>? ?? const [],
   videos: json['videos'] as List<dynamic>? ?? const [],
@@ -21,12 +19,10 @@ Chapter _$ChapterFromJson(Map<String, dynamic> json) => Chapter(
 
 Map<String, dynamic> _$ChapterToJson(Chapter instance) => <String, dynamic>{
   'id': instance.id,
-  'chapterNumber': instance.chapterNumber,
-  'title': instance.title,
+  'chapter_number': instance.chapterNumber,
+  'subject': instance.subject,
+  'name': instance.name,
   'description': instance.description,
-  'createdAt': instance.createdAt,
-  'updatedAt': instance.updatedAt,
-  'isLocked': instance.isLocked,
   'notes': instance.notes,
   'quizzes': instance.quizzes,
   'videos': instance.videos,

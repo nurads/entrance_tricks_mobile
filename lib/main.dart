@@ -1,8 +1,8 @@
-import 'package:entrance_tricks/services/session.dart';
 import 'package:flutter/material.dart';
 import 'package:entrance_tricks/views/home/home.dart';
 import 'package:entrance_tricks/views/views.dart';
 import 'package:get/get.dart';
+import 'package:entrance_tricks/services/services.dart';
 import 'package:entrance_tricks/components/components.dart';
 import 'package:entrance_tricks/utils/utils.dart';
 
@@ -10,11 +10,13 @@ void main() async {
   // Remove debug banner
   await initialize();
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  MyApp({super.key});
+
+  final service = Get.find<AuthService>();
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +32,7 @@ class MyApp extends StatelessWidget {
         GetPage(name: VIEWS.verifyPhone.path, page: () => VerifyPhone()),
         GetPage(name: VIEWS.subjectDetail.path, page: () => SubjectDetail()),
         GetPage(name: VIEWS.chapterDetail.path, page: () => ChapterDetail()),
+        GetPage(name: VIEWS.editProfile.path, page: () => EditProfilePage()),
         GetPage(name: '/payment', page: () => PaymentPage()),
         GetPage(name: '/exam-detail', page: () => ExamDetailPage()),
         // GetPage(
@@ -42,7 +45,9 @@ class MyApp extends StatelessWidget {
         //   page: () => const ResetPassword(),
         // ),
       ],
-      initialRoute: session != null ? VIEWS.home.path : VIEWS.login.path,
+      initialRoute: service.user.value != null
+          ? VIEWS.home.path
+          : VIEWS.login.path,
     );
   }
 }

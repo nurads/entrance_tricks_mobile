@@ -1,136 +1,88 @@
+import 'package:entrance_tricks/utils/utils.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/views/exam/exam_detail_page.dart';
+import 'package:entrance_tricks/models/models.dart';
+import 'package:entrance_tricks/services/services.dart';
+import 'package:entrance_tricks/utils/storages/storages.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 
 class ExamController extends GetxController {
+  final ExamService _examService = ExamService();
+  final HiveExamStorage _hiveExamStorage = HiveExamStorage();
+  final CoreService _coreService = Get.find<CoreService>();
+  final InternetConnection _internetConnection = InternetConnection();
   bool _isLoading = true;
   bool get isLoading => _isLoading;
+  final Subject _allPlaceholderSubject = Subject(
+    id: 0,
+    name: 'All',
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
+  );
 
-  List<Map<String, dynamic>> _exams = [];
-  List<Map<String, dynamic>> get exams => _exams;
+  List<Exam> _exams = [];
+  List<Exam> get exams => _exams;
 
-  List<Map<String, dynamic>> _subjects = [];
-  List<Map<String, dynamic>> get subjects => _subjects;
+  List<Subject> _subjects = [];
+  List<Subject> get subjects => _subjects;
 
   int _selectedSubjectIndex = 0;
   int get selectedSubjectIndex => _selectedSubjectIndex;
+
+  String? _error;
+  String? get error => _error;
 
   @override
   void onInit() {
     super.onInit();
     loadExams();
     loadSubjects();
+
+    _internetConnection.onStatusChange.listen((event) {
+      if (event == InternetStatus.connected) {
+        loadExams();
+      }
+    });
+  }
+
+  Future<void> loadSubjects() async {
+    _subjects = [_allPlaceholderSubject, ..._coreService.subjects];
+    update();
   }
 
   Future<void> loadExams() async {
     _isLoading = true;
+    _error = null;
     update();
 
-    try {
-      // Simulate API call
-      await Future.delayed(Duration(seconds: 1));
-
-      _exams = [
-        {
-          'id': 1,
-          'title': 'Maths Exam One',
-          'subject': 'Maths',
-          'questions': 30,
-          'duration': 75,
-          'bestScore': 85,
-        },
-        {
-          'id': 2,
-          'title': 'Maths Exam Two',
-          'subject': 'Maths',
-          'questions': 60,
-          'duration': 75,
-          'bestScore': 78,
-        },
-        {
-          'id': 3,
-          'title': 'Maths Exam Three',
-          'subject': 'Maths',
-          'questions': 40,
-          'duration': 60,
-          'bestScore': 92,
-        },
-        {
-          'id': 4,
-          'title': 'English Exam One',
-          'subject': 'English',
-          'questions': 25,
-          'duration': 45,
-          'bestScore': 88,
-        },
-        {
-          'id': 5,
-          'title': 'Physics Exam One',
-          'subject': 'Physics',
-          'questions': 35,
-          'duration': 60,
-          'bestScore': 76,
-        },
-        {
-          'id': 6,
-          'title': 'Chemistry Exam One',
-          'subject': 'Chemistry',
-          'questions': 30,
-          'duration': 50,
-          'bestScore': 82,
-        },
-        {
-          'id': 7,
-          'title': 'Biology Exam One',
-          'subject': 'Biology',
-          'questions': 40,
-          'duration': 65,
-          'bestScore': 79,
-        },
-        {
-          'id': 8,
-          'title': 'Geography Exam One',
-          'subject': 'Geography',
-          'questions': 20,
-          'duration': 30,
-          'bestScore': 85,
-        },
-      ];
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to load exams');
-    } finally {
+    if (_coreService.hasInternet) {
+      try {
+        _exams = await _examService.getAvailableExams();
+        await _hiveExamStorage.write('exams', _exams);
+      } catch (e) {
+        _exams = await _hiveExamStorage.read('exams');
+      } finally {
+        _isLoading = false;
+        update();
+      }
+    } else {
+      _exams = await _hiveExamStorage.read('exams');
+      logger.i(_exams);
       _isLoading = false;
       update();
     }
   }
 
-  Future<void> loadSubjects() async {
-    try {
-      _subjects = [
-        {'id': 1, 'name': 'Maths'},
-        {'id': 2, 'name': 'English'},
-        {'id': 3, 'name': 'Physics'},
-        {'id': 4, 'name': 'Biology'},
-        {'id': 5, 'name': 'Chemistry'},
-        {'id': 6, 'name': 'Geography'},
-      ];
-      update();
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to load subjects');
-    }
-  }
-
-  void selectSubject(int index) {
+  Future<void> selectSubject(int index) async {
+    final subject = _subjects[index];
     _selectedSubjectIndex = index;
-    update();
-  }
-
-  List<Map<String, dynamic>> getFilteredExams() {
-    if (_selectedSubjectIndex == 0) {
-      return _exams; // Show all exams
+    final exams = await _hiveExamStorage.read('exams');
+    if (subject.id == 0) {
+      _exams = exams;
+    } else {
+      _exams = exams.where((e) => e.subject?.id == subject.id).toList();
     }
-
-    final selectedSubject = _subjects[_selectedSubjectIndex]['name'];
-    return _exams.where((exam) => exam['subject'] == selectedSubject).toList();
+    update();
   }
 
   void startExam(int examId) {
@@ -141,5 +93,9 @@ class ExamController extends GetxController {
   void navigateToExamDetail(int examId) {
     // Navigate to exam detail page
     Get.to(() => ExamDetailPage(), arguments: {'examId': examId});
+  }
+
+  Future<void> refreshExams() async {
+    await loadExams();
   }
 }

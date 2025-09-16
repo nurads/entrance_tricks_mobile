@@ -7,20 +7,26 @@ part 'user.g.dart';
 @JsonSerializable()
 class User {
   final int id;
-  final String name;
+  @JsonKey(name: 'first_name')
+  final String firstName;
+  @JsonKey(name: 'last_name')
+  final String? lastName;
+  @JsonKey(name: 'phone_number')
   final String phoneNumber;
+  @JsonKey(name: 'is_phone_verified')
   final bool isPhoneVerified;
   final Grade grade;
-  final String? stream;
+  @JsonKey(name: 'created_at')
   final String createdAt;
+  @JsonKey(name: 'updated_at')
   final String updatedAt;
   User({
     required this.id,
-    required this.name,
+    required this.firstName,
+    this.lastName,
     required this.phoneNumber,
     required this.isPhoneVerified,
     required this.grade,
-    required this.stream,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -30,23 +36,11 @@ class User {
 }
 
 @JsonSerializable()
-class AuthToken {
-  final String token;
-  // final String refreshToken;
-
-  AuthToken({required this.token});
-
-  factory AuthToken.fromJson(Map<String, dynamic> json) =>
-      _$AuthTokenFromJson(json);
-  Map<String, dynamic> toJson() => _$AuthTokenToJson(this);
-}
-
-@JsonSerializable()
 class AuthResponse {
-  final String jwt;
+  final AuthToken tokens;
   final User user;
 
-  AuthResponse({required this.jwt, required this.user});
+  AuthResponse({required this.tokens, required this.user});
 
   factory AuthResponse.fromJson(Map<String, dynamic> json) =>
       _$AuthResponseFromJson(json);
@@ -55,14 +49,40 @@ class AuthResponse {
 
 @JsonSerializable()
 class RegisterResponse {
-  final String detail;
-  final String id;
+  final int id;
+  final AuthToken tokens;
+  final String phoneNumber;
+  @JsonKey(name: 'date_joined')
+  final DateTime dateJoined;
 
-  RegisterResponse({required this.detail, required this.id});
+  @JsonKey(name: 'first_name')
+  String firstName;
+  @JsonKey(name: 'last_name')
+  String lastName;
+  final Grade grade;
+  RegisterResponse({
+    required this.id,
+    required this.tokens,
+    required this.phoneNumber,
+    required this.dateJoined,
+    required this.firstName,
+    required this.lastName,
+    required this.grade,
+  });
 
   factory RegisterResponse.fromJson(Map<String, dynamic> json) =>
       _$RegisterResponseFromJson(json);
   Map<String, dynamic> toJson() => _$RegisterResponseToJson(this);
+  User toUser() => User(
+    id: id,
+    firstName: firstName,
+    lastName: lastName,
+    phoneNumber: phoneNumber,
+    isPhoneVerified: true,
+    grade: grade,
+    createdAt: dateJoined.toIso8601String(),
+    updatedAt: dateJoined.toIso8601String(),
+  );
 }
 
 @JsonSerializable()
@@ -84,21 +104,79 @@ class UserTypeAdapter implements TypeAdapter<User> {
 
     return User(
       id: json['id'],
-      name: json['name'],
-      phoneNumber: json['phoneNumber'],
-      isPhoneVerified: json['isPhoneVerified'],
+      firstName: json['first_name'],
+      lastName: json['last_name'],
+      phoneNumber: json['phone_number'],
+      isPhoneVerified: json['is_phone_verified'],
       grade: json['grade'],
-      stream: json['stream'],
-      createdAt: json['createdAt'],
-      updatedAt: json['updatedAt'],
+      createdAt: json['created_at'],
+      updatedAt: json['updated_at'],
     );
   }
 
   @override
-  int get typeId => 13;
+  int get typeId => 8;
 
   @override
   void write(BinaryWriter writer, User obj) {
+    writer.write(obj.toJson());
+  }
+}
+
+@JsonSerializable()
+class AuthToken {
+  final String access;
+  final String refresh;
+
+  AuthToken({required this.access, required this.refresh});
+
+  factory AuthToken.fromJson(Map<String, dynamic> json) =>
+      _$AuthTokenFromJson(json);
+  Map<String, dynamic> toJson() => _$AuthTokenToJson(this);
+}
+
+@JsonSerializable()
+class UserSession {
+  final AuthToken token;
+  final User user;
+
+  UserSession({required this.token, required this.user});
+
+  factory UserSession.fromJson(Map<String, dynamic> json) =>
+      _$UserSessionFromJson(json);
+  Map<String, dynamic> toJson() => _$UserSessionToJson(this);
+}
+
+class UserSessionTypeAdapter implements TypeAdapter<UserSession> {
+  @override
+  read(BinaryReader reader) {
+    final json = reader.read() as Map<dynamic, dynamic>;
+    final json_ = Map<String, dynamic>.from(json);
+    return UserSession.fromJson(json_);
+  }
+
+  @override
+  int get typeId => 10;
+
+  @override
+  void write(BinaryWriter writer, UserSession obj) {
+    writer.write(obj.toJson());
+  }
+}
+
+class AuthTokenTypeAdapter implements TypeAdapter<AuthToken> {
+  @override
+  read(BinaryReader reader) {
+    final json = reader.read() as Map<dynamic, dynamic>;
+    final json_ = Map<String, dynamic>.from(json);
+    return AuthToken.fromJson(json_);
+  }
+
+  @override
+  int get typeId => 11;
+
+  @override
+  void write(BinaryWriter writer, AuthToken obj) {
     writer.write(obj.toJson());
   }
 }

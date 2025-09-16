@@ -21,7 +21,7 @@ class SubjectController extends GetxController {
     update();
 
     try {
-      _subjects = await SubjectsService().getSubjects();
+      _subjects = await SubjectsService().getSubjects(1);
     } catch (e) {
       Get.snackbar('Error', 'Failed to load subjects');
     } finally {

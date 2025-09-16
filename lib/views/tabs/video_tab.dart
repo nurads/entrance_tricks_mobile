@@ -9,23 +9,51 @@ class VideoTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<ChapterDetailController>(
       builder: (controller) {
+        if (controller.videos.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.video_library_outlined,
+                  size: 80,
+                  color: Colors.grey[400],
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'No videos available',
+                  style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+                ),
+              ],
+            ),
+          );
+        }
+
         return Padding(
           padding: EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Video Player Card
-              _buildVideoPlayerCard(context),
-              
-              SizedBox(height: 20),
-              
-              // Video Details
-              _buildVideoDetails(context),
-              
-              SizedBox(height: 20),
-              
-              // Download Button
-              _buildDownloadButton(context),
+              // Video List Header
+              Text(
+                'Videos',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              SizedBox(height: 16),
+
+              Expanded(
+                child: ListView.builder(
+                  itemCount: controller.videos.length,
+                  itemBuilder: (context, index) {
+                    final video = controller.videos[index];
+                    return _buildVideoCard(context, video, controller);
+                  },
+                ),
+              ),
             ],
           ),
         );
@@ -33,147 +61,158 @@ class VideoTab extends StatelessWidget {
     );
   }
 
-  Widget _buildVideoPlayerCard(BuildContext context) {
+  Widget _buildVideoCard(
+    BuildContext context,
+    Map<String, dynamic> video,
+    ChapterDetailController controller,
+  ) {
+    final bool isLocked = video['isLocked'] ?? false;
+    final bool isWatched = video['isWatched'] ?? false;
+
     return Container(
-      width: double.infinity,
-      height: 250,
+      margin: EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.withOpacity(0.2)),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.1),
-            blurRadius: 10,
-            offset: Offset(0, 4),
+            blurRadius: 8,
+            offset: Offset(0, 2),
           ),
         ],
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Stack(
-          children: [
-            // Background Image (Winter landscape)
-            Container(
-              width: double.infinity,
-              height: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                image: DecorationImage(
-                  image: NetworkImage('https://images.unsplash.com/photo-1513297887119-d46091b24bfa?w=400&h=250&fit=crop'),
-                  fit: BoxFit.cover,
-                  onError: (exception, stackTrace) {
-                    // Fallback to gradient if image fails
-                  },
-                ),
-              ),
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      Colors.black.withOpacity(0.3),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            
-            // Play Button Overlay
-            Center(
-              child: Container(
+      child: InkWell(
+        onTap: isLocked ? null : () => controller.playVideo(video['id']),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Row(
+            children: [
+              // Video Thumbnail
+              Container(
                 width: 80,
-                height: 80,
+                height: 60,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
-                  shape: BoxShape.circle,
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  Icons.play_arrow,
-                  size: 50,
-                  color: Colors.blue[600],
+                child: Stack(
+                  children: [
+                    // Thumbnail or placeholder
+                    Container(
+                      width: double.infinity,
+                      height: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Colors.blue[100],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        Icons.play_circle_outline,
+                        size: 30,
+                        color: isLocked ? Colors.grey[600] : Colors.blue[600],
+                      ),
+                    ),
+
+                    // Lock overlay
+                    if (isLocked)
+                      Container(
+                        width: double.infinity,
+                        height: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(Icons.lock, color: Colors.white, size: 24),
+                      ),
+
+                    // Watch indicator
+                    if (isWatched && !isLocked)
+                      Positioned(
+                        top: 4,
+                        right: 4,
+                        child: Container(
+                          padding: EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            color: Colors.green,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.check,
+                            size: 12,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
-  Widget _buildVideoDetails(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Physics and Human Society',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
-        
-        SizedBox(height: 12),
-        
-        Row(
-          children: [
-            Icon(
-              Icons.access_time,
-              size: 20,
-              color: Colors.grey[600],
-            ),
-            SizedBox(width: 8),
-            Text(
-              '6h 30min',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            
-            SizedBox(width: 24),
-            
-            Icon(
-              Icons.book,
-              size: 20,
-              color: Colors.grey[600],
-            ),
-            SizedBox(width: 8),
-            Text(
-              '28 lessons',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
+              SizedBox(width: 16),
 
-  Widget _buildDownloadButton(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      child: ElevatedButton.icon(
-        onPressed: () => _downloadVideo(1),
-        icon: Icon(Icons.download, color: Colors.white),
-        label: Text(
-          'Download',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue[600],
-          padding: EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+              // Video Info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      video['title'] ?? 'Video Title',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: isLocked ? Colors.grey[600] : Colors.black87,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.access_time,
+                          size: 14,
+                          color: Colors.grey[600],
+                        ),
+                        SizedBox(width: 4),
+                        Text(
+                          video['duration'] ?? '00:00',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        if (isWatched && !isLocked) ...[
+                          SizedBox(width: 12),
+                          Icon(
+                            Icons.check_circle,
+                            size: 14,
+                            color: Colors.green,
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            'Watched',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.green,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              // Action button
+              if (!isLocked)
+                IconButton(
+                  onPressed: () => _downloadVideo(video['id']),
+                  icon: Icon(Icons.download_outlined),
+                  color: Colors.grey[600],
+                ),
+            ],
           ),
         ),
       ),
