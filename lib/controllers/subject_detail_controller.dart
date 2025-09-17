@@ -34,7 +34,10 @@ class SubjectDetailController extends GetxController {
       Subject subject = _coreService.subjects.firstWhere(
         (element) => element.id == subjectId,
       );
-      logger.i('subject: $subject');
+      logger.i('subject: $subject ${subject.isLocked}');
+      
+      isLocked=subject.isLocked;
+      
       _subjectName = subject.name;
       _chapters = subject.chapters;
       _chapters.sort((e1, e2) => e1.chapterNumber.compareTo(e2.chapterNumber));

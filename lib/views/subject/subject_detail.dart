@@ -301,7 +301,7 @@ class SubjectDetail extends StatelessWidget {
             GestureDetector(
               onTap: () {
                 if (controller.isLocked) {
-                  _showLockedDialog(context);
+                  // _showLockedDialog(context); TODO: Implement this
                 } else {
                   controller.openChapter(chapter.id);
                 }
@@ -332,87 +332,87 @@ class SubjectDetail extends StatelessWidget {
     );
   }
 
-  void _showLockedDialog(BuildContext context) {
-    final paymentController = Get.find<PaymentController>();
-    final subjectController = Get.find<SubjectDetailController>();
+  // void _showLockedDialog(BuildContext context) {
+  //   final paymentController = Get.find<PaymentController>();
+  //   final subjectController = Get.find<SubjectDetailController>();
 
-    // Get subject payment info
-    paymentController.getSubjectPackageInfo(subjectController.subjectId).then((
-      paymentInfo,
-    ) {
-      final price = paymentInfo?['price'] ?? 0;
-      final title = paymentInfo?['title'] ?? 'Subject';
+  //   // Get subject payment info
+  //   paymentController.getSubjectPackageInfo(subjectController.subjectId).then((
+  //     paymentInfo,
+  //   ) {
+  //     final price = paymentInfo?['price'] ?? 0;
+  //     final title = paymentInfo?['title'] ?? 'Subject';
 
-      Get.dialog(
-        Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Padding(
-            padding: EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.lock_outline, color: Colors.blue),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Content Is Locked',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 8),
-                Text(
-                  'This content requires payment to access. Please make a payment of $price ETB to unlock all chapters.',
-                  style: TextStyle(color: Colors.black54),
-                ),
-                SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () => Get.back(),
-                      child: Text('Cancel'),
-                    ),
-                    SizedBox(width: 8),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        Get.back();
-                        _navigateToPayment(
-                          context,
-                          subjectController.subjectId,
-                          price,
-                          title,
-                        );
-                      },
-                      icon: Icon(Icons.payment),
-                      label: Text('Make Payment'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue.shade700,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-        barrierDismissible: true,
-      );
-    });
-  }
+  //     Get.dialog(
+  //       Dialog(
+  //         shape: RoundedRectangleBorder(
+  //           borderRadius: BorderRadius.circular(16),
+  //         ),
+  //         child: Padding(
+  //           padding: EdgeInsets.all(20),
+  //           child: Column(
+  //             mainAxisSize: MainAxisSize.min,
+  //             crossAxisAlignment: CrossAxisAlignment.start,
+  //             children: [
+  //               Row(
+  //                 children: [
+  //                   Icon(Icons.lock_outline, color: Colors.blue),
+  //                   SizedBox(width: 8),
+  //                   Expanded(
+  //                     child: Text(
+  //                       'Content Is Locked',
+  //                       style: TextStyle(
+  //                         fontWeight: FontWeight.bold,
+  //                         fontSize: 16,
+  //                       ),
+  //                     ),
+  //                   ),
+  //                 ],
+  //               ),
+  //               SizedBox(height: 8),
+  //               Text(
+  //                 'This content requires payment to access. Please make a payment of $price ETB to unlock all chapters.',
+  //                 style: TextStyle(color: Colors.black54),
+  //               ),
+  //               SizedBox(height: 16),
+  //               Row(
+  //                 mainAxisAlignment: MainAxisAlignment.end,
+  //                 children: [
+  //                   TextButton(
+  //                     onPressed: () => Get.back(),
+  //                     child: Text('Cancel'),
+  //                   ),
+  //                   SizedBox(width: 8),
+  //                   ElevatedButton.icon(
+  //                     onPressed: () {
+  //                       Get.back();
+  //                       _navigateToPayment(
+  //                         context,
+  //                         subjectController.subjectId,
+  //                         price,
+  //                         title,
+  //                       );
+  //                     },
+  //                     icon: Icon(Icons.payment),
+  //                     label: Text('Make Payment'),
+  //                     style: ElevatedButton.styleFrom(
+  //                       backgroundColor: Colors.blue.shade700,
+  //                       foregroundColor: Colors.white,
+  //                       shape: RoundedRectangleBorder(
+  //                         borderRadius: BorderRadius.circular(24),
+  //                       ),
+  //                     ),
+  //                   ),
+  //                 ],
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       ),
+  //       barrierDismissible: true,
+  //     );
+  //   });
+  // }
 
   void _navigateToPayment(
     BuildContext context,

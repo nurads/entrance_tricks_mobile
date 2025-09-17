@@ -688,7 +688,6 @@ class HomeDashboard extends StatelessWidget {
                     subtitle: 'Dashboard & Overview',
                     onTap: () {
                       Get.find<MainNavigationController>().changeIndex(0);
-                      Navigator.pop(context);
                     },
                     isSelected:
                         Get.find<MainNavigationController>().currentIndex == 0,
@@ -699,7 +698,6 @@ class HomeDashboard extends StatelessWidget {
                     subtitle: 'Practice & Mock Tests',
                     onTap: () {
                       Get.find<MainNavigationController>().changeIndex(1);
-                      Navigator.pop(context);
                     },
                     isSelected:
                         Get.find<MainNavigationController>().currentIndex == 1,
@@ -710,7 +708,6 @@ class HomeDashboard extends StatelessWidget {
                     subtitle: 'Latest Updates',
                     onTap: () {
                       Get.find<MainNavigationController>().changeIndex(2);
-                      Navigator.pop(context);
                     },
                     isSelected:
                         Get.find<MainNavigationController>().currentIndex == 2,
@@ -721,7 +718,6 @@ class HomeDashboard extends StatelessWidget {
                     subtitle: 'Account & Settings',
                     onTap: () {
                       Get.find<MainNavigationController>().changeIndex(3);
-                      Navigator.pop(context);
                     },
                     isSelected:
                         Get.find<MainNavigationController>().currentIndex == 3,
@@ -735,72 +731,19 @@ class HomeDashboard extends StatelessWidget {
                     icon: Icons.book_rounded,
                     title: 'Subjects',
                     subtitle: 'Browse all subjects',
-                    onTap: () {
-                      Get.toNamed('/subject-page');
-                      Navigator.pop(context);
-                    },
-                  ),
-                  _buildModernDrawerMenuItem(
-                    icon: Icons.video_library_rounded,
-                    title: 'Videos',
-                    subtitle: 'Educational content',
-                    onTap: () {
-                      Get.snackbar('Info', 'Videos page will be implemented');
-                      Navigator.pop(context);
-                    },
-                  ),
-                  _buildModernDrawerMenuItem(
-                    icon: Icons.note_rounded,
-                    title: 'Notes',
-                    subtitle: 'Study materials',
-                    onTap: () {
-                      Get.snackbar('Info', 'Notes page will be implemented');
-                      Navigator.pop(context);
-                    },
-                  ),
-                  _buildModernDrawerMenuItem(
-                    icon: Icons.quiz_rounded,
-                    title: 'Quizzes',
-                    subtitle: 'Quick practice',
-                    onTap: () {
-                      Get.snackbar('Info', 'Quizzes page will be implemented');
-                      Navigator.pop(context);
-                    },
+                    onTap: () => Get.toNamed(VIEWS.subjects.path),
                   ),
 
                   SizedBox(height: 20),
 
                   // Tools & Features Section
                   _buildSectionHeader('Tools & Features'),
-                  _buildModernDrawerMenuItem(
-                    icon: Icons.search_rounded,
-                    title: 'Search',
-                    subtitle: 'Find content quickly',
-                    onTap: () {
-                      Get.toNamed('/search');
-                      Navigator.pop(context);
-                    },
-                  ),
-                  _buildModernDrawerMenuItem(
-                    icon: Icons.notifications_rounded,
-                    title: 'Notifications',
-                    subtitle: 'Stay updated',
-                    onTap: () {
-                      Get.toNamed('/notifications');
-                      Navigator.pop(context);
-                    },
-                  ),
+
                   _buildModernDrawerMenuItem(
                     icon: Icons.download_rounded,
                     title: 'Downloads',
                     subtitle: 'Offline content',
-                    onTap: () {
-                      Get.snackbar(
-                        'Info',
-                        'Downloads page will be implemented',
-                      );
-                      Navigator.pop(context);
-                    },
+                    onTap: () => Get.toNamed(VIEWS.downloads.path),
                   ),
 
                   SizedBox(height: 20),
@@ -811,19 +754,13 @@ class HomeDashboard extends StatelessWidget {
                     icon: Icons.payment_rounded,
                     title: 'Payment',
                     subtitle: 'Manage subscription',
-                    onTap: () {
-                      Get.toNamed('/payment');
-                      Navigator.pop(context);
-                    },
+                    onTap: () => Get.toNamed(VIEWS.payment.path),
                   ),
                   _buildModernDrawerMenuItem(
                     icon: Icons.history_rounded,
                     title: 'Payment History',
                     subtitle: 'View transactions',
-                    onTap: () {
-                      Get.toNamed('/payment/history');
-                      Navigator.pop(context);
-                    },
+                    onTap: () => Get.toNamed(VIEWS.paymentHistory.path),
                   ),
 
                   SizedBox(height: 20),
@@ -834,40 +771,19 @@ class HomeDashboard extends StatelessWidget {
                     icon: Icons.help_outline_rounded,
                     title: 'FAQ',
                     subtitle: 'Frequently asked questions',
-                    onTap: () {
-                      Get.snackbar('Info', 'FAQ page will be implemented');
-                      Navigator.pop(context);
-                    },
+                    onTap: () => Get.toNamed(VIEWS.faq.path),
                   ),
                   _buildModernDrawerMenuItem(
                     icon: Icons.headset_mic_rounded,
                     title: 'Support',
                     subtitle: 'Get help & support',
-                    onTap: () {
-                      Get.snackbar('Info', 'Support page will be implemented');
-                      Navigator.pop(context);
-                    },
+                    onTap: () => Get.toNamed(VIEWS.support.path),
                   ),
                   _buildModernDrawerMenuItem(
                     icon: Icons.info_outline_rounded,
                     title: 'About',
                     subtitle: 'App information',
-                    onTap: () {
-                      Get.snackbar('Info', 'About page will be implemented');
-                      Navigator.pop(context);
-                    },
-                  ),
-                  _buildModernDrawerMenuItem(
-                    icon: Icons.contact_support_rounded,
-                    title: 'Contact Us',
-                    subtitle: 'Get in touch',
-                    onTap: () {
-                      Get.snackbar(
-                        'Info',
-                        'Contact Us page will be implemented',
-                      );
-                      Navigator.pop(context);
-                    },
+                    onTap: () => Get.toNamed(VIEWS.about.path),
                   ),
 
                   SizedBox(height: 20),
@@ -879,7 +795,6 @@ class HomeDashboard extends StatelessWidget {
                     subtitle: 'Sign out of your account',
                     onTap: () {
                       Get.find<NavigationDrawerController>().logout();
-                      Navigator.pop(context);
                     },
                     isDestructive: true,
                   ),

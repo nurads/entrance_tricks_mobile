@@ -8,19 +8,20 @@ class PaymentService extends GetxController {
   final ApiClient apiClient = ApiClient();
 
   // Get all payment methods
-  Future<Response<List<PaymentMethod>>> getPaymentMethods() async {
+  Future<List<PaymentMethod>> getPaymentMethods() async {
     try {
       final response = await apiClient.get(
-        'app/payment-methods/',
+        '/app/payment-methods/',
         authenticated: false,
       );
 
+      logger.d(response.data);
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data ?? [];
         final paymentMethods = data
             .map((json) => PaymentMethod.fromJson(json))
             .toList();
-        return Response(body: paymentMethods);
+        return paymentMethods;
       }
 
       throw ApiException('Failed to load payment methods');
@@ -31,18 +32,16 @@ class PaymentService extends GetxController {
   }
 
   // Create a payment
-  Future<Response<Payment>> createPayment(
-    PaymentCreateRequest paymentRequest,
-  ) async {
+  Future<Payment> createPayment(PaymentCreateRequest paymentRequest) async {
     try {
       final response = await apiClient.post(
         'app/payments/',
-        data: {'data': paymentRequest.toJson()},
+        data: paymentRequest.toJson(),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final payment = Payment.fromJson(response.data);
-        return Response(body: payment);
+        return payment;
       }
 
       throw ApiException(
@@ -56,14 +55,17 @@ class PaymentService extends GetxController {
   }
 
   // Get user's payments
-  Future<Response<List<Payment>>> getUserPayments() async {
+  Future<List<Payment>> getUserPayments() async {
     try {
-      final response = await apiClient.get('/payments', authenticated: true);
+      final response = await apiClient.get(
+        '/app/payments/',
+        authenticated: true,
+      );
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = response.data['data'] ?? [];
+        final List<dynamic> data = response.data ?? [];
         final payments = data.map((json) => Payment.fromJson(json)).toList();
-        return Response(body: payments);
+        return payments;
       }
 
       logger.e(response.data);
@@ -76,7 +78,7 @@ class PaymentService extends GetxController {
   }
 
   // Upload receipt image
-  Future<Response<String>> uploadReceipt(String imagePath) async {
+  Future<String> uploadReceipt(String imagePath) async {
     try {
       final response = await apiClient.uploadFile(
         '/upload',
@@ -87,7 +89,7 @@ class PaymentService extends GetxController {
         final List<dynamic> data = response.data ?? [];
         if (data.isNotEmpty) {
           final fileId = data[0]['id'].toString();
-          return Response(body: fileId);
+          return fileId;
         }
       }
 
@@ -99,16 +101,17 @@ class PaymentService extends GetxController {
   }
 
   // Get all available packages
-  Future<Response<List<Package>>> getPackages() async {
+  Future<List<Package>> getPackages() async {
     try {
       final response = await apiClient.get(
-        '/packages?filters[is_active][\$eq]=true&populate=subjects',
+        '/app/packages/',
+        authenticated: false,
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = response.data['data'] ?? [];
+        final List<dynamic> data = response.data;
         final packages = data.map((json) => Package.fromJson(json)).toList();
-        return Response(body: packages);
+        return packages;
       }
 
       logger.e(response.data);
@@ -117,62 +120,6 @@ class PaymentService extends GetxController {
     } catch (e) {
       logger.e('Error getting packages: $e');
       throw ApiException('Failed to load packages');
-    }
-  }
-
-  // Get subject's package info
-  Future<Response<Map<String, dynamic>>> getSubjectPackageInfo(
-    int subjectId,
-  ) async {
-    try {
-      final response = await apiClient.get(
-        '/subjects/$subjectId?populate=package',
-      );
-
-      if (response.statusCode == 200) {
-        // Add null safety checks
-        final responseData = response.data;
-        if (responseData == null) {
-          logger.w('Response data is null for subject $subjectId');
-          throw ApiException('Invalid response from server');
-        }
-
-        final subject = responseData['data'];
-        if (subject == null) {
-          logger.w('Subject data is null for subject $subjectId');
-          throw ApiException('Subject not found');
-        }
-
-        final package = subject['package'];
-
-        if (package == null) {
-          return Response(
-            body: {
-              'hasPackage': false,
-              'isFree': true,
-              'title': subject['title'] ?? '',
-            },
-          );
-        }
-
-        return Response(
-          body: {
-            'hasPackage': true,
-            'isFree': false,
-            'packageId': package['id'],
-            'packageName': package['name'] ?? '',
-            'packagePrice': package['price'] ?? 0,
-            'title': subject['title'] ?? '',
-          },
-        );
-      }
-
-      logger.i(response.data);
-
-      throw ApiException('Failed to get subject package info');
-    } catch (e) {
-      logger.e('Error getting subject package info: $e');
-      throw ApiException('Failed to get subject package info');
     }
   }
 }

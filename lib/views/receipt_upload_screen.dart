@@ -50,7 +50,7 @@ class ReceiptUploadScreen extends StatelessWidget {
                     const SizedBox(height: 12),
                     _buildSummaryRow('Subject:', subjectTitle),
                     _buildSummaryRow('Amount:', '${amount.toString()} ETB'),
-                    _buildSummaryRow('Payment Method:', paymentMethod.name),
+                    _buildSummaryRow('Payment Method:', paymentMethod.bankName),
                     _buildSummaryRow(
                       'Account Name:',
                       paymentMethod.accountName,

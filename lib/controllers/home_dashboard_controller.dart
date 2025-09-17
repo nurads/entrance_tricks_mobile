@@ -3,11 +3,10 @@ import 'package:entrance_tricks/views/views.dart';
 import 'package:entrance_tricks/controllers/main_navigation_controller.dart';
 import 'package:entrance_tricks/controllers/notifications_controller.dart';
 import 'package:entrance_tricks/models/models.dart';
-import 'package:entrance_tricks/services/api/subjects.dart';
 import 'package:entrance_tricks/services/services.dart';
 import 'package:entrance_tricks/utils/utils.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
-import 'package:entrance_tricks/services/services.dart';
+import 'package:entrance_tricks/utils/device/device.dart';
 
 class HomeDashboardController extends GetxController {
   bool _isLoading = true;
@@ -17,6 +16,8 @@ class HomeDashboardController extends GetxController {
 
   final CoreService _coreService = Get.find<CoreService>();
 
+  late DeviceInfo _deviceInfo;
+
   List<Map<String, dynamic>> _recentNews = [];
   List<Map<String, dynamic>> get recentNews => _recentNews;
 
@@ -24,13 +25,14 @@ class HomeDashboardController extends GetxController {
   List<Subject> get subjects => _subjects;
 
   @override
-  void onInit() {
+  void onInit() async {
     super.onInit();
 
     loadSubjects();
+    _deviceInfo = await UserDevice.getDeviceInfo();
 
     InternetConnection().onStatusChange.listen((event) {
-      logger.i('Internet status changed: ${event}');
+      logger.i('Internet status changed: $event');
       if (event == InternetStatus.connected) {
         loadSubjects();
       }
@@ -44,7 +46,15 @@ class HomeDashboardController extends GetxController {
       try {
         logger.i('Loading subjects from api');
         final gradeId = _coreService.authService.user.value?.grade.id;
-        _subjects = await SubjectsService().getSubjects(gradeId ?? 0);
+
+        _subjects = await SubjectsService().getSubjects(
+          _deviceInfo.id,
+          gradeId: gradeId ?? 0,
+        );
+        logger.i('Subjects: ${_deviceInfo.id}');
+        final _debugSubjects = _subjects.firstWhere((e) => e.isLocked);
+        logger.i('Debug subjects: $_debugSubjects ${_debugSubjects.isLocked}');
+        logger.i('Debug subjects: $_debugSubjects ${_debugSubjects.isLocked}');
         _coreService.setSubjects(_subjects);
       } catch (e) {
         logger.i('Loading subjects from storage');
@@ -93,8 +103,11 @@ class HomeDashboardController extends GetxController {
         },
       ];
 
-      _subjects = await SubjectsService().getSubjects(1);
-      logger.i(_subjects.map((e) => e.icon).toList());
+      _subjects = await SubjectsService().getSubjects(
+        _deviceInfo.id,
+        gradeId: 1,
+      );
+      logger.i(_subjects.map((e) => e.isLocked).toList()[0]);
     } catch (e) {
       Get.snackbar('Error', 'Failed to load dashboard data');
       logger.e(e);

@@ -25,17 +25,31 @@ class PaymentController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    loadPaymentMethods();
-    loadUserPayments();
-    loadPackages();
+
+    loadAll();
+  }
+
+  Future<void> loadAll() async {
+    await Future.wait([
+      loadPaymentMethods(),
+      loadUserPayments(),
+      loadPackages(),
+    ]);
+
+    update();
+  }
+
+  void changeSelectedPaymentMethod(PaymentMethod method) {
+    selectedPaymentMethod.value = method;
+    update();
   }
 
   // Load available payment methods
   Future<void> loadPaymentMethods() async {
     try {
       isLoading.value = true;
-      final response = await _paymentService.getPaymentMethods();
-      paymentMethods.value = response.body ?? [];
+      final paymentMethods_ = await _paymentService.getPaymentMethods();
+      paymentMethods.value = paymentMethods_;
     } catch (e) {
       logger.e(e);
       Get.snackbar(
@@ -53,8 +67,8 @@ class PaymentController extends GetxController {
   Future<void> loadUserPayments() async {
     try {
       isLoadingPayments.value = true;
-      final response = await _paymentService.getUserPayments();
-      userPayments.value = response.body ?? [];
+      final userPayments_ = await _paymentService.getUserPayments();
+      userPayments.value = userPayments_;
     } catch (e) {
       Get.snackbar(
         'Error',
@@ -64,6 +78,7 @@ class PaymentController extends GetxController {
       );
     } finally {
       isLoadingPayments.value = false;
+      update();
     }
   }
 
@@ -122,8 +137,8 @@ class PaymentController extends GetxController {
   Future<void> loadPackages() async {
     try {
       isLoading.value = true;
-      final response = await _paymentService.getPackages();
-      packages.value = response.body ?? [];
+      final packages_ = await _paymentService.getPackages();
+      packages.value = packages_;
     } catch (e) {
       Get.snackbar(
         'Error',
@@ -160,47 +175,37 @@ class PaymentController extends GetxController {
 
     try {
       isCreatingPayment.value = true;
-
       // First upload the receipt image
       final uploadResponse = await _paymentService.uploadReceipt(
         selectedReceiptImage.value!.path,
       );
-
-      if (uploadResponse.body == null) {
-        throw ApiException('Failed to upload receipt');
-      }
 
       // Create payment request
       final paymentRequest = PaymentCreateRequest(
         package: packageId,
         paymentMethod: selectedPaymentMethod.value!.id,
         amount: amount,
-        receipt: int.parse(uploadResponse.body!),
+        receipt: int.parse(uploadResponse),
       );
 
-      // Create the payment
-      final response = await _paymentService.createPayment(paymentRequest);
+      await _paymentService.createPayment(paymentRequest);
 
-      if (response.body != null) {
-        Get.snackbar(
-          'Success',
-          'Payment submitted successfully! It will be reviewed by admin.',
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 4),
-        );
+      Get.snackbar(
+        'Success',
+        'Payment submitted successfully! It will be reviewed by admin!',
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 4),
+      );
 
-        // Reset form
-        selectedPaymentMethod.value = null;
-        selectedReceiptImage.value = null;
+      // Reset form
+      selectedPaymentMethod.value = null;
+      selectedReceiptImage.value = null;
 
-        // Refresh user payments
-        loadUserPayments();
+      // Refresh user payments
+      loadUserPayments();
 
-        return true;
-      }
-
-      return false;
+      return true;
     } catch (e) {
       Get.snackbar(
         'Error',
@@ -214,19 +219,27 @@ class PaymentController extends GetxController {
     }
   }
 
-  // Get subject package info
-  Future<Map<String, dynamic>?> getSubjectPackageInfo(int subjectId) async {
-    try {
-      final response = await _paymentService.getSubjectPackageInfo(subjectId);
-      return response.body;
-    } catch (e) {
-      return null;
-    }
-  }
-
   // Clear selected items
   void clearSelection() {
     selectedPaymentMethod.value = null;
     selectedReceiptImage.value = null;
+  }
+
+  // Get payment status color
+  Color getPaymentStatusColor(bool isCompleted) {
+    if (isCompleted) {
+      return Colors.green;
+    } else {
+      return Colors.orange;
+    }
+  }
+
+  // Get payment status icon
+  IconData getPaymentStatusIcon(bool isCompleted) {
+    if (isCompleted) {
+      return Icons.check_circle;
+    } else {
+      return Icons.pending;
+    }
   }
 }

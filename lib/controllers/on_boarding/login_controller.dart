@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:entrance_tricks/services/services.dart';
 import 'package:entrance_tricks/services/api/exceptions.dart';
 import 'package:entrance_tricks/views/views.dart';
+import 'package:entrance_tricks/services/api/device.dart';
 
 class LoginController extends GetxController {
   final authService = Get.find<AuthService>();
@@ -34,6 +35,8 @@ class LoginController extends GetxController {
           backgroundColor: Colors.green,
           colorText: Colors.white,
         );
+
+        await DeviceService().registerDevice();
 
         Get.offAllNamed(VIEWS.home.path);
       } on DioException catch (e) {

@@ -3,62 +3,19 @@ import 'package:entrance_tricks/models/models.dart';
 
 part 'payment.g.dart';
 
-@JsonSerializable()
-class Package {
-  final int id;
-  final String name;
-  final String? description;
-  final int price;
-  @JsonKey(name: 'is_active')
-  final bool isActive;
-  final List<Subject>? subjects;
-  final String createdAt;
-  final String updatedAt;
+enum PaymentStatus { pending, approved, rejected }
 
-  Package({
-    required this.id,
-    required this.name,
-    this.description,
-    required this.price,
-    required this.isActive,
-    this.subjects,
-    required this.createdAt,
-    required this.updatedAt,
-  });
-
-  factory Package.fromJson(Map<String, dynamic> json) =>
-      _$PackageFromJson(json);
-  Map<String, dynamic> toJson() => _$PackageToJson(this);
-}
-
-@JsonSerializable()
-class PaymentMethod {
-  final int id;
-  final String name;
-  @JsonKey(name: 'account_name')
-  final String accountName;
-  @JsonKey(name: 'account_number')
-  final String accountNumber;
-  @JsonKey(name: 'is_active')
-  final bool isActive;
-  final String? image;
-  final String createdAt;
-  final String updatedAt;
-
-  PaymentMethod({
-    required this.id,
-    required this.name,
-    required this.accountName,
-    required this.accountNumber,
-    required this.isActive,
-    this.image,
-    required this.createdAt,
-    required this.updatedAt,
-  });
-
-  factory PaymentMethod.fromJson(Map<String, dynamic> json) =>
-      _$PaymentMethodFromJson(json);
-  Map<String, dynamic> toJson() => _$PaymentMethodToJson(this);
+extension PaymentStatusExtension on PaymentStatus {
+  String get displayName {
+    switch (this) {
+      case PaymentStatus.pending:
+        return 'Pending';
+      case PaymentStatus.approved:
+        return 'Approved';
+      case PaymentStatus.rejected:
+        return 'Rejected';
+    }
+  }
 }
 
 @JsonSerializable()
@@ -96,6 +53,17 @@ class Payment {
     required this.createdAt,
     required this.updatedAt,
   });
+
+  // Get payment status based on isCompleted and adminNotes
+  PaymentStatus get status {
+    if (isCompleted && approvedAt != null) {
+      return PaymentStatus.approved;
+    } else if (adminNotes != null && adminNotes!.isNotEmpty) {
+      return PaymentStatus.rejected;
+    } else {
+      return PaymentStatus.pending;
+    }
+  }
 
   factory Payment.fromJson(Map<String, dynamic> json) =>
       _$PaymentFromJson(json);

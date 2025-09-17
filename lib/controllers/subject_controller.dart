@@ -2,17 +2,27 @@ import 'package:get/get.dart';
 import 'package:entrance_tricks/views/subject/subject_detail.dart';
 import 'package:entrance_tricks/services/services.dart';
 import 'package:entrance_tricks/models/models.dart';
+import 'package:entrance_tricks/utils/device/device.dart';
 
 class SubjectController extends GetxController {
   bool _isLoading = true;
   bool get isLoading => _isLoading;
 
+  Grade? _grade;
+  Grade? get grade => _grade;
+
   List<Subject> _subjects = [];
   List<Subject> get subjects => _subjects;
 
+  final _coreService = Get.find<CoreService>();
+
+  late DeviceInfo _deviceInfo;
+
   @override
-  void onInit() {
+  void onInit() async {
     super.onInit();
+    _grade = _coreService.authService.user.value?.grade;
+    _deviceInfo = await UserDevice.getDeviceInfo();
     loadSubjects();
   }
 
@@ -21,9 +31,13 @@ class SubjectController extends GetxController {
     update();
 
     try {
-      _subjects = await SubjectsService().getSubjects(1);
+      _subjects = await SubjectsService().getSubjects(
+        _deviceInfo.id,
+        gradeId: _grade?.id ?? 0,
+      );
+      _coreService.setSubjects(_subjects);
     } catch (e) {
-      Get.snackbar('Error', 'Failed to load subjects');
+      _subjects = _coreService.subjects;
     } finally {
       _isLoading = false;
       update();

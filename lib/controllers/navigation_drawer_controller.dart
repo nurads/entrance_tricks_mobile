@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:entrance_tricks/views/views.dart';
+import 'package:entrance_tricks/services/services.dart';
 
 class NavigationDrawerController extends GetxController {
   bool _isDrawerOpen = false;
@@ -41,8 +42,9 @@ class NavigationDrawerController extends GetxController {
     closeDrawer();
   }
 
-  void logout() {
+  void logout() async {
     // Navigate to login and clear navigation stack
+    await AuthService().logout();
     Get.offAllNamed(VIEWS.login.path);
   }
 }

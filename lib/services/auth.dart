@@ -1,6 +1,6 @@
 import 'package:entrance_tricks/models/models.dart';
+import 'package:entrance_tricks/services/api/api.dart';
 import 'package:entrance_tricks/utils/storages/storages.dart';
-import 'package:entrance_tricks/utils/utils.dart';
 import 'package:get/get.dart';
 
 class AuthService extends GetxService {
@@ -18,18 +18,22 @@ class AuthService extends GetxService {
 
   Future<void> saveAuthToken(AuthToken authToken) async {
     await _hiveAuthStorage.setAuthToken(authToken);
+    BaseApiClient.setTokens(authToken.access, authToken.refresh);
     this.authToken.value = authToken;
   }
 
   Future<void> saveUser(User user) async {
     this.user.value = user;
-    logger.i('Saving user to hive ${user.grade.name}');
     await _hiveUserStorage.setUser(user);
   }
 
   Future<void> loadUser() async {
     authToken.value = await _hiveAuthStorage.getAuthToken();
     user.value = await _hiveUserStorage.getUser();
+    BaseApiClient.setTokens(
+      authToken.value?.access ?? '',
+      authToken.value?.refresh ?? '',
+    );
   }
 
   Future<void> logout() async {

@@ -1,2 +1,2 @@
 const authTokenStorage = 'authTokenStorage';
-const defaultApiURL = 'http://192.168.1.5:8080';
+const defaultApiURL = 'http://192.168.1.6:8000';

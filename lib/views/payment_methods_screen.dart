@@ -81,7 +81,11 @@ class PaymentMethodsScreen extends StatelessWidget {
                       itemCount: controller.paymentMethods.length,
                       itemBuilder: (context, index) {
                         final method = controller.paymentMethods[index];
-                        return _buildPaymentMethodCard(context, controller, method);
+                        return _buildPaymentMethodCard(
+                          context,
+                          controller,
+                          method,
+                        );
                       },
                     ),
             ),
@@ -90,23 +94,25 @@ class PaymentMethodsScreen extends StatelessWidget {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
-              child: Obx(() => ElevatedButton(
-                onPressed: controller.selectedPaymentMethod.value != null
-                    ? () => _navigateToReceiptUpload(context, controller)
-                    : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+              child: Obx(
+                () => ElevatedButton(
+                  onPressed: controller.selectedPaymentMethod.value != null
+                      ? () => _navigateToReceiptUpload(context, controller)
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).primaryColor,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    'Continue',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
-                child: const Text(
-                  'Continue',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              )),
+              ),
             ),
           ],
         );
@@ -120,7 +126,8 @@ class PaymentMethodsScreen extends StatelessWidget {
     PaymentMethod method,
   ) {
     return Obx(() {
-      final isSelected = controller.selectedPaymentMethod.value?.id == method.id;
+      final isSelected =
+          controller.selectedPaymentMethod.value?.id == method.id;
 
       return Card(
         margin: const EdgeInsets.only(bottom: 12),
@@ -155,8 +162,7 @@ class PaymentMethodsScreen extends StatelessWidget {
                           child: Image.network(
                             method.image!,
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                Icon(
+                            errorBuilder: (context, error, stackTrace) => Icon(
                               Icons.account_balance,
                               color: Theme.of(context).primaryColor,
                               size: 30,
@@ -177,7 +183,7 @@ class PaymentMethodsScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        method.name,
+                        method.bankName,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -186,10 +192,7 @@ class PaymentMethodsScreen extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         method.accountName,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -219,12 +222,18 @@ class PaymentMethodsScreen extends StatelessWidget {
     });
   }
 
-  void _navigateToReceiptUpload(BuildContext context, PaymentController controller) {
-    Get.toNamed('/payment/receipt', arguments: {
-      'subjectId': subjectId,
-      'amount': amount,
-      'subjectTitle': subjectTitle,
-      'paymentMethod': controller.selectedPaymentMethod.value,
-    });
+  void _navigateToReceiptUpload(
+    BuildContext context,
+    PaymentController controller,
+  ) {
+    Get.toNamed(
+      '/payment/receipt',
+      arguments: {
+        'subjectId': subjectId,
+        'amount': amount,
+        'subjectTitle': subjectTitle,
+        'paymentMethod': controller.selectedPaymentMethod.value,
+      },
+    );
   }
 }

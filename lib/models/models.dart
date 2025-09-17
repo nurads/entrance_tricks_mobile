@@ -10,3 +10,5 @@ export 'video.dart';
 export 'note.dart';
 export 'news.dart';
 export 'config.dart';
+export 'package.dart';
+export 'payment_methods.dart';

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:entrance_tricks/views/home/home.dart';
+import 'package:entrance_tricks/views/payment_history_screen.dart';
 import 'package:entrance_tricks/views/views.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/services/services.dart';
@@ -33,8 +34,23 @@ class MyApp extends StatelessWidget {
         GetPage(name: VIEWS.subjectDetail.path, page: () => SubjectDetail()),
         GetPage(name: VIEWS.chapterDetail.path, page: () => ChapterDetail()),
         GetPage(name: VIEWS.editProfile.path, page: () => EditProfilePage()),
-        GetPage(name: '/payment', page: () => PaymentPage()),
-        GetPage(name: '/exam-detail', page: () => ExamDetailPage()),
+        GetPage(name: VIEWS.subjects.path, page: () => SubjectPage()),
+        // Move paymentHistory route before payment route to fix route matching
+        GetPage(
+          name: VIEWS.paymentHistory.path,
+          page: () => PaymentHistoryScreen(),
+        ),
+        GetPage(name: VIEWS.payment.path, page: () => PaymentPage()),
+        GetPage(name: VIEWS.examDetail.path, page: () => ExamDetailPage()),
+        GetPage(name: VIEWS.downloads.path, page: () => DownloadsPage()),
+        GetPage(name: VIEWS.support.path, page: () => SupportPage()),
+        GetPage(name: VIEWS.about.path, page: () => AboutPage()),
+        GetPage(name: VIEWS.faq.path, page: () => FAQPage()),
+        // GetPage(name: VIEWS.notes.path, page: () => NotesPage()),
+        // GetPage(name: VIEWS.videos.path, page: () => VideosPage()),
+        // GetPage(name: VIEWS.paymentHistory.path, page: () => PaymentHistoryPage()),
+        // GetPage(name: VIEWS.paymentMethods.path, page: () => PaymentMethodsPage()),
+        // GetPage(name: VIEWS.receiptUpload.path, page: () => ReceiptUploadPage()),
         // GetPage(
         //   name: VIEWS.forgotPassword.name,
         //   page: () => const ForgotPassword(),

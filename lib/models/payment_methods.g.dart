@@ -6,24 +6,20 @@ part of 'payment_methods.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-PaymentMethods _$PaymentMethodsFromJson(Map<String, dynamic> json) =>
-    PaymentMethods(
+PaymentMethod _$PaymentMethodFromJson(Map<String, dynamic> json) =>
+    PaymentMethod(
       id: (json['id'] as num).toInt(),
       bankName: json['bank_name'] as String,
-      accountName: json['accountName'] as String,
-      accountNumber: json['accountNumber'] as String,
-      isActive: json['isActive'] as bool,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      accountName: json['account_name'] as String,
+      accountNumber: json['account_number'] as String,
+      image: json['image'] as String?,
     );
 
-Map<String, dynamic> _$PaymentMethodsToJson(PaymentMethods instance) =>
+Map<String, dynamic> _$PaymentMethodToJson(PaymentMethod instance) =>
     <String, dynamic>{
       'id': instance.id,
       'bank_name': instance.bankName,
-      'accountName': instance.accountName,
-      'accountNumber': instance.accountNumber,
-      'isActive': instance.isActive,
-      'createdAt': instance.createdAt.toIso8601String(),
-      'updatedAt': instance.updatedAt.toIso8601String(),
+      'account_name': instance.accountName,
+      'account_number': instance.accountNumber,
+      'image': instance.image,
     };

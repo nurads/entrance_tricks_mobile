@@ -4,44 +4,42 @@ import 'package:hive/hive.dart';
 part 'payment_methods.g.dart';
 
 @JsonSerializable()
-class PaymentMethods {
+class PaymentMethod {
   final int id;
   @JsonKey(name: 'bank_name')
   final String bankName;
+  @JsonKey(name: 'account_name')
   final String accountName;
+  @JsonKey(name: 'account_number')
   final String accountNumber;
-  final bool isActive;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final String? image;
 
-  PaymentMethods({
+  PaymentMethod({
     required this.id,
     required this.bankName,
     required this.accountName,
     required this.accountNumber,
-    required this.isActive,
-    required this.createdAt,
-    required this.updatedAt,
+    required this.image,
   });
 
-  factory PaymentMethods.fromJson(Map<String, dynamic> json) =>
-      _$PaymentMethodsFromJson(json);
-  Map<String, dynamic> toJson() => _$PaymentMethodsToJson(this);
+  factory PaymentMethod.fromJson(Map<String, dynamic> json) =>
+      _$PaymentMethodFromJson(json);
+  Map<String, dynamic> toJson() => _$PaymentMethodToJson(this);
 }
 
-class PaymentMethodsTypeAdapter implements TypeAdapter<PaymentMethods> {
+class PaymentMethodTypeAdapter implements TypeAdapter<PaymentMethod> {
   @override
   read(BinaryReader reader) {
     final json = reader.read() as Map<dynamic, dynamic>;
     final json_ = Map<String, dynamic>.from(json);
-    return PaymentMethods.fromJson(json_);
+    return PaymentMethod.fromJson(json_);
   }
 
   @override
   int get typeId => 5;
 
   @override
-  void write(BinaryWriter writer, PaymentMethods obj) {
+  void write(BinaryWriter writer, PaymentMethod obj) {
     writer.write(obj.toJson());
   }
 }

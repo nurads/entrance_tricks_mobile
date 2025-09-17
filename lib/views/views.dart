@@ -9,6 +9,8 @@ export 'exam/exam_page.dart';
 export 'news/news_page.dart';
 export 'common/profile_page.dart';
 export 'common/edit_profile_page.dart';
+export 'common/video_player_screen.dart';
+export 'common/pdf_reader_screen.dart';
 export 'subject/subject_page.dart';
 export 'common/search_page.dart';
 export 'common/notifications_page.dart';
@@ -21,6 +23,10 @@ export 'exam/exam_result_page.dart';
 export 'news/news_detail_page.dart';
 export 'quiz/quiz_detail_page.dart';
 export 'quiz/quiz_taking_page.dart';
+export 'downloads/downloads_page.dart';
+export 'support/support_page.dart';
+export 'about/about_page.dart';
+export 'faq/faq_page.dart';
 
 enum VIEWS {
   home('/home'),
@@ -32,10 +38,21 @@ enum VIEWS {
   resetPassword('/resetPassword'),
   subjectDetail('/subject-detail'),
   chapterDetail('/chapter-detail'),
+  videoPlayer('/video-player'),
+  pdfReader('/pdf-reader'),
   paymentMethods('/payment/methods'),
   receiptUpload('/payment/receipt'),
   paymentHistory('/payment/history'),
-  editProfile('/edit-profile');
+  editProfile('/edit-profile'),
+  videos('/videos'),
+  notes('/notes'),
+  payment('/payment'),
+  examDetail('/exam-detail'),
+  downloads('/downloads'),
+  subjects('/subjects'),
+  support('/support'),
+  about('/about'),
+  faq('/faq');
 
   final String path;
 

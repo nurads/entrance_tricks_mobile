@@ -6,54 +6,6 @@ part of 'payment.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Package _$PackageFromJson(Map<String, dynamic> json) => Package(
-  id: (json['id'] as num).toInt(),
-  name: json['name'] as String,
-  description: json['description'] as String?,
-  price: (json['price'] as num).toInt(),
-  isActive: json['is_active'] as bool,
-  subjects: (json['subjects'] as List<dynamic>?)
-      ?.map((e) => Subject.fromJson(e as Map<String, dynamic>))
-      .toList(),
-  createdAt: json['createdAt'] as String,
-  updatedAt: json['updatedAt'] as String,
-);
-
-Map<String, dynamic> _$PackageToJson(Package instance) => <String, dynamic>{
-  'id': instance.id,
-  'name': instance.name,
-  'description': instance.description,
-  'price': instance.price,
-  'is_active': instance.isActive,
-  'subjects': instance.subjects,
-  'createdAt': instance.createdAt,
-  'updatedAt': instance.updatedAt,
-};
-
-PaymentMethod _$PaymentMethodFromJson(Map<String, dynamic> json) =>
-    PaymentMethod(
-      id: (json['id'] as num).toInt(),
-      name: json['name'] as String,
-      accountName: json['account_name'] as String,
-      accountNumber: json['account_number'] as String,
-      isActive: json['is_active'] as bool,
-      image: json['image'] as String?,
-      createdAt: json['createdAt'] as String,
-      updatedAt: json['updatedAt'] as String,
-    );
-
-Map<String, dynamic> _$PaymentMethodToJson(PaymentMethod instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'name': instance.name,
-      'account_name': instance.accountName,
-      'account_number': instance.accountNumber,
-      'is_active': instance.isActive,
-      'image': instance.image,
-      'createdAt': instance.createdAt,
-      'updatedAt': instance.updatedAt,
-    };
-
 Payment _$PaymentFromJson(Map<String, dynamic> json) => Payment(
   id: (json['id'] as num).toInt(),
   amount: (json['amount'] as num).toInt(),

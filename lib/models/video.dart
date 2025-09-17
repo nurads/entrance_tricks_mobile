@@ -5,10 +5,14 @@ part 'video.g.dart';
 @JsonSerializable()
 class Video {
   final int id;
+  final int chapter;
   final String title;
-  final String url;
-  final String duration;
+  final String file;
+  @JsonKey(name: 'duration_in_minutes')
+  final int duration;
+  @JsonKey(name: 'created_at')
   final DateTime createdAt;
+  @JsonKey(name: 'updated_at')
   final DateTime updatedAt;
   final String? image;
   @JsonKey(name: 'is_locked')
@@ -16,12 +20,16 @@ class Video {
   final String? description;
   @JsonKey(name: 'is_watched')
   final bool isWatched;
+  @JsonKey(name: 'is_downloaded')
   bool isDownloaded;
+
+  final String? thumbnail;
 
   Video({
     required this.id,
+    required this.chapter,
     required this.title,
-    required this.url,
+    required this.file,
     required this.duration,
     required this.createdAt,
     required this.updatedAt,
@@ -29,6 +37,7 @@ class Video {
     this.isWatched = false,
     this.image,
     this.description,
+    this.thumbnail,
     this.isDownloaded = false,
   });
 
