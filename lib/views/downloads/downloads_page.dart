@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/controllers/downloads_controller.dart';
+import 'package:entrance_tricks/controllers/controllers.dart';
 
 class DownloadsPage extends StatefulWidget {
   const DownloadsPage({super.key});
@@ -1032,4 +1032,3 @@ class _NotesTab extends StatelessWidget {
     );
   }
 }
-

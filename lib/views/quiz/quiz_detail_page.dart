@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/controllers/exam_controller.dart';
+import 'package:entrance_tricks/controllers/exam/exam_controller.dart';
 import 'package:entrance_tricks/views/quiz/quiz_taking_page.dart';
 
 class QuizDetailPage extends StatelessWidget {
   final Map<String, dynamic> quiz;
 
-  const QuizDetailPage({
-    super.key,
-    required this.quiz,
-  });
+  const QuizDetailPage({super.key, required this.quiz});
 
   @override
   Widget build(BuildContext context) {
@@ -20,12 +17,10 @@ class QuizDetailPage extends StatelessWidget {
           children: [
             // Top Bar
             _buildTopBar(context),
-            
+
             // Quiz Content
-            Expanded(
-              child: _buildQuizContent(context),
-            ),
-            
+            Expanded(child: _buildQuizContent(context)),
+
             // Start Quiz Button
             _buildStartQuizButton(context),
           ],
@@ -48,16 +43,12 @@ class QuizDetailPage extends StatelessWidget {
                 color: Colors.blue[600],
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                Icons.arrow_back,
-                color: Colors.white,
-                size: 20,
-              ),
+              child: Icon(Icons.arrow_back, color: Colors.white, size: 20),
             ),
           ),
-          
+
           SizedBox(width: 16),
-          
+
           // Title
           Text(
             "Detail Quiz",
@@ -87,14 +78,14 @@ class QuizDetailPage extends StatelessWidget {
               color: Colors.black87,
             ),
           ),
-          
+
           SizedBox(height: 24),
-          
+
           // Quiz Summary
           _buildQuizSummary(context),
-          
+
           SizedBox(height: 32),
-          
+
           // Instructions
           Text(
             "Please read the text below carefully so you can understand it",
@@ -104,9 +95,9 @@ class QuizDetailPage extends StatelessWidget {
               color: Colors.black87,
             ),
           ),
-          
+
           SizedBox(height: 16),
-          
+
           // Instructions List
           _buildInstructionsList(context),
         ],
@@ -122,17 +113,17 @@ class QuizDetailPage extends StatelessWidget {
           "10 Question",
           "10 point for a correct answer",
         ),
-        
+
         SizedBox(height: 16),
-        
+
         _buildSummaryItem(
           Icons.access_time,
           "1 hour 15 min",
           "Total duration of the quiz",
         ),
-        
+
         SizedBox(height: 16),
-        
+
         _buildSummaryItem(
           Icons.star,
           "Win 10 star",
@@ -152,15 +143,11 @@ class QuizDetailPage extends StatelessWidget {
             color: Colors.blue[50],
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(
-            icon,
-            color: Colors.blue[600],
-            size: 24,
-          ),
+          child: Icon(icon, color: Colors.blue[600], size: 24),
         ),
-        
+
         SizedBox(width: 16),
-        
+
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -173,15 +160,12 @@ class QuizDetailPage extends StatelessWidget {
                   color: Colors.black87,
                 ),
               ),
-              
+
               SizedBox(height: 4),
-              
+
               Text(
                 subtitle,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
             ],
           ),
@@ -214,9 +198,9 @@ class QuizDetailPage extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
               ),
-              
+
               SizedBox(width: 12),
-              
+
               Expanded(
                 child: Text(
                   instruction,

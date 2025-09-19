@@ -9,12 +9,18 @@ class Note {
   final String title;
   final String content;
   final int chapter;
+  @JsonKey(name: 'is_downloaded')
+  final bool isDownloaded;
+
+  final int? size;
 
   Note({
     required this.id,
     required this.title,
     required this.content,
     required this.chapter,
+    required this.isDownloaded,
+    required this.size,
   });
 
   factory Note.fromJson(Map<String, dynamic> json) => _$NoteFromJson(json);
@@ -30,6 +36,8 @@ class NoteTypeAdapter implements TypeAdapter<Note> {
       title: json['title'],
       content: json['content'],
       chapter: json['chapter'],
+      size: json['size'],
+      isDownloaded: json['is_downloaded'],
     );
   }
 

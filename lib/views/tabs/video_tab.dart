@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/controllers/chapter_detail_controller.dart';
+import 'package:entrance_tricks/controllers/subject/chapter_detail_controller.dart';
+import 'package:entrance_tricks/models/models.dart';
 
 class VideoTab extends StatelessWidget {
   VideoTab({super.key});
@@ -87,12 +88,12 @@ class VideoTab extends StatelessWidget {
 
   Widget _buildModernVideoCard(
     BuildContext context,
-    Map<String, dynamic> video,
+    Video video,
     ChapterDetailController controller,
   ) {
     final theme = Theme.of(context);
-    final bool isLocked = video['isLocked'] ?? false;
-    final bool isWatched = video['isWatched'] ?? false;
+    final bool isLocked = video.isLocked;
+    final bool isWatched = video.isWatched;
 
     return Container(
       decoration: BoxDecoration(
@@ -113,7 +114,7 @@ class VideoTab extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: isLocked ? null : () => controller.playVideo(video['id']),
+          onTap: isLocked ? null : () => controller.playVideo(video.id),
           borderRadius: BorderRadius.circular(20),
           child: Padding(
             padding: EdgeInsets.all(20),
@@ -176,7 +177,7 @@ class VideoTab extends StatelessWidget {
                       ),
 
                       // Duration badge
-                      if (video['duration'] != null)
+                      if (video.duration != 0)
                         Positioned(
                           bottom: 6,
                           right: 6,
@@ -190,7 +191,7 @@ class VideoTab extends StatelessWidget {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
-                              video['duration'] ?? '00:00',
+                              video.duration.toString(),
                               style: theme.textTheme.labelSmall?.copyWith(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w600,
@@ -237,7 +238,7 @@ class VideoTab extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        video['name'] ?? 'Video Title',
+                        video.title,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: isLocked
@@ -346,7 +347,7 @@ class VideoTab extends StatelessWidget {
                       ),
                     ),
                     child: IconButton(
-                      onPressed: () => _downloadVideo(video['id']),
+                      onPressed: () => _downloadVideo(video.id),
                       icon: Icon(
                         Icons.download_outlined,
                         color: theme.colorScheme.primary,

@@ -1,0 +1,14 @@
+export 'home/home_dashboard_controller.dart';
+export 'home/main_navigation_controller.dart';
+export 'home/navigation_drawer_controller.dart';
+export 'misc/notifications_controller.dart';
+export 'misc/general_controller.dart';
+export 'misc/news_controller.dart';
+export 'misc/payment_controller.dart';
+export 'misc/downloads_controller.dart';
+export 'misc/profile_controller.dart';
+export 'misc/search_controller.dart';
+export 'misc/video_player_controller.dart';
+export 'subject/subject_controller.dart';
+export 'subject/chapter_detail_controller.dart';
+export 'exam/exam_controller.dart';

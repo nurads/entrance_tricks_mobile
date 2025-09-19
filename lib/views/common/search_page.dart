@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/controllers/search_controller.dart';
+import 'package:entrance_tricks/controllers/controllers.dart';
 import 'package:entrance_tricks/views/subject/subject_detail.dart';
 import 'package:entrance_tricks/components/components.dart';
 
@@ -29,16 +29,16 @@ class SearchPage extends StatelessWidget {
                 onSubmitted: (query) => controller.search(query),
               ),
             ),
-            
+
             // Search Results
             Expanded(
               child: controller.isLoading
                   ? _buildLoadingState()
                   : controller.searchQuery.isEmpty
-                      ? _buildEmptyState(context)
-                      : controller.searchResults.isEmpty
-                          ? _buildNoResultsState(context)
-                          : _buildSearchResults(context, controller),
+                  ? _buildEmptyState(context)
+                  : controller.searchResults.isEmpty
+                  ? _buildNoResultsState(context)
+                  : _buildSearchResults(context, controller),
             ),
           ],
         ),
@@ -68,9 +68,9 @@ class SearchPage extends StatelessWidget {
           SizedBox(height: 16),
           Text(
             'Search for anything',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600),
           ),
           SizedBox(height: 8),
           Text(
@@ -98,9 +98,9 @@ class SearchPage extends StatelessWidget {
           SizedBox(height: 16),
           Text(
             'No results found',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600),
           ),
           SizedBox(height: 8),
           Text(
@@ -115,7 +115,10 @@ class SearchPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSearchResults(BuildContext context, SearchPageController controller) {
+  Widget _buildSearchResults(
+    BuildContext context,
+    SearchPageController controller,
+  ) {
     return ListView.separated(
       padding: EdgeInsets.all(20),
       itemCount: controller.searchResults.length,
@@ -173,11 +176,7 @@ class SearchPage extends StatelessWidget {
               color: getIconColor().withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              getIcon(),
-              color: getIconColor(),
-              size: 24,
-            ),
+            child: Icon(getIcon(), color: getIconColor(), size: 24),
           ),
           SizedBox(width: 16),
           Expanded(

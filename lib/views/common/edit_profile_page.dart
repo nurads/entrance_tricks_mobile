@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/controllers/profile_controller.dart';
-import 'package:entrance_tricks/services/services.dart';
+import 'package:entrance_tricks/controllers/controllers.dart';
 import 'package:entrance_tricks/models/models.dart';
 
 class EditProfilePage extends StatelessWidget {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/controllers/subject_controller.dart';
+import 'package:entrance_tricks/controllers/subject/subject_controller.dart';
 import 'package:entrance_tricks/models/models.dart';
 
 class SubjectPage extends StatefulWidget {

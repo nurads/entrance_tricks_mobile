@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:entrance_tricks/views/home/home.dart';
-import 'package:entrance_tricks/views/payment_history_screen.dart';
 import 'package:entrance_tricks/views/views.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/services/services.dart';
@@ -9,8 +8,8 @@ import 'package:entrance_tricks/utils/utils.dart';
 
 void main() async {
   // Remove debug banner
-  await initialize();
   WidgetsFlutterBinding.ensureInitialized();
+  await initialize();
   runApp(MyApp());
 }
 

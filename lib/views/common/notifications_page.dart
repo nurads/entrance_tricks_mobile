@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/controllers/notifications_controller.dart';
+import 'package:entrance_tricks/controllers/controllers.dart';
 
 class NotificationsPage extends StatelessWidget {
   const NotificationsPage({super.key});
@@ -8,7 +8,7 @@ class NotificationsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Get.put(NotificationsController());
-    
+
     return GetBuilder<NotificationsController>(
       builder: (controller) => Scaffold(
         backgroundColor: Colors.white,
@@ -65,8 +65,8 @@ class NotificationsPage extends StatelessWidget {
         body: controller.isLoading
             ? Center(child: CircularProgressIndicator())
             : controller.notifications.isEmpty
-                ? _buildEmptyState()
-                : _buildNotificationsList(context, controller),
+            ? _buildEmptyState()
+            : _buildNotificationsList(context, controller),
       ),
     );
   }
@@ -76,11 +76,7 @@ class NotificationsPage extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.notifications_none,
-            size: 80,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.notifications_none, size: 80, color: Colors.grey[400]),
           SizedBox(height: 16),
           Text(
             'No notifications yet',
@@ -93,17 +89,17 @@ class NotificationsPage extends StatelessWidget {
           SizedBox(height: 8),
           Text(
             'You\'ll see notifications here when they arrive',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[500],
-            ),
+            style: TextStyle(fontSize: 16, color: Colors.grey[500]),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildNotificationsList(BuildContext context, NotificationsController controller) {
+  Widget _buildNotificationsList(
+    BuildContext context,
+    NotificationsController controller,
+  ) {
     return ListView.builder(
       padding: EdgeInsets.all(16),
       itemCount: controller.notifications.length,
@@ -121,7 +117,7 @@ class NotificationsPage extends StatelessWidget {
   ) {
     final isRead = notification['isRead'] ?? false;
     final type = notification['type'] ?? 'general';
-    
+
     return Container(
       margin: EdgeInsets.only(bottom: 12),
       child: Dismissible(
@@ -131,10 +127,7 @@ class NotificationsPage extends StatelessWidget {
           alignment: Alignment.centerRight,
           padding: EdgeInsets.only(right: 20),
           color: Colors.red[600],
-          child: Icon(
-            Icons.delete,
-            color: Colors.white,
-          ),
+          child: Icon(Icons.delete, color: Colors.white),
         ),
         onDismissed: (direction) {
           controller.deleteNotification(notification['id']);
@@ -175,9 +168,9 @@ class NotificationsPage extends StatelessWidget {
                   size: 20,
                 ),
               ),
-              
+
               SizedBox(width: 12),
-              
+
               // Notification Content
               Expanded(
                 child: Column(
@@ -190,7 +183,9 @@ class NotificationsPage extends StatelessWidget {
                             notification['title'] ?? '',
                             style: TextStyle(
                               fontSize: 16,
-                              fontWeight: isRead ? FontWeight.w500 : FontWeight.bold,
+                              fontWeight: isRead
+                                  ? FontWeight.w500
+                                  : FontWeight.bold,
                               color: isRead ? Colors.grey[700] : Colors.black87,
                             ),
                           ),
@@ -206,9 +201,9 @@ class NotificationsPage extends StatelessWidget {
                           ),
                       ],
                     ),
-                    
+
                     SizedBox(height: 4),
-                    
+
                     Text(
                       notification['message'] ?? '',
                       style: TextStyle(
@@ -219,27 +214,22 @@ class NotificationsPage extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    
+
                     SizedBox(height: 8),
-                    
+
                     Text(
                       notification['time'] ?? '',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[500],
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.grey[500]),
                     ),
                   ],
                 ),
               ),
-              
+
               // Action Button
               IconButton(
-                icon: Icon(
-                  Icons.more_vert,
-                  color: Colors.grey[500],
-                ),
-                onPressed: () => _showNotificationActions(context, notification, controller),
+                icon: Icon(Icons.more_vert, color: Colors.grey[500]),
+                onPressed: () =>
+                    _showNotificationActions(context, notification, controller),
               ),
             ],
           ),
@@ -312,12 +302,17 @@ class NotificationsPage extends StatelessWidget {
     );
   }
 
-  void _showClearAllDialog(BuildContext context, NotificationsController controller) {
+  void _showClearAllDialog(
+    BuildContext context,
+    NotificationsController controller,
+  ) {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text('Clear All Notifications'),
-        content: Text('Are you sure you want to clear all notifications? This action cannot be undone.'),
+        content: Text(
+          'Are you sure you want to clear all notifications? This action cannot be undone.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
@@ -328,10 +323,7 @@ class NotificationsPage extends StatelessWidget {
               controller.clearAllNotifications();
               Navigator.pop(dialogContext);
             },
-            child: Text(
-              'Clear All',
-              style: TextStyle(color: Colors.red[600]),
-            ),
+            child: Text('Clear All', style: TextStyle(color: Colors.red[600])),
           ),
         ],
       ),

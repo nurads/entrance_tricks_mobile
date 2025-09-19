@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/controllers/main_navigation_controller.dart';
+import 'package:entrance_tricks/controllers/home/main_navigation_controller.dart';
 
 class ExamResultPage extends StatelessWidget {
   final int score;
@@ -26,14 +26,14 @@ class ExamResultPage extends StatelessWidget {
             children: [
               // Score Circle
               _buildScoreCircle(context),
-              
+
               SizedBox(height: 40),
-              
+
               // Congratulation Message
               _buildCongratulationMessage(context),
-              
+
               SizedBox(height: 60),
-              
+
               // Back Button
               _buildBackButton(context),
             ],
@@ -99,18 +99,12 @@ class ExamResultPage extends StatelessWidget {
         SizedBox(height: 8),
         Text(
           "Great job, Yared You Did It",
-          style: TextStyle(
-            fontSize: 18,
-            color: Colors.black87,
-          ),
+          style: TextStyle(fontSize: 18, color: Colors.black87),
         ),
         SizedBox(height: 16),
         Text(
           "You scored ${score}% on this exam!",
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.grey[600],
-          ),
+          style: TextStyle(fontSize: 16, color: Colors.grey[600]),
         ),
       ],
     );
@@ -137,10 +131,7 @@ class ExamResultPage extends StatelessWidget {
           ),
           child: Text(
             "Back to Page",
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ),
       ),

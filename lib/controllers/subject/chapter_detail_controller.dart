@@ -1,7 +1,8 @@
 import 'package:get/get.dart';
 import 'package:entrance_tricks/models/models.dart';
 import 'package:entrance_tricks/utils/utils.dart';
-import 'package:entrance_tricks/controllers/subject_detail_controller.dart';
+import 'package:entrance_tricks/views/views.dart';
+import 'package:entrance_tricks/controllers/subject/subject_detail_controller.dart';
 
 class ChapterDetailController extends GetxController {
   bool _isLoading = true;
@@ -13,14 +14,14 @@ class ChapterDetailController extends GetxController {
   Chapter? _chapter;
   Chapter? get chapter => _chapter;
 
-  List<dynamic> _videos = [];
-  List<dynamic> get videos => _videos;
+  List<Video> _videos = [];
+  List<Video> get videos => _videos;
 
-  List<dynamic> _notes = [];
-  List<dynamic> get notes => _notes;
+  List<Note> _notes = [];
+  List<Note> get notes => _notes;
 
-  List<dynamic> _quizzes = [];
-  List<dynamic> get quizzes => _quizzes;
+  List<Exam> _quizzes = [];
+  List<Exam> get quizzes => _quizzes;
 
   int chapterId = 0;
   int subjectId = 0;
@@ -52,70 +53,12 @@ class ChapterDetailController extends GetxController {
       );
       if (_chapter != null) {
         _chapterTitle = _chapter!.name;
-        _videos = _chapter!.videos;
-        _notes = _chapter!.notes;
-        _quizzes = _chapter!.quizzes;
+        _videos = _chapter!.videos.map((e) => Video.fromJson(e)).toList();
+        _notes = _chapter!.notes.map((e) => Note.fromJson(e)).toList();
+        _quizzes = _chapter!.quizzes.map((e) => Exam.fromJson(e)).toList();
       }
       // Fallback to mock data if chapter not found
       // _chapterTitle = 'Chapter Details';
-      _videos = [
-        {
-          'id': 1,
-          'name': 'Introduction to Motion',
-          'duration': '15:30',
-          'isWatched': true,
-          'thumbnail': '',
-          'url':
-              'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-        },
-        {
-          'id': 2,
-          'name': 'Newton\'s Laws of Motion',
-          'duration': '22:45',
-          'isWatched': false,
-          'thumbnail': '',
-          'url':
-              'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-        },
-      ];
-      _notes = [
-        {
-          'id': 1,
-          'name': 'Motion Formulas',
-          'type': 'PDF',
-          'size': '2.5 MB',
-          'isDownloaded': true,
-          'url':
-              'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
-        },
-        {
-          'id': 2,
-          'name': 'Newton\'s Laws Summary',
-          'type': 'Markdown',
-          'size': '1.2 MB',
-          'isDownloaded': false,
-          'url':
-              'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
-        },
-      ];
-      _quizzes = [
-        {
-          'id': 1,
-          'name': 'Motion Basics Quiz',
-          'questions': 10,
-          'duration': 15,
-          'bestScore': 85,
-          'attempts': 2,
-        },
-        {
-          'id': 2,
-          'name': 'Newton\'s Laws Quiz',
-          'questions': 8,
-          'duration': 12,
-          'bestScore': 0,
-          'attempts': 0,
-        },
-      ];
 
       logger.i('Chapter loaded: $_chapterTitle');
       logger.i(
@@ -132,14 +75,14 @@ class ChapterDetailController extends GetxController {
 
   void playVideo(int videoId) {
     try {
-      final video = _videos.firstWhereOrNull((v) => v['id'] == videoId);
+      final video = _videos.firstWhereOrNull((v) => v.id == videoId);
       if (video != null) {
         Get.toNamed(
-          '/video-player',
+          VIEWS.videoPlayer.path,
           arguments: {
             'videoId': videoId,
-            'videoUrl': video['url'] ?? '',
-            'videoTitle': video['name'] ?? 'Video',
+            'videoUrl': video.file,
+            'videoTitle': video.title,
           },
         );
       } else {
@@ -153,14 +96,14 @@ class ChapterDetailController extends GetxController {
 
   void openPDF(int noteId) {
     try {
-      final note = _notes.firstWhereOrNull((n) => n['id'] == noteId);
+      final note = _notes.firstWhereOrNull((n) => n.id == noteId);
       if (note != null) {
         Get.toNamed(
-          '/pdf-reader',
+          VIEWS.pdfReader.path,
           arguments: {
             'pdfId': noteId,
-            'pdfUrl': note['url'] ?? '',
-            'pdfTitle': note['name'] ?? 'PDF Document',
+            'pdfUrl': note.content,
+            'pdfTitle': note.title,
           },
         );
       } else {
@@ -174,10 +117,10 @@ class ChapterDetailController extends GetxController {
 
   void downloadNote(int noteId) {
     try {
-      final note = _notes.firstWhereOrNull((n) => n['id'] == noteId);
+      final note = _notes.firstWhereOrNull((n) => n.id == noteId);
       if (note != null) {
         // If it's a PDF, open it directly
-        if (note['type']?.toLowerCase() == 'pdf') {
+        if (note.content.toLowerCase() == 'pdf') {
           openPDF(noteId);
         } else {
           // For other types, show download message

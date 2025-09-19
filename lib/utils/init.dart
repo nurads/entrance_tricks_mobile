@@ -6,9 +6,10 @@ import 'package:get/get.dart';
 import 'package:entrance_tricks/services/auth.dart';
 import 'package:entrance_tricks/services/core.dart';
 import 'package:entrance_tricks/services/api/grades.dart';
+import 'package:flutter_tex/flutter_tex.dart';
 
 Future<void> initialize() async {
-  // Hive Box Initilizer
+  await TeXRenderingServer.start();
   await Hive.initFlutter();
   await HiveChaptersStorage().init();
   await HiveSubjectsStorage().init();

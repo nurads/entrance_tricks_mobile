@@ -27,6 +27,8 @@ class Exam {
   @JsonKey(name: 'is_downloaded')
   bool isDownloaded;
 
+  final List<Question> questions;
+
   Exam({
     required this.id,
     required this.name,
@@ -40,6 +42,7 @@ class Exam {
     required this.createdAt,
     required this.updatedAt,
     this.isDownloaded = false,
+    this.questions = const [],
   });
 
   factory Exam.fromJson(Map<String, dynamic> json) => _$ExamFromJson(json);

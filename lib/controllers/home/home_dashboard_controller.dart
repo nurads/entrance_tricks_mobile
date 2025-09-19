@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:entrance_tricks/views/views.dart';
-import 'package:entrance_tricks/controllers/main_navigation_controller.dart';
-import 'package:entrance_tricks/controllers/notifications_controller.dart';
+import 'package:entrance_tricks/controllers/home/main_navigation_controller.dart';
+import 'package:entrance_tricks/controllers/misc/notifications_controller.dart';
 import 'package:entrance_tricks/models/models.dart';
 import 'package:entrance_tricks/services/services.dart';
 import 'package:entrance_tricks/utils/utils.dart';

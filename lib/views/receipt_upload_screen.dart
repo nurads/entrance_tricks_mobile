@@ -1,7 +1,6 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/payment_controller.dart';
+import 'package:entrance_tricks/controllers/controllers.dart';
 import '../models/models.dart';
 
 class ReceiptUploadScreen extends StatelessWidget {

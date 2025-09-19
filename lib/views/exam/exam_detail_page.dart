@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/controllers/exam_controller.dart';
+import 'package:entrance_tricks/controllers/exam/exam_controller.dart';
 import 'package:entrance_tricks/views/exam/exam_result_page.dart';
+import 'package:entrance_tricks/views/exam/question_page.dart';
+import 'package:entrance_tricks/models/models.dart';
 
 class ExamDetailPage extends StatefulWidget {
   const ExamDetailPage({super.key});
@@ -12,396 +14,251 @@ class ExamDetailPage extends StatefulWidget {
 
 class _ExamDetailPageState extends State<ExamDetailPage> {
   late ExamController controller;
-  int currentQuestionIndex = 0;
-  int? selectedAnswer;
-  List<Map<String, dynamic>> userAnswers = [];
-  bool isExamCompleted = false;
 
   @override
   void initState() {
     super.initState();
     controller = Get.put(ExamController());
-    _initializeExam();
-  }
-
-  void _initializeExam() {
-    final examId = Get.arguments['examId'];
-    // For now, we'll use mock questions
-    // In the future, this will fetch questions from API
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Top Bar
-            _buildTopBar(context),
-            
-            // Question Card
-            Expanded(
-              child: _buildQuestionCard(context),
-            ),
-            
-            // Navigation Buttons
-            _buildNavigationButtons(context),
-          ],
-        ),
-      ),
-    );
-  }
+    // Get exam data from arguments
+    final examId = Get.arguments?['examId'];
+    final examTitle =
+        Get.arguments?['examTitle'] ?? 'Mathematics Practice Test';
+    final totalQuestions = Get.arguments?['totalQuestions'] ?? 10;
+    final timeLimit = Get.arguments?['timeLimit'] ?? 30; // in minutes
 
-  Widget _buildTopBar(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: Row(
-        children: [
-          // Back Arrow
-          GestureDetector(
-            onTap: () => Get.back(),
-            child: MouseRegion(
-              cursor: SystemMouseCursors.click,
-              child: Container(
-                padding: EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.blue,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  Icons.arrow_back,
-                  color: Colors.white,
-                  size: 20,
-                ),
-              ),
-            ),
-          ),
-          
-          SizedBox(width: 16),
-          
-          // Exam Title and Info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Maths Exam One",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
-                Text(
-                  "30 Question",
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-          // Timer
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.orange[100],
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.timer,
-                  size: 16,
-                  color: Colors.orange[700],
-                ),
-                SizedBox(width: 4),
-                Text(
-                  "16:35",
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.orange[700],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+    // Create mock math questions
+    final mockQuestions = _createMathQuestions();
 
-  Widget _buildQuestionCard(BuildContext context) {
-    // Mock question data - in future this will come from API
-    final Map<String, dynamic> mockQuestion = {
-      'question': 'Who is making the Web standards?',
-      'options': [
-        'The World Wide Web Consortium',
-        'Microsoft',
-        'Mozilla',
-        'Google',
-      ],
-      'correctAnswer': 0,
-    };
+    return QuestionPage(
+      title: examTitle,
+      initialTimeMinutes: timeLimit,
+      questions: mockQuestions,
+      onComplete: (answers, timeSpent) {
+        // Calculate results
+        final correctAnswers = _calculateCorrectAnswers(answers, mockQuestions);
+        final score = (correctAnswers / mockQuestions.length * 100).round();
 
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      padding: EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.grey.withOpacity(0.2),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.05),
-            blurRadius: 10,
-            offset: Offset(0, 2),
+        // Navigate to result page
+        Get.to(
+          () => ExamResultPage(
+            score: score,
+            correctAnswers: correctAnswers,
+            totalQuestions: mockQuestions.length,
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Progress and Quit Button
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Question: ${currentQuestionIndex + 1}/30",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-              TextButton(
-                onPressed: () => _showQuitDialog(context),
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.red,
-                ),
-                child: Text("Quit"),
-              ),
-            ],
-          ),
-          
-          SizedBox(height: 24),
-          
-          // Question Text
-          Text(
-            mockQuestion['question'],
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-              color: Colors.black87,
-            ),
-          ),
-          
-          SizedBox(height: 32),
-          
-          // Options
-          ...List.generate(
-            mockQuestion['options'].length,
-            (index) => _buildOptionButton(
-              context,
-              mockQuestion['options'][index],
-              index,
-              mockQuestion['correctAnswer'] == index,
-            ),
-          ),
-          
-          Spacer(),
-          
-          // See Result Section
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              children: [
-                Text(
-                  "See Result",
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[700],
-                  ),
-                ),
-                Spacer(),
-                Icon(
-                  Icons.keyboard_arrow_down,
-                  color: Colors.grey[600],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildOptionButton(BuildContext context, String option, int index, bool isCorrect) {
-    final isSelected = selectedAnswer == index;
-    
-    return Container(
-      margin: EdgeInsets.only(bottom: 16),
-      child: ElevatedButton(
-        onPressed: () {
-          setState(() {
-            selectedAnswer = index;
-            userAnswers.add({
-              'questionIndex': currentQuestionIndex,
-              'selectedAnswer': index,
-              'isCorrect': isCorrect,
-            });
-          });
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: isSelected ? Colors.blue : Colors.white,
-          foregroundColor: isSelected ? Colors.white : Colors.black87,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(
-              color: isSelected ? Colors.blue : Colors.grey.withOpacity(0.3),
-              width: 1,
-            ),
-          ),
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          elevation: 0,
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                option,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
-            ),
-            if (isSelected)
-              Icon(
-                Icons.check_circle,
-                color: Colors.white,
-                size: 20,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavigationButtons(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(20),
-      child: Row(
-        children: [
-          // Previous Button
-          Expanded(
-            child: ElevatedButton(
-              onPressed: currentQuestionIndex > 0 ? () {
-                setState(() {
-                  currentQuestionIndex--;
-                  selectedAnswer = userAnswers
-                      .where((answer) => answer['questionIndex'] == currentQuestionIndex)
-                      .firstOrNull?['selectedAnswer'];
-                });
-              } : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue[600],
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: EdgeInsets.symmetric(vertical: 16),
-              ),
-              child: Text(
-                "Previous",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
-          
-          SizedBox(width: 16),
-          
-          // Next Button
-          Expanded(
-            child: ElevatedButton(
-              onPressed: selectedAnswer != null ? () {
-                if (currentQuestionIndex < 29) {
-                  setState(() {
-                    currentQuestionIndex++;
-                    selectedAnswer = userAnswers
-                        .where((answer) => answer['questionIndex'] == currentQuestionIndex)
-                        .firstOrNull?['selectedAnswer'];
-                  });
-                } else {
-                  // Exam completed, show results
-                  _showResults();
-                }
-              } : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue[600],
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: EdgeInsets.symmetric(vertical: 16),
-              ),
-              child: Text(
-                currentQuestionIndex < 29 ? "Next" : "Finish",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showQuitDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Quit Exam"),
-          content: Text("Are you sure you want to quit this exam? Your progress will be lost."),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Get.back();
-              },
-              child: Text("Quit", style: TextStyle(color: Colors.red)),
-            ),
-          ],
         );
       },
+      allowReview: true,
+      showTimer: true,
     );
   }
 
-  void _showResults() {
-    final correctAnswers = userAnswers.where((answer) => answer['isCorrect'] == true).length;
-    final totalQuestions = 30;
-    final score = (correctAnswers / totalQuestions * 100).round();
-    
-    Get.to(() => ExamResultPage(
-      score: score,
-      correctAnswers: correctAnswers,
-      totalQuestions: totalQuestions,
-    ));
+  List<Question> _createMathQuestions() {
+    return [
+      // Question 1: Basic Algebra
+      Question(
+        id: 1,
+        content: r'Solve for x: $2x + 5 = 13$ x^2 + 2x + 1 = 0 $\alpha \beta$',
+        choices: [
+          Choice(id: 1, content: 'x = 4'),
+          Choice(id: 2, content: 'x = 3'),
+          Choice(id: 3, content: 'x = 5'),
+          Choice(id: 4, content: 'x = 6'),
+        ],
+      ),
+
+      // Question 2: Quadratic Equation
+      Question(
+        id: 2,
+        content:
+            r'Find the roots of the quadratic equation: $x^2 - 5x + 6 = 0$',
+        choices: [
+          Choice(id: 1, content: 'x = 2, x = 3'),
+          Choice(id: 2, content: 'x = 1, x = 6'),
+          Choice(id: 3, content: 'x = -2, x = -3'),
+          Choice(id: 4, content: 'x = 0, x = 5'),
+        ],
+      ),
+
+      // Question 3: Trigonometry
+      Question(
+        id: 3,
+        content: r'What is the value of $\\sin(30°)$?',
+        choices: [
+          Choice(id: 1, content: r'$\frac{1}{2}$'),
+          Choice(id: 2, content: r'$\frac{\sqrt{2}}{2}$'),
+          Choice(id: 3, content: r'$\frac{\sqrt{3}}{2}$'),
+          Choice(id: 4, content: '1'),
+        ],
+      ),
+
+      // Question 4: Calculus - Derivative
+      Question(
+        id: 4,
+        content: r'Find the derivative of $f(x) = x^3 + 2x^2 - 5x + 1$',
+        choices: [
+          Choice(id: 1, content: r"$f'(x) = 3x^2 + 4x - 5$"),
+          Choice(id: 2, content: r"$f'(x) = 3x^2 + 2x - 5$"),
+          Choice(id: 3, content: r"$f'(x) = x^2 + 4x - 5$"),
+          Choice(id: 4, content: r"$f'(x) = 3x^2 + 4x + 1$"),
+        ],
+      ),
+
+      // Question 5: Geometry - Area
+      Question(
+        id: 5,
+        content:
+            r'What is the area of a circle with radius $r = 7$ cm? (Use $\pi = \frac{22}{7}$)',
+        choices: [
+          Choice(id: 1, content: '154 cm²'),
+          Choice(id: 2, content: '44 cm²'),
+          Choice(id: 3, content: '22 cm²'),
+          Choice(id: 4, content: '308 cm²'),
+        ],
+      ),
+
+      // Question 6: Logarithms
+      Question(
+        id: 6,
+        content: r'Solve for x: $$log_2(x) = 4$$',
+        choices: [
+          Choice(id: 1, content: 'x = 16'),
+          Choice(id: 2, content: 'x = 8'),
+          Choice(id: 3, content: 'x = 2'),
+          Choice(id: 4, content: 'x = 4'),
+        ],
+      ),
+
+      // Question 7: Complex Numbers
+      Question(
+        id: 7,
+        content: r'What is the value of $(3 + 4i)(2 - i)$?',
+        choices: [
+          Choice(id: 1, content: '10 + 5i'),
+          Choice(id: 2, content: '6 - 4i'),
+          Choice(id: 3, content: '2 + 11i'),
+          Choice(id: 4, content: '10 - 5i'),
+        ],
+      ),
+
+      // Question 8: Probability
+      Question(
+        id: 8,
+        content:
+            r'A fair die is rolled. What is the probability of getting an even number?',
+        choices: [
+          Choice(id: 1, content: r'$\frac{1}{2}$'),
+          Choice(id: 2, content: r'$\frac{1}{3}$'),
+          Choice(id: 3, content: r'$\frac{1}{6}$'),
+          Choice(id: 4, content: r'$\frac{2}{3}$'),
+        ],
+      ),
+
+      // Question 9: Integration
+      Question(
+        id: 9,
+        content: r'Evaluate: $\\int_0^2 (3x^2 + 2x) dx$',
+        choices: [
+          Choice(id: 1, content: '12'),
+          Choice(id: 2, content: '8'),
+          Choice(id: 3, content: '16'),
+          Choice(id: 4, content: '10'),
+        ],
+      ),
+
+      // Question 10: Matrix Operations
+      Question(
+        id: 10,
+        content:
+            r'Find the determinant of the matrix: $\\begin{pmatrix} 2 & 3 \\\\ 1 & 4 \\end{pmatrix}$',
+        choices: [
+          Choice(id: 1, content: '5'),
+          Choice(id: 2, content: '11'),
+          Choice(id: 3, content: '8'),
+          Choice(id: 4, content: '14'),
+        ],
+      ),
+
+      // Question 11: Limits
+      Question(
+        id: 11,
+        content: r'Find the limit: $\\lim_{x \\to 0} \\frac{\\sin(x)}{x}$',
+        choices: [
+          Choice(id: 1, content: '1'),
+          Choice(id: 2, content: '0'),
+          Choice(id: 3, content: r'$\\infty$'),
+          Choice(id: 4, content: 'undefined'),
+        ],
+      ),
+
+      // Question 12: Series
+      Question(
+        id: 12,
+        content:
+            r'Find the sum of the arithmetic series: $2 + 5 + 8 + ... + 20$',
+        choices: [
+          Choice(id: 1, content: '77'),
+          Choice(id: 2, content: '66'),
+          Choice(id: 3, content: '88'),
+          Choice(id: 4, content: '99'),
+        ],
+      ),
+
+      // Question 13: Functions
+      Question(
+        id: 13,
+        content:
+            r'If $f(x) = x^2 + 1$ and $g(x) = 2x - 3$, find $(f \\circ g)(2)$',
+        choices: [
+          Choice(id: 1, content: '2'),
+          Choice(id: 2, content: '5'),
+          Choice(id: 3, content: '10'),
+          Choice(id: 4, content: '17'),
+        ],
+      ),
+
+      // Question 14: Statistics
+      Question(
+        id: 14,
+        content: r'Find the mean of the data set: $\\{2, 4, 6, 8, 10\\}$',
+        choices: [
+          Choice(id: 1, content: '6'),
+          Choice(id: 2, content: '5'),
+          Choice(id: 3, content: '7'),
+          Choice(id: 4, content: '8'),
+        ],
+      ),
+
+      // Question 15: Coordinate Geometry
+      Question(
+        id: 15,
+        content: r'Find the distance between points $A(1, 2)$ and $B(4, 6)$',
+        choices: [
+          Choice(id: 1, content: '5'),
+          Choice(id: 2, content: r'$\\sqrt{13}$'),
+          Choice(id: 3, content: r'$\\sqrt{25}$'),
+          Choice(id: 4, content: '7'),
+        ],
+      ),
+    ];
+  }
+
+  int _calculateCorrectAnswers(
+    List<int> userAnswers,
+    List<Question> questions,
+  ) {
+    // Define correct answers for each question
+    final correctAnswers = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+
+    int correct = 0;
+    for (int i = 0; i < userAnswers.length && i < questions.length; i++) {
+      if (userAnswers[i] == correctAnswers[i]) {
+        correct++;
+      }
+    }
+    return correct;
   }
 }

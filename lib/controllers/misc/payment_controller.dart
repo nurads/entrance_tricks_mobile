@@ -2,10 +2,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import '../models/models.dart';
-import '../services/services.dart';
-import '../services/api/exceptions.dart';
-import '../utils/utils.dart';
+import 'package:entrance_tricks/models/models.dart';
+import 'package:entrance_tricks/services/services.dart';
+import 'package:entrance_tricks/services/api/exceptions.dart';
+import 'package:entrance_tricks/utils/utils.dart';
 
 class PaymentController extends GetxController {
   final PaymentService _paymentService = PaymentService();

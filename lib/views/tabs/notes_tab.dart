@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/controllers/chapter_detail_controller.dart';
+import 'package:entrance_tricks/controllers/subject/chapter_detail_controller.dart';
+import 'package:entrance_tricks/models/models.dart';
 
 class NotesTab extends StatelessWidget {
   NotesTab({super.key});
@@ -87,12 +88,12 @@ class NotesTab extends StatelessWidget {
 
   Widget _buildModernNoteCard(
     BuildContext context,
-    Map<String, dynamic> note,
+    Note note,
     ChapterDetailController controller,
   ) {
     final theme = Theme.of(context);
-    final String type = note['type'] ?? 'PDF';
-    final bool isDownloaded = note['isDownloaded'] ?? false;
+    final String type = note.content.toLowerCase() == 'pdf' ? 'PDF' : 'DOC';
+    final bool isDownloaded = note.isDownloaded;
 
     return Container(
       decoration: BoxDecoration(
@@ -155,7 +156,7 @@ class NotesTab extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        note['name'] ?? 'Note Title',
+                        note.title,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                           height: 1.3,
@@ -210,7 +211,7 @@ class NotesTab extends StatelessWidget {
                               ), // Reduced from 16
                             ),
                             child: Text(
-                              note['size'] ?? '0 MB',
+                              note.size?.toString() ?? '0 MB',
                               style: theme.textTheme.labelSmall?.copyWith(
                                 // Changed to labelSmall
                                 color: theme.colorScheme.onSurfaceVariant,
@@ -298,41 +299,35 @@ class NotesTab extends StatelessWidget {
     );
   }
 
-  void _handleNoteTap(
-    Map<String, dynamic> note,
-    ChapterDetailController controller,
-  ) {
-    final String type = note['type']?.toLowerCase() ?? 'pdf';
+  void _handleNoteTap(Note note, ChapterDetailController controller) {
+    final String type = note.content.toLowerCase() == 'pdf' ? 'PDF' : 'DOC';
 
     if (type == 'pdf') {
-      controller.openPDF(note['id']);
+      controller.openPDF(note.id);
     } else {
       // For other types, show a message or implement other viewers
       Get.snackbar('Info', 'Opening ${type.toUpperCase()} viewer');
     }
   }
 
-  void _handleNoteAction(
-    Map<String, dynamic> note,
-    ChapterDetailController controller,
-  ) {
-    final String type = note['type']?.toLowerCase() ?? 'pdf';
-    final bool isDownloaded = note['isDownloaded'] ?? false;
+  void _handleNoteAction(Note note, ChapterDetailController controller) {
+    final String type = note.content.toLowerCase() == 'pdf' ? 'PDF' : 'DOC';
+    final bool isDownloaded = note.isDownloaded;
 
     if (type == 'pdf') {
       if (isDownloaded) {
-        controller.openPDF(note['id']);
+        controller.openPDF(note.id);
       } else {
-        controller.downloadNote(note['id']);
+        controller.downloadNote(note.id);
       }
     } else {
-      controller.downloadNote(note['id']);
+      controller.downloadNote(note.id);
     }
   }
 
-  IconData _getActionIcon(Map<String, dynamic> note) {
-    final String type = note['type']?.toLowerCase() ?? 'pdf';
-    final bool isDownloaded = note['isDownloaded'] ?? false;
+  IconData _getActionIcon(Note note) {
+    final String type = note.content.toLowerCase() == 'pdf' ? 'PDF' : 'DOC';
+    final bool isDownloaded = note.isDownloaded;
 
     if (type == 'pdf' && isDownloaded) {
       return Icons.folder_open;
