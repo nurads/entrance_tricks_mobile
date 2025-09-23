@@ -1,2 +1,3 @@
 const authTokenStorage = 'authTokenStorage';
-const defaultApiURL = 'http://192.168.1.5:8000';
+// const defaultApiURL = 'https://api.entrancetricks.com';
+const defaultApiURL = 'http://api.entrancetricks.com';

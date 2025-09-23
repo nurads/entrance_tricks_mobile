@@ -40,6 +40,11 @@ class QuestionPage extends StatelessWidget {
 
     return GetBuilder<QuestionPageController>(
       builder: (controller) {
+        // Handle empty questions state
+        if (controller.questions.isEmpty) {
+          return _buildEmptyQuestionsState(context, controller);
+        }
+
         if (controller.isCompleted.value && !controller.showAnswers.value) {
           return _buildResultsPage(context, controller);
         }
@@ -546,6 +551,126 @@ class QuestionPage extends StatelessWidget {
                 ],
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyQuestionsState(
+    BuildContext context,
+    QuestionPageController controller,
+  ) {
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
+      appBar: _buildAppBar(context, controller),
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Empty state icon
+                Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primaryContainer.withValues(
+                      alpha: 0.3,
+                    ),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.quiz_outlined,
+                    size: 60,
+                    color: theme.colorScheme.primary.withValues(alpha: 0.7),
+                  ),
+                ),
+
+                SizedBox(height: 32),
+
+                // Empty state title
+                Text(
+                  'No Questions Available',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    color: theme.colorScheme.onSurface,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+
+                SizedBox(height: 16),
+
+                // Empty state description
+                Text(
+                  'There are no questions available for this quiz at the moment. Please try again later or contact support if this problem persists.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+
+                SizedBox(height: 40),
+
+                // Action buttons
+                Column(
+                  children: [
+                    // Retry button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          // You can add retry logic here if needed
+                          Get.back();
+                        },
+                        icon: Icon(Icons.refresh),
+                        label: Text('Go Back'),
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: 12),
+
+                    // Contact support button (optional)
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          // You can add contact support logic here
+                          // For now, just show a snackbar
+                          Get.snackbar(
+                            'Contact Support',
+                            'Please contact our support team for assistance.',
+                            backgroundColor: theme.colorScheme.primaryContainer,
+                            colorText: theme.colorScheme.onPrimaryContainer,
+                            snackPosition: SnackPosition.BOTTOM,
+                            margin: EdgeInsets.all(16),
+                            borderRadius: 12,
+                          );
+                        },
+                        icon: Icon(Icons.support_agent),
+                        label: Text('Contact Support'),
+                        style: OutlinedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

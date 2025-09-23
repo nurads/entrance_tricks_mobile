@@ -8,3 +8,5 @@ export 'api/payments.dart';
 export 'auth.dart';
 export 'core.dart';
 export 'api/news.dart';
+export 'api/notes.dart';
+export 'api/video.dart';

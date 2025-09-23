@@ -2,13 +2,16 @@ import 'package:get/get.dart' hide Response, FormData, MultipartFile;
 import 'package:entrance_tricks/services/api/exceptions.dart';
 import 'api.dart';
 import '../../models/exam.dart';
+import '../../models/question.dart';
 
 class ExamService extends GetxService {
   final ApiClient apiClient = ApiClient();
 
-  Future<List<Exam>> getAvailableExams({
+  Future<List<Exam>> getAvailableExams(
+    String deviceId, {
     String? examType,
     int? subjectId,
+    int? chapterId,
   }) async {
     final queryParams = <String, dynamic>{};
 
@@ -17,11 +20,14 @@ class ExamService extends GetxService {
     }
 
     if (subjectId != null) {
-      queryParams['subject_id'] = subjectId;
+      queryParams['subject'] = subjectId;
+    }
+    if (chapterId != null) {
+      queryParams['chapter'] = chapterId;
     }
 
     final response = await apiClient.get(
-      '/app/exams/',
+      '/app/exams/?device=$deviceId',
       queryParameters: queryParams,
       authenticated: true,
     );
@@ -32,5 +38,14 @@ class ExamService extends GetxService {
     } else {
       throw ApiException(response.data['message'] ?? 'Failed to fetch exams');
     }
+  }
+
+  Future<List<Question>> getQuestions(String deviceId, int examId) async {
+    final response = await apiClient.get(
+      '/app/questions/',
+      authenticated: true,
+      queryParameters: {'device': deviceId, 'exam': examId},
+    );
+    return (response.data as List).map((e) => Question.fromJson(e)).toList();
   }
 }

@@ -51,10 +51,6 @@ class HomeDashboardController extends GetxController {
           _deviceInfo.id,
           gradeId: gradeId ?? 0,
         );
-        logger.i('Subjects: ${_deviceInfo.id}');
-        final _debugSubjects = _subjects.firstWhere((e) => e.isLocked);
-        logger.i('Debug subjects: $_debugSubjects ${_debugSubjects.isLocked}');
-        logger.i('Debug subjects: $_debugSubjects ${_debugSubjects.isLocked}');
         _coreService.setSubjects(_subjects);
       } catch (e) {
         logger.i('Loading subjects from storage');

@@ -51,6 +51,7 @@ class AuthResponse {
 class RegisterResponse {
   final int id;
   final AuthToken tokens;
+  @JsonKey(name: 'phone_number')
   final String phoneNumber;
   @JsonKey(name: 'date_joined')
   final DateTime dateJoined;

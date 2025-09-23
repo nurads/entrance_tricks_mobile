@@ -1,36 +1,47 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
+import 'dart:io'; // Added for File
+import 'package:flutter/material.dart';
+import 'package:entrance_tricks/utils/utils.dart';
 
-class VideoPlayerScreen extends StatefulWidget {
-  final String videoUrl;
-  final String videoTitle;
-  final int videoId;
-
-  const VideoPlayerScreen({
-    super.key,
-    required this.videoUrl,
-    required this.videoTitle,
-    required this.videoId,
-  });
-
-  @override
-  State<VideoPlayerScreen> createState() => _VideoPlayerScreenState();
-}
-
-class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
+class CustomVideoPlayerController extends GetxController {
   late VideoPlayerController _controller;
-  bool _isInitialized = false;
-  bool _isPlaying = false;
-  bool _showControls = true;
-  Duration _position = Duration.zero;
-  Duration _duration = Duration.zero;
+  VideoPlayerController get videoController => _controller;
+
+  final RxBool isInitialized = false.obs;
+  final RxBool isPlaying = false.obs;
+  final RxBool showControls = true.obs;
+  final Rx<Duration> position = Duration.zero.obs;
+  final Rx<Duration> duration = Duration.zero.obs;
+  final RxBool isLoading = true.obs;
+
+  String videoUrl = '';
+  String videoTitle = '';
+  int videoId = 0;
 
   @override
-  void initState() {
-    super.initState();
-    _initializeVideo();
+  void onInit() {
+    super.onInit();
+    // Get arguments passed to the controller
+    final args = Get.arguments;
+    if (args != null) {
+      videoUrl = args['videoUrl'] ?? '';
+      videoTitle = args['videoTitle'] ?? '';
+      videoId = args['videoId'] ?? 0;
+    }
+
+    _setupOrientations();
+  }
+
+  @override
+  void onClose() {
+    _controller.dispose();
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    super.onClose();
+  }
+
+  void _setupOrientations() {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
@@ -38,51 +49,59 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     ]);
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-    super.dispose();
-  }
-
-  void _initializeVideo() async {
+  Future<void> initializeVideo(
+    String videoUrl,
+    String videoTitle,
+    int videoId,
+  ) async {
     try {
-      _controller = VideoPlayerController.networkUrl(
-        Uri.parse(widget.videoUrl),
-      );
+      isLoading.value = true;
+
+      logger.d('Video URL: $videoUrl');
+
+      // Check if videoUrl is a local file path or remote URL
+      if (videoUrl.startsWith('http://') || videoUrl.startsWith('https://')) {
+        // Remote URL
+        _controller = VideoPlayerController.networkUrl(Uri.parse(videoUrl));
+      } else {
+        // Local file path
+        _controller = VideoPlayerController.file(File(videoUrl));
+      }
+
       await _controller.initialize();
+      _controller.addListener(_videoListener);
 
-      _controller.addListener(() {
-        if (mounted) {
-          setState(() {
-            _position = _controller.value.position;
-            _duration = _controller.value.duration;
-            _isPlaying = _controller.value.isPlaying;
-          });
-        }
-      });
-
-      setState(() {
-        _isInitialized = true;
-      });
+      isInitialized.value = true;
+      isLoading.value = false;
     } catch (e) {
+      isLoading.value = false;
       Get.snackbar('Error', 'Failed to load video: $e');
     }
   }
 
-  void _togglePlayPause() {
-    if (_isPlaying) {
+  void _videoListener() {
+    position.value = _controller.value.position;
+    duration.value = _controller.value.duration;
+    isPlaying.value = _controller.value.isPlaying;
+  }
+
+  void togglePlayPause() {
+    if (isPlaying.value) {
       _controller.pause();
     } else {
       _controller.play();
     }
   }
 
-  void _seekTo(Duration position) {
+  void seekTo(Duration position) {
     _controller.seekTo(position);
   }
 
-  String _formatDuration(Duration duration) {
+  void toggleControls() {
+    showControls.value = !showControls.value;
+  }
+
+  String formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     final hours = twoDigits(duration.inHours);
     final minutes = twoDigits(duration.inMinutes.remainder(60));
@@ -95,192 +114,11 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+  void goBack() {
+    Get.back();
+  }
 
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            // Video Player
-            Center(
-              child: _isInitialized
-                  ? AspectRatio(
-                      aspectRatio: _controller.value.aspectRatio,
-                      child: VideoPlayer(_controller),
-                    )
-                  : Container(
-                      width: double.infinity,
-                      height: 200,
-                      color: Colors.grey[900],
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CircularProgressIndicator(
-                            color: theme.colorScheme.primary,
-                          ),
-                          SizedBox(height: 16),
-                          Text(
-                            'Loading video...',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-            ),
-
-            // Video Controls
-            if (_isInitialized)
-              Positioned.fill(
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _showControls = !_showControls;
-                    });
-                  },
-                  child: AnimatedOpacity(
-                    opacity: _showControls ? 1.0 : 0.0,
-                    duration: Duration(milliseconds: 300),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.black.withOpacity(0.7),
-                            Colors.transparent,
-                            Colors.transparent,
-                            Colors.black.withOpacity(0.7),
-                          ],
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          // Top Controls
-                          Container(
-                            padding: EdgeInsets.all(16),
-                            child: Row(
-                              children: [
-                                IconButton(
-                                  onPressed: () => Get.back(),
-                                  icon: Icon(
-                                    Icons.arrow_back,
-                                    color: Colors.white,
-                                    size: 28,
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    widget.videoTitle,
-                                    style: theme.textTheme.titleMedium
-                                        ?.copyWith(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                IconButton(
-                                  onPressed: () {
-                                    // TODO: Implement fullscreen toggle
-                                  },
-                                  icon: Icon(
-                                    Icons.fullscreen,
-                                    color: Colors.white,
-                                    size: 28,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          // Center Play Button
-                          Expanded(
-                            child: Center(
-                              child: IconButton(
-                                onPressed: _togglePlayPause,
-                                icon: Icon(
-                                  _isPlaying ? Icons.pause : Icons.play_arrow,
-                                  color: Colors.white,
-                                  size: 64,
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          // Bottom Controls
-                          Container(
-                            padding: EdgeInsets.all(16),
-                            child: Column(
-                              children: [
-                                // Progress Bar
-                                SliderTheme(
-                                  data: SliderTheme.of(context).copyWith(
-                                    activeTrackColor: theme.colorScheme.primary,
-                                    inactiveTrackColor: Colors.white
-                                        .withOpacity(0.3),
-                                    thumbColor: theme.colorScheme.primary,
-                                    overlayColor: theme.colorScheme.primary
-                                        .withOpacity(0.2),
-                                    thumbShape: RoundSliderThumbShape(
-                                      enabledThumbRadius: 8,
-                                    ),
-                                  ),
-                                  child: Slider(
-                                    value: _position.inMilliseconds.toDouble(),
-                                    max: _duration.inMilliseconds.toDouble(),
-                                    onChanged: (value) {
-                                      _seekTo(
-                                        Duration(milliseconds: value.toInt()),
-                                      );
-                                    },
-                                  ),
-                                ),
-
-                                // Time and Controls
-                                Row(
-                                  children: [
-                                    Text(
-                                      _formatDuration(_position),
-                                      style: theme.textTheme.bodySmall
-                                          ?.copyWith(color: Colors.white),
-                                    ),
-                                    Spacer(),
-                                    Text(
-                                      _formatDuration(_duration),
-                                      style: theme.textTheme.bodySmall
-                                          ?.copyWith(color: Colors.white),
-                                    ),
-                                    SizedBox(width: 16),
-                                    IconButton(
-                                      onPressed: _togglePlayPause,
-                                      icon: Icon(
-                                        _isPlaying
-                                            ? Icons.pause
-                                            : Icons.play_arrow,
-                                        color: Colors.white,
-                                        size: 32,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
+  void toggleFullscreen() {
+    // TODO: Implement fullscreen toggle functionality
   }
 }

@@ -27,8 +27,9 @@ class UserService extends GetxController {
     String password,
     int grade,
   ) async {
-    final lastName = name.split(' ').last;
-    final firstName = name.replaceAll(lastName, '').trim();
+    name = name.trim();
+    final lastName = name.split(' ').lastOrNull;
+    final firstName = name.split(' ').first;
     final response = await apiClient.post(
       '/auth/register/',
       data: {
@@ -36,7 +37,7 @@ class UserService extends GetxController {
         'last_name': lastName,
         'phone_number': phone,
         'password': password,
-        'grade': grade,
+        'gradeId': grade,
       },
     );
 

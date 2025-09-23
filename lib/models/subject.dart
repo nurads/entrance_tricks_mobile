@@ -1,7 +1,6 @@
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:entrance_tricks/models/models.dart';
-import 'package:entrance_tricks/utils/utils.dart';
 part 'subject.g.dart';
 
 @JsonSerializable()

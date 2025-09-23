@@ -41,52 +41,6 @@ class HiveSubjectsStorage extends BaseObjectStorage<List<Subject>> {
   }
 }
 
-class HiveVideoStorage extends BaseObjectStorage<List<Video>> {
-  final String _boxName = 'videoStorage';
-  static late Box<List<dynamic>> _box;
-
-  @override
-  Future<void> init() async {
-    Hive.registerAdapter<Video>(VideoTypeAdapter());
-    if (!Hive.isBoxOpen(_boxName)) {
-      _box = await Hive.openBox<List<dynamic>>(_boxName);
-    } else {
-      _box = Hive.box<List<dynamic>>(_boxName);
-    }
-  }
-
-  @override
-  Future<void> clear() {
-    return Hive.box<List<Video>>(_boxName).clear();
-  }
-
-  @override
-  void listen(void Function(List<Video> p1) callback, String key) {
-    Hive.box<List<Video>>(
-      _boxName,
-    ).watch(key: key).listen((event) => callback(event.value));
-  }
-
-  @override
-  Future<List<Video>?> read(String key) async {
-    return Hive.box<List<Video>>(_boxName).get(key);
-  }
-
-  @override
-  Future<void> write(String key, List<Video> value) {
-    return Hive.box<List<Video>>(_boxName).put(key, value);
-  }
-
-  Future<void> setVideos(int chapterId, List<Video> videos) {
-    return _box.put('videos_$chapterId', videos);
-  }
-
-  Future<List<Video>> getVideos(int chapterId) async {
-    final value = _box.get('videos_$chapterId') ?? [];
-    return value.cast<Video>();
-  }
-}
-
 class HiveChaptersStorage extends BaseObjectStorage<List<Chapter>> {
   final String _boxName = 'chaptersStorage';
 

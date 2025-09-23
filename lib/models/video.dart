@@ -6,15 +6,16 @@ part 'video.g.dart';
 class Video {
   final int id;
   final int chapter;
+  final int subject;
   final String title;
-  final String file;
+
+  final String? file;
   @JsonKey(name: 'duration_in_minutes')
   final int duration;
   @JsonKey(name: 'created_at')
   final DateTime createdAt;
   @JsonKey(name: 'updated_at')
   final DateTime updatedAt;
-  final String? image;
   @JsonKey(name: 'is_locked')
   final bool isLocked;
   final String? description;
@@ -24,21 +25,33 @@ class Video {
   bool isDownloaded;
 
   final String? thumbnail;
+  @JsonKey(name: 'file_path')
+  String? filePath;
+
+  // Add download progress tracking properties
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool isDownloading;
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  double downloadProgress;
 
   Video({
     required this.id,
     required this.chapter,
+    required this.subject,
     required this.title,
-    required this.file,
     required this.duration,
     required this.createdAt,
     required this.updatedAt,
+    this.file,
     this.isLocked = true,
     this.isWatched = false,
-    this.image,
     this.description,
     this.thumbnail,
     this.isDownloaded = false,
+    this.filePath,
+    this.isDownloading = false,
+    this.downloadProgress = 0.0,
   });
 
   factory Video.fromJson(Map<String, dynamic> json) => _$VideoFromJson(json);

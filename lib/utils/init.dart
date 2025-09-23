@@ -13,13 +13,13 @@ Future<void> initialize() async {
   await Hive.initFlutter();
   await HiveChaptersStorage().init();
   await HiveSubjectsStorage().init();
-  await HiveVideoStorage().init();
   await HiveAuthStorage().init();
   await HiveUserStorage().init();
   await HiveExamStorage().init();
   await HiveQuizzesStorage().init();
   await HiveQuestionStorage().init();
   await HiveNoteStorage().init();
+  await HiveVideoStorage().init();
   Get.put(AuthService());
   Get.put(CoreService());
   Get.put(GradeService());

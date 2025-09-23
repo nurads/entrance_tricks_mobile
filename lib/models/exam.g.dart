@@ -21,6 +21,11 @@ Exam _$ExamFromJson(Map<String, dynamic> json) => Exam(
   createdAt: DateTime.parse(json['created_at'] as String),
   updatedAt: DateTime.parse(json['updated_at'] as String),
   isDownloaded: json['is_downloaded'] as bool? ?? false,
+  questions:
+      (json['questions'] as List<dynamic>?)
+          ?.map((e) => Question.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
 );
 
 Map<String, dynamic> _$ExamToJson(Exam instance) => <String, dynamic>{
@@ -36,4 +41,5 @@ Map<String, dynamic> _$ExamToJson(Exam instance) => <String, dynamic>{
   'created_at': instance.createdAt.toIso8601String(),
   'updated_at': instance.updatedAt.toIso8601String(),
   'is_downloaded': instance.isDownloaded,
+  'questions': instance.questions,
 };

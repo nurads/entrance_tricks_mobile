@@ -4,7 +4,7 @@ import 'package:entrance_tricks/controllers/subject/subject_detail_controller.da
 import 'package:entrance_tricks/models/models.dart';
 
 class SubjectDetail extends StatelessWidget {
-  SubjectDetail({super.key});
+  const SubjectDetail({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -16,17 +16,8 @@ class SubjectDetail extends StatelessWidget {
         body: SafeArea(
           child: Column(
             children: [
-              // Top Bar with Back Arrow and Subject Name
               _buildTopBar(context, controller),
 
-              // Payment Status Section (if subject is paid)
-              // _buildPaymentStatusSection(
-              //   context,
-              //   controller,
-              //   paymentController,
-              // ),
-
-              // Chapter List Section
               Expanded(child: _buildChapterList(context, controller)),
             ],
           ),
@@ -43,7 +34,6 @@ class SubjectDetail extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
         children: [
-          // Back Arrow
           GestureDetector(
             onTap: () => Get.back(),
             child: Container(
@@ -55,7 +45,6 @@ class SubjectDetail extends StatelessWidget {
 
           SizedBox(width: 16),
 
-          // Subject Name
           Text(
             controller.subjectName,
             style: TextStyle(
@@ -68,127 +57,6 @@ class SubjectDetail extends StatelessWidget {
       ),
     );
   }
-
-  // Widget _buildPaymentStatusSection(
-  //   BuildContext context,
-  //   SubjectDetailController controller,
-  //   PaymentController paymentController,
-  // ) {
-  //   // This would need to be implemented based on the subject's payment status
-  //   // For now, return empty container - in real implementation, you'd check if subject requires payment
-  //   return FutureBuilder<Payment?>(
-  //     future: paymentController.getSubjectPackageInfo(controller.subjectId),
-  //     builder: (context, snapshot) {
-  //       if (!snapshot.hasData) return SizedBox.shrink();
-
-  //       final paymentInfo = snapshot.data!;
-  //       final bool isPaid = paymentInfo['isPaid'] ?? false;
-
-  //       if (!isPaid) return SizedBox.shrink();
-
-  //       final int price = paymentInfo['price'] ?? 0;
-
-  //       return FutureBuilder<Payment?>(
-  //         future: paymentController.checkPayment(controller.subjectId),
-  //         builder: (context, accessSnapshot) {
-  //           if (!accessSnapshot.hasData) {
-  //             return Container(
-  //               margin: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-  //               padding: EdgeInsets.all(16),
-  //               decoration: BoxDecoration(
-  //                 color: Colors.orange.shade50,
-  //                 borderRadius: BorderRadius.circular(12),
-  //                 border: Border.all(color: Colors.orange.shade200),
-  //               ),
-  //               child: Row(
-  //                 children: [
-  //                   CircularProgressIndicator(strokeWidth: 2),
-  //                   SizedBox(width: 12),
-  //                   Text('Checking payment status...'),
-  //                 ],
-  //               ),
-  //             );
-  //           }
-
-  //           final accessResponse = accessSnapshot.data!;
-
-  //           if (accessResponse.hasAccess) {
-  //             return Container(
-  //               margin: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-  //               padding: EdgeInsets.all(16),
-  //               decoration: BoxDecoration(
-  //                 color: Colors.green.shade50,
-  //                 borderRadius: BorderRadius.circular(12),
-  //                 border: Border.all(color: Colors.green.shade200),
-  //               ),
-  //               child: Row(
-  //                 children: [
-  //                   Icon(Icons.check_circle, color: Colors.green.shade700),
-  //                   SizedBox(width: 12),
-  //                   Expanded(
-  //                     child: Text(
-  //                       'Payment approved - You have full access',
-  //                       style: TextStyle(
-  //                         color: Colors.green.shade700,
-  //                         fontWeight: FontWeight.w500,
-  //                       ),
-  //                     ),
-  //                   ),
-  //                 ],
-  //               ),
-  //             );
-  //           } else {
-  //             return Container(
-  //               margin: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-  //               padding: EdgeInsets.all(16),
-  //               decoration: BoxDecoration(
-  //                 color: Colors.red.shade50,
-  //                 borderRadius: BorderRadius.circular(12),
-  //                 border: Border.all(color: Colors.red.shade200),
-  //               ),
-  //               child: Column(
-  //                 children: [
-  //                   Row(
-  //                     children: [
-  //                       Icon(Icons.payment, color: Colors.red.shade700),
-  //                       SizedBox(width: 12),
-  //                       Expanded(
-  //                         child: Text(
-  //                           'Payment required - $price ETB',
-  //                           style: TextStyle(
-  //                             color: Colors.red.shade700,
-  //                             fontWeight: FontWeight.w500,
-  //                           ),
-  //                         ),
-  //                       ),
-  //                     ],
-  //                   ),
-  //                   SizedBox(height: 12),
-  //                   SizedBox(
-  //                     width: double.infinity,
-  //                     child: ElevatedButton(
-  //                       onPressed: () => _navigateToPayment(
-  //                         context,
-  //                         controller.subjectId,
-  //                         price,
-  //                         paymentInfo['title'] ?? 'Subject',
-  //                       ),
-  //                       style: ElevatedButton.styleFrom(
-  //                         backgroundColor: Theme.of(context).primaryColor,
-  //                         foregroundColor: Colors.white,
-  //                       ),
-  //                       child: Text('Make Payment'),
-  //                     ),
-  //                   ),
-  //                 ],
-  //               ),
-  //             );
-  //           }
-  //         },
-  //       );
-  //     },
-  //   );
-  // }
 
   Widget _buildChapterList(
     BuildContext context,
@@ -250,7 +118,6 @@ class SubjectDetail extends StatelessWidget {
         padding: EdgeInsets.all(20),
         child: Row(
           children: [
-            // Chapter Number Circle
             Container(
               width: 50,
               height: 50,
@@ -272,7 +139,6 @@ class SubjectDetail extends StatelessWidget {
 
             SizedBox(width: 20),
 
-            // Chapter Content
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -296,11 +162,9 @@ class SubjectDetail extends StatelessWidget {
 
             SizedBox(width: 16),
 
-            // Lock/Unlock Icon
             GestureDetector(
               onTap: () {
                 if (controller.isLocked) {
-                  // _showLockedDialog(context); TODO: Implement this
                 } else {
                   controller.openChapter(chapter.id);
                 }
@@ -330,88 +194,6 @@ class SubjectDetail extends StatelessWidget {
       ),
     );
   }
-
-  // void _showLockedDialog(BuildContext context) {
-  //   final paymentController = Get.find<PaymentController>();
-  //   final subjectController = Get.find<SubjectDetailController>();
-
-  //   // Get subject payment info
-  //   paymentController.getSubjectPackageInfo(subjectController.subjectId).then((
-  //     paymentInfo,
-  //   ) {
-  //     final price = paymentInfo?['price'] ?? 0;
-  //     final title = paymentInfo?['title'] ?? 'Subject';
-
-  //     Get.dialog(
-  //       Dialog(
-  //         shape: RoundedRectangleBorder(
-  //           borderRadius: BorderRadius.circular(16),
-  //         ),
-  //         child: Padding(
-  //           padding: EdgeInsets.all(20),
-  //           child: Column(
-  //             mainAxisSize: MainAxisSize.min,
-  //             crossAxisAlignment: CrossAxisAlignment.start,
-  //             children: [
-  //               Row(
-  //                 children: [
-  //                   Icon(Icons.lock_outline, color: Colors.blue),
-  //                   SizedBox(width: 8),
-  //                   Expanded(
-  //                     child: Text(
-  //                       'Content Is Locked',
-  //                       style: TextStyle(
-  //                         fontWeight: FontWeight.bold,
-  //                         fontSize: 16,
-  //                       ),
-  //                     ),
-  //                   ),
-  //                 ],
-  //               ),
-  //               SizedBox(height: 8),
-  //               Text(
-  //                 'This content requires payment to access. Please make a payment of $price ETB to unlock all chapters.',
-  //                 style: TextStyle(color: Colors.black54),
-  //               ),
-  //               SizedBox(height: 16),
-  //               Row(
-  //                 mainAxisAlignment: MainAxisAlignment.end,
-  //                 children: [
-  //                   TextButton(
-  //                     onPressed: () => Get.back(),
-  //                     child: Text('Cancel'),
-  //                   ),
-  //                   SizedBox(width: 8),
-  //                   ElevatedButton.icon(
-  //                     onPressed: () {
-  //                       Get.back();
-  //                       _navigateToPayment(
-  //                         context,
-  //                         subjectController.subjectId,
-  //                         price,
-  //                         title,
-  //                       );
-  //                     },
-  //                     icon: Icon(Icons.payment),
-  //                     label: Text('Make Payment'),
-  //                     style: ElevatedButton.styleFrom(
-  //                       backgroundColor: Colors.blue.shade700,
-  //                       foregroundColor: Colors.white,
-  //                       shape: RoundedRectangleBorder(
-  //                         borderRadius: BorderRadius.circular(24),
-  //                       ),
-  //                     ),
-  //                   ),
-  //                 ],
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-  //       ),
-  //       barrierDismissible: true,
-  //     );
-  //   });
-  // }
 
   void _navigateToPayment(
     BuildContext context,

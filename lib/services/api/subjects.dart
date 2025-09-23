@@ -16,6 +16,8 @@ class SubjectsService extends GetxController {
         '/app/subjects?grade=$gradeId&device=$deviceId',
         authenticated: true,
       );
+      logger.i('Subjects response');
+      logger.d(response.data);
       if (response.statusCode == 200) {
         return (response.data as List).map((e) => Subject.fromJson(e)).toList();
       } else {

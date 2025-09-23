@@ -6,8 +6,11 @@ import 'package:flutter_file_downloader/flutter_file_downloader.dart';
 class NoteService {
   final ApiClient apiClient = ApiClient();
 
-  Future<List<Note>> getNotes(int chapterId) async {
-    final response = await apiClient.get('/app/notes?chapter=$chapterId');
+  Future<List<Note>> getNotes(String deviceId, {required int chapterId}) async {
+    final response = await apiClient.get(
+      '/app/notes?chapter=$chapterId&device=$deviceId',
+      authenticated: true,
+    );
     return (response.data as List).map((e) => Note.fromJson(e)).toList();
   }
 

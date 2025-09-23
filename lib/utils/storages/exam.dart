@@ -5,32 +5,45 @@ import 'base.dart';
 
 class HiveQuestionStorage extends BaseObjectStorage<List<Question>> {
   final String _boxName = 'questionStorage';
+  static Box<List<dynamic>>? _box;
   @override
   Future<void> init() async {
     Hive.registerAdapter<Question>(QuestionTypeAdapter());
-    await Hive.openBox<List<Question>>(_boxName);
+    if (!Hive.isBoxOpen(_boxName)) {
+      _box = await Hive.openBox<List<dynamic>>(_boxName);
+    } else {
+      _box = Hive.box<List<dynamic>>(_boxName);
+    }
   }
 
   @override
-  Future<void> clear() {
-    return Hive.box<List<Question>>(_boxName).clear();
+  Future<void> clear() async {
+    _box?.clear();
   }
 
   @override
   void listen(void Function(List<Question>) callback, String key) {
-    Hive.box<List<Question>>(
-      _boxName,
-    ).watch(key: key).listen((event) => callback(event.value));
+    _box?.watch(key: key).listen((event) => callback(event.value));
   }
 
   @override
   Future<List<Question>?> read(String key) async {
-    return Hive.box<List<Question>>(_boxName).get(key) ?? [];
+    final values = _box?.get(key) ?? [];
+    return values.cast<Question>();
   }
 
   @override
-  Future<void> write(String key, List<Question> value) {
-    return Hive.box<List<Question>>(_boxName).put(key, value);
+  Future<void> write(String key, List<Question> value) async {
+    _box?.put(key, value);
+  }
+
+  Future<List<Question>> getQuestions(int examId) async {
+    final value = _box?.get('questions_$examId') ?? [];
+    return value.cast<Question>();
+  }
+
+  Future<void> setQuestions(int examId, List<Question> questions) async {
+    _box?.put('questions_$examId', questions);
   }
 }
 
@@ -67,50 +80,13 @@ class HiveExamStorage extends BaseObjectStorage<List<Exam>> {
   Future<void> write(String key, List<Exam> value) {
     return _box.put(key, value);
   }
-}
 
-class HiveNoteStorage extends BaseObjectStorage<List<Note>> {
-  final String _boxName = 'noteStorage';
-  static late Box<List<dynamic>> _box;
-  @override
-  Future<void> init() async {
-    Hive.registerAdapter<Note>(NoteTypeAdapter());
-    if (!Hive.isBoxOpen(_boxName)) {
-      _box = await Hive.openBox<List<dynamic>>(_boxName);
-    } else {
-      _box = Hive.box<List<dynamic>>(_boxName);
-    }
+  Future<void> setQuizzes(int chapterId, List<Exam> quizzes) {
+    return _box.put('quizzes_$chapterId', quizzes);
   }
 
-  @override
-  Future<void> clear() {
-    return Hive.box<List<Note>>(_boxName).clear();
-  }
-
-  @override
-  void listen(void Function(List<Note>) callback, String key) {
-    Hive.box<List<Note>>(
-      _boxName,
-    ).watch(key: key).listen((event) => callback(event.value));
-  }
-
-  @override
-  Future<List<Note>?> read(String key) async {
-    return Hive.box<List<Note>>(_boxName).get(key) ?? [];
-  }
-
-  @override
-  Future<void> write(String key, List<Note> value) {
-    return Hive.box<List<Note>>(_boxName).put(key, value);
-  }
-
-  Future<void> setNotes(int chapterId, List<Note> notes) {
-    return _box.put('notes_$chapterId', notes);
-  }
-
-  Future<List<Note>> getNotes(int chapterId) async {
-    final value = _box.get('notes_$chapterId') ?? [];
-
-    return value.cast<Note>();
+  Future<List<Exam>> getQuizzes(int chapterId) async {
+    final value = _box.get('quizzes_$chapterId') ?? [];
+    return value.cast<Exam>();
   }
 }

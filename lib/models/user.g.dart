@@ -40,7 +40,7 @@ RegisterResponse _$RegisterResponseFromJson(Map<String, dynamic> json) =>
     RegisterResponse(
       id: (json['id'] as num).toInt(),
       tokens: AuthToken.fromJson(json['tokens'] as Map<String, dynamic>),
-      phoneNumber: json['phoneNumber'] as String,
+      phoneNumber: json['phone_number'] as String,
       dateJoined: DateTime.parse(json['date_joined'] as String),
       firstName: json['first_name'] as String,
       lastName: json['last_name'] as String,
@@ -51,7 +51,7 @@ Map<String, dynamic> _$RegisterResponseToJson(RegisterResponse instance) =>
     <String, dynamic>{
       'id': instance.id,
       'tokens': instance.tokens,
-      'phoneNumber': instance.phoneNumber,
+      'phone_number': instance.phoneNumber,
       'date_joined': instance.dateJoined.toIso8601String(),
       'first_name': instance.firstName,
       'last_name': instance.lastName,

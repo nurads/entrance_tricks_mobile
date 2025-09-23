@@ -3,7 +3,6 @@ import 'package:entrance_tricks/views/news/news_detail_page.dart';
 import 'package:entrance_tricks/services/services.dart';
 import 'package:entrance_tricks/models/models.dart';
 import 'package:entrance_tricks/utils/utils.dart';
-import 'package:entrance_tricks/utils/utils.dart';
 
 class NewsController extends GetxController {
   bool _isLoading = true;

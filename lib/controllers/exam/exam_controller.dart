@@ -5,6 +5,7 @@ import 'package:entrance_tricks/models/models.dart';
 import 'package:entrance_tricks/services/services.dart';
 import 'package:entrance_tricks/utils/storages/storages.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
+import 'package:entrance_tricks/utils/device/device.dart';
 
 class ExamController extends GetxController {
   final ExamService _examService = ExamService();
@@ -55,9 +56,11 @@ class ExamController extends GetxController {
     _error = null;
     update();
 
+    final device = await UserDevice.getDeviceInfo();
+
     if (_coreService.hasInternet) {
       try {
-        _exams = await _examService.getAvailableExams();
+        _exams = await _examService.getAvailableExams(device.id);
         await _hiveExamStorage.write('exams', _exams);
       } catch (e) {
         _exams = await _hiveExamStorage.read('exams');

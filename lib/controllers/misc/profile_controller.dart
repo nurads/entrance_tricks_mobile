@@ -81,6 +81,9 @@ class ProfileController extends GetxController {
         _selectedGrade = user.grade;
       } catch (e) {
         logger.e(e);
+
+        AuthService().logout();
+        Get.offAllNamed(VIEWS.login.path);
         Get.snackbar('Error', 'Failed to load user data');
       } finally {
         _isLoading = false;

@@ -3,7 +3,6 @@ import 'package:dio/dio.dart';
 import 'package:get/get.dart' hide Response, FormData, MultipartFile;
 import "package:entrance_tricks/utils/utils.dart";
 import 'package:flutter/material.dart';
-import 'package:entrance_tricks/views/views.dart';
 
 class BaseApiClient {
   final String baseUrl = defaultApiURL;

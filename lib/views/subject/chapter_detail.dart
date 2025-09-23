@@ -15,7 +15,7 @@ class ChapterDetail extends StatelessWidget {
       builder: (controller) => DefaultTabController(
         length: 3,
         child: Scaffold(
-          backgroundColor: Theme.of(context).colorScheme.background,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           body: NestedScrollView(
             headerSliverBuilder: (context, innerBoxIsScrolled) {
               return [
@@ -39,19 +39,19 @@ class ChapterDetail extends StatelessWidget {
     final theme = Theme.of(context);
 
     return SliverAppBar(
-      expandedHeight: 180, // Reduced from 200
+      expandedHeight: 200, // Reduced from 200
       floating: false,
       pinned: true,
       elevation: 0,
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.white,
       leading: Container(
         margin: EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.9),
+          color: Colors.white.withValues(alpha: 0.9),
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 8,
               offset: Offset(0, 2),
             ),
@@ -65,28 +65,7 @@ class ChapterDetail extends StatelessWidget {
           ),
         ),
       ),
-      actions: [
-        Container(
-          margin: EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.9),
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 8,
-                offset: Offset(0, 2),
-              ),
-            ],
-          ),
-          child: IconButton(
-            onPressed: () {
-              // TODO: Add bookmark functionality
-            },
-            icon: Icon(Icons.bookmark_border, color: theme.colorScheme.primary),
-          ),
-        ),
-      ],
+      actions: [],
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
           decoration: BoxDecoration(
@@ -95,8 +74,8 @@ class ChapterDetail extends StatelessWidget {
               end: Alignment.bottomRight,
               colors: [
                 theme.colorScheme.primary,
-                theme.colorScheme.primary.withOpacity(0.8),
-                theme.colorScheme.secondary.withOpacity(0.6),
+                theme.colorScheme.primary.withValues(alpha: 0.8),
+                theme.colorScheme.secondary.withValues(alpha: 0.6),
               ],
             ),
           ),
@@ -114,7 +93,7 @@ class ChapterDetail extends StatelessWidget {
                       vertical: 4,
                     ), // Reduced padding
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(16), // Reduced radius
                     ),
                     child: Row(
@@ -160,19 +139,19 @@ class ChapterDetail extends StatelessWidget {
                         context,
                         Icons.play_circle_outline,
                         '${controller.videos.length} Videos',
-                        Colors.white.withOpacity(0.2),
+                        Colors.white.withValues(alpha: 0.2),
                       ),
                       _buildStatChip(
                         context,
                         Icons.description_outlined,
                         '${controller.notes.length} Notes',
-                        Colors.white.withOpacity(0.2),
+                        Colors.white.withValues(alpha: 0.2),
                       ),
                       _buildStatChip(
                         context,
                         Icons.quiz_outlined,
                         '${controller.quizzes.length} Quizzes',
-                        Colors.white.withOpacity(0.2),
+                        Colors.white.withValues(alpha: 0.2),
                       ),
                     ],
                   ),
@@ -295,7 +274,7 @@ class ChapterDetail extends StatelessWidget {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withOpacity(0.1),
+              color: theme.colorScheme.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
             ),
             child: CircularProgressIndicator(
@@ -337,10 +316,10 @@ class _ModernTabBarDelegate extends SliverPersistentHeaderDelegate {
 
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.background,
+        color: theme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: Offset(0, 2),
           ),

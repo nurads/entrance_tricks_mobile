@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/views/views.dart';
 import 'package:entrance_tricks/models/models.dart';
 import 'package:entrance_tricks/services/services.dart';
 import 'package:entrance_tricks/services/api/exceptions.dart';
 import 'package:entrance_tricks/utils/utils.dart';
+import 'package:entrance_tricks/views/views.dart';
+import 'package:entrance_tricks/services/api/device.dart';
 
 class RegisterController extends GetxController {
   final formKey = GlobalKey<FormState>();
@@ -96,6 +97,15 @@ class RegisterController extends GetxController {
 
         logger.i(response);
 
+        await AuthService().saveAuthToken(response.tokens);
+        await AuthService().saveUser(response.toUser());
+        BaseApiClient.setTokens(
+          response.tokens.access,
+          response.tokens.refresh,
+        );
+
+        Get.offAllNamed(VIEWS.home.path);
+
         Get.snackbar(
           'Success',
           'Registration successful! Please verify your phone number.',
@@ -104,11 +114,9 @@ class RegisterController extends GetxController {
           colorText: Colors.white,
         );
 
+        await DeviceService().registerDevice();
+
         // Navigate to verify phone page
-        // Get.toNamed(
-        //   VIEWS.verifyPhone.path,
-        //   arguments: {'phone': '09${phoneController.text}'},
-        // );
       } on DioException catch (e) {
         Get.snackbar(
           'Registration Failed',

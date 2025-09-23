@@ -11,8 +11,9 @@ Note _$NoteFromJson(Map<String, dynamic> json) => Note(
   title: json['title'] as String,
   content: json['content'] as String,
   chapter: (json['chapter'] as num).toInt(),
-  isDownloaded: json['is_downloaded'] as bool,
-  size: (json['size'] as num?)?.toInt(),
+  size: (json['size'] as num?)?.toInt() ?? 0,
+  filePath: json['file_path'] as String?,
+  isDownloaded: json['is_downloaded'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$NoteToJson(Note instance) => <String, dynamic>{
@@ -21,5 +22,6 @@ Map<String, dynamic> _$NoteToJson(Note instance) => <String, dynamic>{
   'content': instance.content,
   'chapter': instance.chapter,
   'is_downloaded': instance.isDownloaded,
+  'file_path': instance.filePath,
   'size': instance.size,
 };

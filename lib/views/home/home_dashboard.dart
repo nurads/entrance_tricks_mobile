@@ -5,6 +5,7 @@ import "package:entrance_tricks/models/models.dart";
 import "package:entrance_tricks/utils/utils.dart";
 import "package:entrance_tricks/services/services.dart";
 import 'package:entrance_tricks/views/views.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class HomeDashboard extends StatelessWidget {
   HomeDashboard({super.key});
@@ -25,17 +26,10 @@ class HomeDashboard extends StatelessWidget {
         body: SafeArea(
           child: Column(
             children: [
-              // Top Bar with Hamburger Menu and Notification Bell
               _buildTopBar(context, controller),
 
-              // Search Bar
-              // _buildSearchBar(context),
-
-              // Promotional Banner
               _buildPromotionalBanner(context),
 
-              // Grade Selection Section
-              // Expanded(child: _buildGradeSelection(context, controller)),
               Expanded(child: _buildSubjectSelection(context, controller)),
             ],
           ),
@@ -52,7 +46,6 @@ class HomeDashboard extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
         children: [
-          // Hamburger Menu
           IconButton(
             onPressed: () {
               _scaffoldKey.currentState?.openDrawer();
@@ -65,7 +58,6 @@ class HomeDashboard extends StatelessWidget {
 
           Spacer(),
 
-          // Notification Bell with Badge
           GetBuilder<NotificationsController>(
             builder: (notificationsController) => Stack(
               children: [
@@ -112,26 +104,6 @@ class HomeDashboard extends StatelessWidget {
     );
   }
 
-  // Widget _buildSearchBar(BuildContext context) {
-  //   return Container(
-  //     margin: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-  //     child: TextField(
-  //       decoration: InputDecoration(
-  //         hintText: 'Search..',
-  //         hintStyle: TextStyle(color: Colors.grey[600]),
-  //         prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
-  //         filled: true,
-  //         fillColor: Colors.grey[100],
-  //         border: OutlineInputBorder(
-  //           borderRadius: BorderRadius.circular(25),
-  //           borderSide: BorderSide.none,
-  //         ),
-  //         contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-  //       ),
-  //     ),
-  //   );
-  // }
-
   Widget _buildPromotionalBanner(BuildContext context) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -168,9 +140,7 @@ class HomeDashboard extends StatelessWidget {
                 ),
                 SizedBox(height: 16),
                 GestureDetector(
-                  onTap: () {
-                    // TODO: Implement contact us functionality
-                  },
+                  onTap: () {},
                   child: MouseRegion(
                     cursor: SystemMouseCursors.click,
                     child: Container(
@@ -195,7 +165,7 @@ class HomeDashboard extends StatelessWidget {
               ],
             ),
           ),
-          // Illustration placeholder
+
           Container(
             width: 80,
             height: 80,
@@ -252,52 +222,29 @@ class HomeDashboard extends StatelessWidget {
                       ],
                     ),
                   )
-                : ListView.builder(
-                    physics: BouncingScrollPhysics(),
-                    itemCount: controller.subjects.length,
-                    itemBuilder: (context, index) {
-                      final subject = controller.subjects[index];
-                      return _buildSubjectCard(context, subject, controller);
+                : RefreshIndicator(
+                    onRefresh: () async {
+                      await controller.loadSubjects();
                     },
+                    color: Colors.blue,
+                    backgroundColor: Colors.white,
+                    strokeWidth: 2.5,
+                    child: ListView.builder(
+                      physics: AlwaysScrollableScrollPhysics(
+                        parent: BouncingScrollPhysics(),
+                      ),
+                      itemCount: controller.subjects.length,
+                      itemBuilder: (context, index) {
+                        final subject = controller.subjects[index];
+                        return _buildSubjectCard(context, subject, controller);
+                      },
+                    ),
                   ),
           ),
         ],
       ),
     );
   }
-
-  // Widget _buildGradeSelection(
-  //   BuildContext context,
-  //   HomeDashboardController controller,
-  // ) {
-  //   return Padding(
-  //     padding: EdgeInsets.symmetric(horizontal: 20),
-  //     child: Column(
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         Text(
-  //           'What Grade Are You?',
-  //           style: TextStyle(
-  //             fontSize: 20,
-  //             fontWeight: FontWeight.bold,
-  //             color: Colors.black87,
-  //           ),
-  //         ),
-  //         SizedBox(height: 20),
-  //         Expanded(
-  //           child: ListView.builder(
-  //             physics: BouncingScrollPhysics(),
-  //             itemCount: controller.grades.length,
-  //             itemBuilder: (context, index) {
-  //               final grade = controller.grades[index];
-  //               return _buildSubjectCard(context, grade, controller);
-  //             },
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   Widget _buildSubjectCard(
     BuildContext context,
@@ -341,7 +288,6 @@ class HomeDashboard extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  // Enhanced Grade Icon with Lock Overlay
                   Stack(
                     children: [
                       Container(
@@ -367,12 +313,22 @@ class HomeDashboard extends StatelessWidget {
                         child: subject.icon != null && subject.icon!.isNotEmpty
                             ? ClipRRect(
                                 borderRadius: BorderRadius.circular(16),
-                                child: Image.network(
-                                  subject.icon!,
+                                child: CachedNetworkImage(
+                                  imageUrl: subject.icon!,
                                   width: 60,
                                   height: 60,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
+                                  placeholder: (context, url) => Center(
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        isLocked
+                                            ? Colors.grey[600]!
+                                            : Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                  errorWidget: (context, url, error) {
                                     logger.e(error);
                                     return Icon(
                                       _getGradeIcon(subject.name),
@@ -382,31 +338,6 @@ class HomeDashboard extends StatelessWidget {
                                           : Colors.white,
                                     );
                                   },
-                                  loadingBuilder:
-                                      (context, child, loadingProgress) {
-                                        if (loadingProgress == null)
-                                          return child;
-                                        return Center(
-                                          child: CircularProgressIndicator(
-                                            value:
-                                                loadingProgress
-                                                        .expectedTotalBytes !=
-                                                    null
-                                                ? loadingProgress
-                                                          .cumulativeBytesLoaded /
-                                                      loadingProgress
-                                                          .expectedTotalBytes!
-                                                : null,
-                                            strokeWidth: 2,
-                                            valueColor:
-                                                AlwaysStoppedAnimation<Color>(
-                                                  isLocked
-                                                      ? Colors.grey[600]!
-                                                      : Colors.white,
-                                                ),
-                                          ),
-                                        );
-                                      },
                                 ),
                               )
                             : Icon(
@@ -417,7 +348,7 @@ class HomeDashboard extends StatelessWidget {
                                     : Colors.white,
                               ),
                       ),
-                      // Lock Icon Overlay
+
                       if (isLocked)
                         Positioned(
                           top: 0,
@@ -442,12 +373,10 @@ class HomeDashboard extends StatelessWidget {
 
                   SizedBox(width: 16),
 
-                  // Enhanced Content Section
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Subject Name with Lock Status
                         Row(
                           children: [
                             Expanded(
@@ -486,7 +415,6 @@ class HomeDashboard extends StatelessWidget {
 
                         SizedBox(height: 6),
 
-                        // Description (if available)
                         if (subject.description != null &&
                             subject.description!.isNotEmpty)
                           Text(
@@ -504,7 +432,6 @@ class HomeDashboard extends StatelessWidget {
 
                         SizedBox(height: 8),
 
-                        // Chapter Information
                         Row(
                           children: [
                             Icon(
@@ -531,7 +458,6 @@ class HomeDashboard extends StatelessWidget {
                     ),
                   ),
 
-                  // Arrow Icon
                   Icon(
                     Icons.arrow_forward_ios,
                     color: isLocked
@@ -547,8 +473,6 @@ class HomeDashboard extends StatelessWidget {
       ),
     );
   }
-
-  // Helper method to format dates
 
   Color _getGradeIconColor(String gradeName) {
     switch (gradeName.toLowerCase()) {
@@ -597,7 +521,6 @@ class HomeDashboard extends StatelessWidget {
         ),
         child: Column(
           children: [
-            // Modern Drawer Header (Reduced - No Logo)
             Container(
               padding: EdgeInsets.only(
                 top: MediaQuery.of(context).padding.top + 20,
@@ -626,7 +549,6 @@ class HomeDashboard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // User Info with modern styling
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
@@ -671,12 +593,10 @@ class HomeDashboard extends StatelessWidget {
               ),
             ),
 
-            // Drawer Menu Items with sections
             Expanded(
               child: ListView(
                 padding: EdgeInsets.symmetric(vertical: 10),
                 children: [
-                  // Main Navigation Section
                   _buildSectionHeader('Main Navigation'),
                   _buildModernDrawerMenuItem(
                     icon: Icons.home_rounded,
@@ -721,7 +641,6 @@ class HomeDashboard extends StatelessWidget {
 
                   SizedBox(height: 20),
 
-                  // Study Materials Section
                   _buildSectionHeader('Study Materials'),
                   _buildModernDrawerMenuItem(
                     icon: Icons.book_rounded,
@@ -732,7 +651,6 @@ class HomeDashboard extends StatelessWidget {
 
                   SizedBox(height: 20),
 
-                  // Tools & Features Section
                   _buildSectionHeader('Tools & Features'),
 
                   _buildModernDrawerMenuItem(
@@ -744,7 +662,6 @@ class HomeDashboard extends StatelessWidget {
 
                   SizedBox(height: 20),
 
-                  // Payment & Account Section
                   _buildSectionHeader('Account & Payment'),
                   _buildModernDrawerMenuItem(
                     icon: Icons.payment_rounded,
@@ -761,7 +678,6 @@ class HomeDashboard extends StatelessWidget {
 
                   SizedBox(height: 20),
 
-                  // Support Section
                   _buildSectionHeader('Support'),
                   _buildModernDrawerMenuItem(
                     icon: Icons.help_outline_rounded,
@@ -784,7 +700,6 @@ class HomeDashboard extends StatelessWidget {
 
                   SizedBox(height: 20),
 
-                  // Logout Section
                   _buildModernDrawerMenuItem(
                     icon: Icons.logout_rounded,
                     title: 'Logout',

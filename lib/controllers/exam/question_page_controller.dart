@@ -37,6 +37,13 @@ class QuestionPageController extends GetxController {
     this.allowReview = allowReview;
     this.showTimer = showTimer;
 
+    // Handle empty questions
+    if (questions.isEmpty) {
+      userAnswers.value = [];
+      timeRemaining.value = 0;
+      return;
+    }
+
     userAnswers.value = List.filled(questions.length, null);
     timeRemaining.value = initialTimeMinutes * 60;
     if (showTimer) {
@@ -87,21 +94,25 @@ class QuestionPageController extends GetxController {
   }
 
   void previousQuestion() {
-    if (currentQuestionIndex.value > 0) {
+    if (questions.isNotEmpty && currentQuestionIndex.value > 0) {
       currentQuestionIndex.value--;
       update();
     }
   }
 
   void nextQuestion() {
-    if (currentQuestionIndex.value < questions.length - 1) {
+    if (questions.isNotEmpty &&
+        currentQuestionIndex.value < questions.length - 1) {
       currentQuestionIndex.value++;
       update();
     }
   }
 
   void goToQuestion(int index) {
-    if (allowReview) {
+    if (allowReview &&
+        questions.isNotEmpty &&
+        index >= 0 &&
+        index < questions.length) {
       currentQuestionIndex.value = index;
     }
   }
@@ -123,6 +134,8 @@ class QuestionPageController extends GetxController {
   }
 
   int calculateCorrectAnswers() {
+    if (questions.isEmpty) return 0;
+
     int correct = 0;
     for (int i = 0; i < questions.length; i++) {
       final userAnswer = userAnswers[i];
