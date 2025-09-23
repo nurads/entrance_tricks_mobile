@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/controllers/exam/exam_controller.dart';
 import 'package:entrance_tricks/views/quiz/quiz_taking_page.dart';
 
 class QuizDetailPage extends StatelessWidget {
@@ -221,23 +220,23 @@ class QuizDetailPage extends StatelessWidget {
   Widget _buildStartQuizButton(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(20),
-      child: Container(
+      child: SizedBox(
         width: double.infinity,
         child: ElevatedButton(
           onPressed: () => _startQuiz(),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blue[600],
+            padding: EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
           child: Text(
             "Start Quiz",
             style: TextStyle(
               color: Colors.white,
               fontSize: 18,
               fontWeight: FontWeight.w600,
-            ),
-          ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue[600],
-            padding: EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
             ),
           ),
         ),

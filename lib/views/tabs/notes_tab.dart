@@ -4,7 +4,7 @@ import 'package:entrance_tricks/controllers/subject/chapter_detail_controller.da
 import 'package:entrance_tricks/models/models.dart';
 
 class NotesTab extends StatelessWidget {
-  NotesTab({super.key});
+  const NotesTab({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -94,6 +94,8 @@ class NotesTab extends StatelessWidget {
     final theme = Theme.of(context);
     final String type = note.content.toLowerCase() == 'pdf' ? 'PDF' : 'DOC';
     final bool isDownloaded = note.isDownloaded;
+    final bool isDownloading = note.isDownloading;
+    final double downloadProgress = note.downloadProgress;
 
     return Container(
       decoration: BoxDecoration(
@@ -114,183 +116,308 @@ class NotesTab extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => _handleNoteTap(note, controller),
+          onTap: isDownloading ? null : () => _handleNoteTap(note, controller),
           borderRadius: BorderRadius.circular(20),
           child: Padding(
-            padding: EdgeInsets.all(16), // Reduced from 20
-            child: Row(
+            padding: EdgeInsets.all(16),
+            child: Column(
               children: [
-                // File Type Icon
-                Container(
-                  width: 56, // Reduced from 64
-                  height: 56, // Reduced from 64
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        _getFileTypeColor(type),
-                        _getFileTypeColor(type).withValues(alpha: 0.8),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(16), // Reduced from 18
-                    boxShadow: [
-                      BoxShadow(
-                        color: _getFileTypeColor(type).withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        offset: Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    _getFileTypeIcon(type),
-                    color: Colors.white,
-                    size: 26, // Reduced from 30
-                  ),
-                ),
-
-                SizedBox(width: 16), // Reduced from 20
-                // Note Info
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        note.title,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          height: 1.3,
+                Row(
+                  children: [
+                    // File Type Icon
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            _getFileTypeColor(type),
+                            _getFileTypeColor(type).withValues(alpha: 0.8),
+                          ],
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: _getFileTypeColor(
+                              type,
+                            ).withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
                       ),
-                      SizedBox(height: 10), // Reduced from 12
-                      // Use Wrap instead of Row to prevent overflow
-                      Wrap(
-                        spacing: 8, // Reduced from 12
-                        runSpacing: 6,
+                      child: Stack(
+                        alignment: Alignment.center,
                         children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 8, // Reduced from 10
-                              vertical: 4, // Reduced from 6
-                            ),
-                            decoration: BoxDecoration(
-                              color: _getFileTypeColor(
-                                type,
-                              ).withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(
-                                12,
-                              ), // Reduced from 16
-                              border: Border.all(
-                                color: _getFileTypeColor(
-                                  type,
-                                ).withValues(alpha: 0.3),
-                                width: 1,
-                              ),
-                            ),
-                            child: Text(
-                              type.toUpperCase(),
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                // Changed to labelSmall
-                                color: _getFileTypeColor(type),
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
+                          Icon(
+                            _getFileTypeIcon(type),
+                            color: Colors.white,
+                            size: 26,
                           ),
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 8, // Reduced from 10
-                              vertical: 4, // Reduced from 6
-                            ),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.surfaceVariant
-                                  .withValues(alpha: 0.5),
-                              borderRadius: BorderRadius.circular(
-                                12,
-                              ), // Reduced from 16
-                            ),
-                            child: Text(
-                              note.size?.toString() ?? '0 MB',
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                // Changed to labelSmall
-                                color: theme.colorScheme.onSurfaceVariant,
-                                fontWeight: FontWeight.w500,
+                          if (isDownloading)
+                            CircularProgressIndicator(
+                              value: downloadProgress,
+                              strokeWidth: 3,
+                              backgroundColor: Colors.white.withValues(
+                                alpha: 0.3,
                               ),
-                            ),
-                          ),
-                          if (isDownloaded)
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 8, // Reduced from 10
-                                vertical: 4, // Reduced from 6
-                              ),
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.secondary.withValues(
-                                  alpha: 0.1,
-                                ),
-                                borderRadius: BorderRadius.circular(
-                                  12,
-                                ), // Reduced from 16
-                                border: Border.all(
-                                  color: theme.colorScheme.secondary.withValues(
-                                    alpha: 0.3,
-                                  ),
-                                  width: 1,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.check_circle,
-                                    size: 14, // Reduced from 16
-                                    color: theme.colorScheme.secondary,
-                                  ),
-                                  SizedBox(width: 4), // Reduced from 6
-                                  Text(
-                                    'Downloaded',
-                                    style: theme.textTheme.labelSmall?.copyWith(
-                                      // Changed to labelSmall
-                                      color: theme.colorScheme.secondary,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
                               ),
                             ),
                         ],
                       ),
+                    ),
+
+                    SizedBox(width: 16),
+                    // Note Info
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            note.title,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              height: 1.3,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(height: 10),
+                          // Use Wrap instead of Row to prevent overflow
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 6,
+                            children: [
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: _getFileTypeColor(
+                                    type,
+                                  ).withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: _getFileTypeColor(
+                                      type,
+                                    ).withValues(alpha: 0.3),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Text(
+                                  type.toUpperCase(),
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: _getFileTypeColor(type),
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: theme
+                                      .colorScheme
+                                      .surfaceContainerHighest
+                                      .withValues(alpha: 0.5),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  note.size?.toString() ?? '0 MB',
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                              if (isDownloaded && !isDownloading)
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.secondary
+                                        .withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: theme.colorScheme.secondary
+                                          .withValues(alpha: 0.3),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.check_circle,
+                                        size: 14,
+                                        color: theme.colorScheme.secondary,
+                                      ),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        'Downloaded',
+                                        style: theme.textTheme.labelSmall
+                                            ?.copyWith(
+                                              color:
+                                                  theme.colorScheme.secondary,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              if (isDownloading)
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.primary.withValues(
+                                      alpha: 0.1,
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: theme.colorScheme.primary
+                                          .withValues(alpha: 0.3),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      SizedBox(
+                                        width: 14,
+                                        height: 14,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          value: downloadProgress,
+                                          color: theme.colorScheme.primary,
+                                        ),
+                                      ),
+                                      SizedBox(width: 6),
+                                      Text(
+                                        '${(downloadProgress * 100).toInt()}%',
+                                        style: theme.textTheme.labelSmall
+                                            ?.copyWith(
+                                              color: theme.colorScheme.primary,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Action button
+                    Container(
+                      decoration: BoxDecoration(
+                        color: isDownloading
+                            ? theme.colorScheme.primary.withValues(alpha: 0.05)
+                            : isDownloaded
+                            ? theme.colorScheme.secondary.withValues(alpha: 0.1)
+                            : theme.colorScheme.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: isDownloading
+                              ? theme.colorScheme.primary.withValues(alpha: 0.1)
+                              : isDownloaded
+                              ? theme.colorScheme.secondary.withValues(
+                                  alpha: 0.2,
+                                )
+                              : theme.colorScheme.primary.withValues(
+                                  alpha: 0.2,
+                                ),
+                          width: 1,
+                        ),
+                      ),
+                      child: IconButton(
+                        onPressed: isDownloading
+                            ? null
+                            : () => _handleNoteAction(note, controller),
+                        icon: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Icon(
+                              _getActionIcon(note),
+                              color: isDownloading
+                                  ? theme.colorScheme.primary.withValues(
+                                      alpha: 0.5,
+                                    )
+                                  : isDownloaded
+                                  ? theme.colorScheme.secondary
+                                  : theme.colorScheme.primary,
+                              size: 18,
+                            ),
+                            if (isDownloading)
+                              SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  value: downloadProgress,
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ),
+                          ],
+                        ),
+                        padding: EdgeInsets.all(8),
+                      ),
+                    ),
+                  ],
+                ),
+                // Progress bar at the bottom when downloading
+                if (isDownloading) ...[
+                  SizedBox(height: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Downloading...',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Text(
+                            '${(downloadProgress * 100).toInt()}%',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 6),
+                      LinearProgressIndicator(
+                        value: downloadProgress,
+                        backgroundColor: theme.colorScheme.primary.withValues(
+                          alpha: 0.1,
+                        ),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          theme.colorScheme.primary,
+                        ),
+                        minHeight: 3,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ],
                   ),
-                ),
-
-                // Action button
-                Container(
-                  decoration: BoxDecoration(
-                    color: isDownloaded
-                        ? theme.colorScheme.secondary.withValues(alpha: 0.1)
-                        : theme.colorScheme.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(14), // Reduced from 16
-                    border: Border.all(
-                      color: isDownloaded
-                          ? theme.colorScheme.secondary.withValues(alpha: 0.2)
-                          : theme.colorScheme.primary.withValues(alpha: 0.2),
-                      width: 1,
-                    ),
-                  ),
-                  child: IconButton(
-                    onPressed: () => _handleNoteAction(note, controller),
-                    icon: Icon(
-                      _getActionIcon(note),
-                      color: isDownloaded
-                          ? theme.colorScheme.secondary
-                          : theme.colorScheme.primary,
-                      size: 18, // Reduced from 20
-                    ),
-                    padding: EdgeInsets.all(8), // Reduced padding
-                  ),
-                ),
+                ],
               ],
             ),
           ),
@@ -302,7 +429,7 @@ class NotesTab extends StatelessWidget {
   void _handleNoteTap(Note note, ChapterDetailController controller) {
     final String type = note.content.toLowerCase() == 'pdf' ? 'PDF' : 'DOC';
 
-    if (type == 'pdf') {
+    if (type == 'PDF') {
       controller.openPDF(note.id);
     } else {
       // For other types, show a message or implement other viewers

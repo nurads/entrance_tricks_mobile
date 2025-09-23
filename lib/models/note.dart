@@ -17,6 +17,13 @@ class Note {
 
   final int? size;
 
+  // Add these new properties for download progress
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool isDownloading = false;
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  double downloadProgress = 0.0;
+
   Note({
     required this.id,
     required this.title,

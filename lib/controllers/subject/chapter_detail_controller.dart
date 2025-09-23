@@ -40,6 +40,7 @@ class ChapterDetailController extends GetxController {
   int subjectId = 0;
 
   RxMap<int, dynamic> videoDownloadProgress = RxMap<int, dynamic>({});
+  RxMap<int, dynamic> noteDownloadProgress = RxMap<int, dynamic>({});
 
   final HiveVideoStorage _hiveVideoStorage = HiveVideoStorage();
   final HiveNoteStorage _hiveNoteStorage = HiveNoteStorage();
@@ -57,6 +58,7 @@ class ChapterDetailController extends GetxController {
     loadVideos();
     loadNotes();
     loadQuizzes();
+    _loadDownloadedNotes(); // Add this line
   }
 
   void loadVideos() async {
@@ -214,13 +216,49 @@ class ChapterDetailController extends GetxController {
     try {
       final note = _notes.firstWhereOrNull((n) => n.id == noteId);
       if (note != null) {
-        Get.toNamed(
-          VIEWS.pdfReader.path,
-          arguments: {
-            'pdfId': noteId,
-            'pdfUrl': note.content,
-            'pdfTitle': note.title,
-          },
+        String pdfUrl;
+
+        // If note is downloaded, use local file path
+        if (note.isDownloaded &&
+            note.filePath != null &&
+            note.filePath!.isNotEmpty) {
+          final file = File(note.filePath!);
+          if (file.existsSync()) {
+            pdfUrl = note.filePath!;
+            logger.d('Using local file path: $pdfUrl');
+          } else {
+            // File doesn't exist anymore, reset download status
+            note.isDownloaded = false;
+            note.filePath = null;
+            update();
+            Get.snackbar(
+              'File Not Found',
+              'The downloaded file could not be found. Please download again.',
+              backgroundColor: Colors.orange,
+              colorText: Colors.white,
+            );
+            return;
+          }
+        } else {
+          // For remote files, we need to get the actual URL from the API
+          // The note.content field just contains "pdf", not the URL
+          logger.e(
+            'Remote PDF access not properly implemented. Note content: ${note.content}',
+          );
+          Get.snackbar(
+            'Error',
+            'Remote PDF viewing is not implemented. Please download the PDF first.',
+            backgroundColor: Colors.orange,
+            colorText: Colors.white,
+          );
+          return;
+        }
+
+        logger.d(
+          'Opening PDF with URL: $pdfUrl, Title: ${note.title}, ID: $noteId',
+        );
+        Get.to(
+          PDFReaderScreen(pdfUrl: pdfUrl, pdfTitle: note.title, pdfId: noteId),
         );
       } else {
         Get.snackbar('Error', 'PDF not found');
@@ -231,23 +269,152 @@ class ChapterDetailController extends GetxController {
     }
   }
 
-  void downloadNote(int noteId) {
+  void downloadNote(int noteId) async {
     try {
       final note = _notes.firstWhereOrNull((n) => n.id == noteId);
       if (note != null) {
-        // If it's a PDF, open it directly
-        if (note.content.toLowerCase() == 'pdf') {
-          openPDF(noteId);
-        } else {
-          // For other types, show download message
-          Get.snackbar('Info', 'Note download will be implemented');
+        // Check if already downloaded
+        if (note.isDownloaded &&
+            note.filePath != null &&
+            note.filePath!.isNotEmpty) {
+          // If it's a PDF, open it directly
+          if (note.content.toLowerCase() == 'pdf') {
+            openPDF(noteId);
+          } else {
+            // For other types, you could implement other viewers or just show success
+            Get.snackbar(
+              'Info',
+              'Note is already downloaded and available offline',
+            );
+          }
+          return;
         }
+
+        // Check if already downloading
+        if (note.isDownloading) {
+          Get.snackbar(
+            'Already Downloading',
+            'This note is already being downloaded',
+            backgroundColor: Colors.orange,
+            colorText: Colors.white,
+          );
+          return;
+        }
+
+        // Start download process
+        note.isDownloading = true;
+        note.downloadProgress = 0.0;
+        noteDownloadProgress[noteId] = {'progress': 0.0, 'isDownloading': true};
+        update();
+
+        Get.snackbar(
+          'Downloading',
+          'Starting download of ${note.title}...',
+          backgroundColor: Colors.blue,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 2),
+        );
+
+        final device = await UserDevice.getDeviceInfo();
+        await _noteApiService.downloadNote(
+          noteId,
+          deviceId: device.id,
+          onData: (data, progress) {
+            logger.d('Downloading note: $progress%');
+            // Update progress in real-time
+            note.downloadProgress = progress / 100.0;
+            noteDownloadProgress[noteId] = {
+              'progress': progress / 100.0,
+              'isDownloading': true,
+            };
+            update();
+          },
+          onDone: (path) {
+            logger.d('Downloaded note to: $path');
+
+            // Verify the file exists and has content
+            final file = File(path);
+            if (file.existsSync() && file.lengthSync() > 0) {
+              // Update note with download info
+              note.filePath = path;
+              note.isDownloaded = true;
+              note.isDownloading = false;
+              note.downloadProgress = 1.0;
+
+              // Update progress map
+              noteDownloadProgress[noteId] = {
+                'progress': 1.0,
+                'isDownloading': false,
+              };
+
+              // Save to storage
+              _hiveNoteStorage.addDownloadedNote(noteId, path);
+
+              // Update UI
+              update();
+
+              Get.snackbar(
+                'Download Complete',
+                'Note downloaded successfully',
+                backgroundColor: Colors.green,
+                colorText: Colors.white,
+                duration: const Duration(seconds: 3),
+              );
+
+              // If it's a PDF, offer to open it
+              if (note.content.toLowerCase() == 'pdf') {
+                Get.snackbar(
+                  'PDF Ready',
+                  'Tap the note to open the downloaded PDF',
+                  backgroundColor: Colors.green,
+                  colorText: Colors.white,
+                  duration: const Duration(seconds: 3),
+                );
+              }
+            } else {
+              logger.e('Downloaded file is empty or doesn\'t exist: $path');
+              // Reset download state on error
+              note.isDownloading = false;
+              note.downloadProgress = 0.0;
+              noteDownloadProgress.remove(noteId);
+              update();
+
+              Get.snackbar(
+                'Error',
+                'Downloaded file is corrupted or empty',
+                backgroundColor: Colors.red,
+                colorText: Colors.white,
+              );
+            }
+          },
+          onError: (error) {
+            logger.e('Error downloading note: $error');
+            // Reset download state on error
+            note.isDownloading = false;
+            note.downloadProgress = 0.0;
+            noteDownloadProgress.remove(noteId);
+            update();
+
+            Get.snackbar(
+              'Download Failed',
+              'Failed to download note: $error',
+              backgroundColor: Colors.red,
+              colorText: Colors.white,
+              duration: const Duration(seconds: 4),
+            );
+          },
+        );
       } else {
         Get.snackbar('Error', 'Note not found');
       }
     } catch (e) {
       logger.e('Error downloading note: $e');
-      Get.snackbar('Error', 'Failed to download note');
+      Get.snackbar(
+        'Error',
+        'Failed to download note: $e',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     }
   }
 
@@ -319,6 +486,37 @@ class ChapterDetailController extends GetxController {
     } catch (e) {
       logger.e('Error downloading video: $e');
       Get.snackbar('Error', 'Failed to download video: $e');
+    }
+  }
+
+  // Add this method to load downloaded notes on init
+  void _loadDownloadedNotes() async {
+    try {
+      final downloadedNotes = await _hiveNoteStorage.getDownloadedNotes();
+
+      for (final downloadedNote in downloadedNotes) {
+        final noteId = downloadedNote['id'] as int;
+        final filePath = downloadedNote['file_path'] as String;
+
+        // Find the note in current notes list
+        final note = _notes.firstWhereOrNull((n) => n.id == noteId);
+        if (note != null) {
+          // Verify file still exists
+          final file = File(filePath);
+          if (file.existsSync()) {
+            note.isDownloaded = true;
+            note.filePath = filePath;
+          } else {
+            // File doesn't exist, remove from downloaded list
+            downloadedNotes.removeWhere((n) => n['id'] == noteId);
+            _hiveNoteStorage.setDownloadedNotes(downloadedNotes);
+          }
+        }
+      }
+
+      update();
+    } catch (e) {
+      logger.e('Error loading downloaded notes: $e');
     }
   }
 }

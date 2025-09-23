@@ -44,6 +44,37 @@ class HiveNoteStorage extends BaseObjectStorage<List<Note>> {
   Future<List<Note>> getNotes(int chapterId) async {
     final value = _box.get('notes_$chapterId') ?? [];
 
+    final downloadedNotes = await getDownloadedNotes();
+    for (var note in value) {
+      final downloadedNote = downloadedNotes.firstWhere(
+        (element) => element['id'] == note.id,
+        orElse: () => {},
+      );
+      note.filePath = downloadedNote['file_path'];
+      if (note.filePath != null) {
+        note.isDownloaded = true;
+      }
+    }
+
     return value.cast<Note>();
+  }
+
+  // Add these new methods for downloaded notes
+  Future<void> addDownloadedNote(int id, String filePath) async {
+    final notes = _box.get('downloaded_notes') ?? [];
+    notes.add({'id': id, 'file_path': filePath});
+    _box.put('downloaded_notes', notes);
+  }
+
+  Future<List<Map<String, dynamic>>> getDownloadedNotes() async {
+    final value = _box.get('downloaded_notes') ?? [];
+    return value
+        .cast<Map<dynamic, dynamic>>()
+        .map((e) => Map<String, dynamic>.from(e))
+        .toList();
+  }
+
+  Future<void> setDownloadedNotes(List<Map<String, dynamic>> notes) async {
+    _box.put('downloaded_notes', notes);
   }
 }

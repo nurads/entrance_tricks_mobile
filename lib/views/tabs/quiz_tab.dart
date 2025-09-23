@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/controllers/subject/chapter_detail_controller.dart';
 import 'package:entrance_tricks/views/exam/question_page.dart';
-import 'package:entrance_tricks/views/quiz/quiz_detail_page.dart';
 import 'package:entrance_tricks/models/models.dart';
 
 class QuizTab extends StatelessWidget {
-  QuizTab({super.key});
+  const QuizTab({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +18,7 @@ class QuizTab extends StatelessWidget {
         }
 
         return Container(
-          color: theme.colorScheme.background,
+          color: theme.colorScheme.surface,
           child: CustomScrollView(
             slivers: [
               SliverPadding(
@@ -56,8 +55,8 @@ class QuizTab extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  theme.colorScheme.primary.withOpacity(0.1),
-                  theme.colorScheme.secondary.withOpacity(0.05),
+                  theme.colorScheme.primary.withValues(alpha: 0.1),
+                  theme.colorScheme.secondary.withValues(alpha: 0.05),
                 ],
               ),
               borderRadius: BorderRadius.circular(30),
@@ -65,7 +64,7 @@ class QuizTab extends StatelessWidget {
             child: Icon(
               Icons.quiz_outlined,
               size: 60,
-              color: theme.colorScheme.primary.withOpacity(0.6),
+              color: theme.colorScheme.primary.withValues(alpha: 0.6),
             ),
           ),
           SizedBox(height: 24),
@@ -100,12 +99,12 @@ class QuizTab extends StatelessWidget {
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(0.1),
+          color: theme.colorScheme.outline.withValues(alpha: 0.1),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.shadow.withOpacity(0.05),
+            color: theme.colorScheme.shadow.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: Offset(0, 4),
           ),
@@ -134,13 +133,15 @@ class QuizTab extends StatelessWidget {
                           end: Alignment.bottomRight,
                           colors: [
                             theme.colorScheme.primary,
-                            theme.colorScheme.primary.withOpacity(0.8),
+                            theme.colorScheme.primary.withValues(alpha: 0.8),
                           ],
                         ),
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: theme.colorScheme.primary.withOpacity(0.3),
+                            color: theme.colorScheme.primary.withValues(
+                              alpha: 0.3,
+                            ),
                             blurRadius: 8,
                             offset: Offset(0, 4),
                           ),
@@ -180,8 +181,10 @@ class QuizTab extends StatelessWidget {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: theme.colorScheme.surfaceVariant
-                                      .withOpacity(0.5),
+                                  color: theme
+                                      .colorScheme
+                                      .surfaceContainerHighest
+                                      .withValues(alpha: 0.5),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Row(
@@ -212,8 +215,10 @@ class QuizTab extends StatelessWidget {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: theme.colorScheme.surfaceVariant
-                                      .withOpacity(0.5  ),
+                                  color: theme
+                                      .colorScheme
+                                      .surfaceContainerHighest
+                                      .withValues(alpha: 0.5),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Row(
@@ -248,9 +253,8 @@ class QuizTab extends StatelessWidget {
                     Container(
                       padding: EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceVariant.withOpacity(
-                          0.5,
-                        ),
+                        color: theme.colorScheme.surfaceContainerHighest
+                            .withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Icon(
@@ -287,10 +291,12 @@ class QuizTab extends StatelessWidget {
   }
 
   void _openQuizDetail(Exam quiz) {
-    Get.to(() => QuestionPage(
-          title: quiz.name,
-          initialTimeMinutes: quiz.duration,
-          questions: quiz.questions,
-        ));
+    Get.to(
+      () => QuestionPage(
+        title: quiz.name,
+        initialTimeMinutes: quiz.duration,
+        questions: quiz.questions,
+      ),
+    );
   }
 }

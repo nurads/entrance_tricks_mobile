@@ -1,286 +1,222 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:video_player/video_player.dart';
+import 'package:flutter_pdfview/flutter_pdfview.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:dio/dio.dart';
+import 'dart:io';
+import '../../utils/utils.dart'; // Import logger
 
-class VideoPlayerScreen extends StatefulWidget {
-  final String videoUrl;
-  final String videoTitle;
-  final int videoId;
+class PDFReaderController extends GetxController {
+  // Observable properties
+  final RxString _localPath = RxString('');
+  final RxBool _isLoading = RxBool(true);
+  final RxBool _isDownloading = RxBool(false);
+  final RxInt _currentPage = RxInt(0);
+  final RxInt _totalPages = RxInt(0);
+  final RxBool _isReady = RxBool(false);
+  final RxString _errorMessage = RxString('');
 
-  const VideoPlayerScreen({
-    super.key,
-    required this.videoUrl,
-    required this.videoTitle,
-    required this.videoId,
-  });
+  // PDF details
+  late String pdfUrl;
+  late String pdfTitle;
+  late int pdfId;
 
-  @override
-  State<VideoPlayerScreen> createState() => _VideoPlayerScreenState();
-}
+  // PDF Controller
+  PDFViewController? _pdfViewController;
 
-class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
-  late VideoPlayerController _controller;
-  bool _isInitialized = false;
-  bool _isPlaying = false;
-  bool _showControls = true;
-  Duration _position = Duration.zero;
-  Duration _duration = Duration.zero;
+  // Getters
+  String get localPath => _localPath.value;
+  bool get isLoading => _isLoading.value;
+  bool get isDownloading => _isDownloading.value;
+  int get currentPage => _currentPage.value;
+  int get totalPages => _totalPages.value;
+  bool get isReady => _isReady.value;
+  String get errorMessage => _errorMessage.value;
+  bool get hasError => _errorMessage.value.isNotEmpty;
+  bool get hasLocalPath => _localPath.value.isNotEmpty;
 
-  @override
-  void initState() {
-    super.initState();
-    _initializeVideo();
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-      DeviceOrientation.portraitUp,
-    ]);
+  void initialize(String url, String title, int id) {
+    logger.d('Initializing PDF Reader with URL: $url, Title: $title, ID: $id');
+    pdfUrl = url;
+    pdfTitle = title;
+    pdfId = id;
+    _initializePDF();
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-    super.dispose();
-  }
+  Future<void> _initializePDF() async {
+    logger.d('Starting PDF initialization for URL: $pdfUrl');
 
-  void _initializeVideo() async {
-    try {
-      _controller = VideoPlayerController.networkUrl(
-        Uri.parse(widget.videoUrl),
+    // Check if the URL is valid
+    if (pdfUrl.isEmpty || pdfUrl.toLowerCase() == 'pdf') {
+      _setError(
+        'Invalid PDF URL: $pdfUrl. The content field contains only file type, not the actual URL.',
       );
-      await _controller.initialize();
+      logger.e('Invalid PDF URL provided: $pdfUrl');
+      return;
+    }
 
-      _controller.addListener(() {
-        if (mounted) {
-          setState(() {
-            _position = _controller.value.position;
-            _duration = _controller.value.duration;
-            _isPlaying = _controller.value.isPlaying;
-          });
-        }
-      });
+    if (_isLocalFile(pdfUrl)) {
+      logger.d('Handling as local file: $pdfUrl');
+      _handleLocalFile();
+    } else {
+      logger.d('Handling as remote file, downloading: $pdfUrl');
+      await _downloadPDF();
+    }
+  }
 
-      setState(() {
-        _isInitialized = true;
-      });
+  bool _isLocalFile(String url) {
+    final isLocal =
+        url.startsWith('/') ||
+        url.startsWith('file://') ||
+        (url.contains(':') && !url.startsWith('http'));
+    logger.d('URL $url is local file: $isLocal');
+    return isLocal;
+  }
+
+  void _handleLocalFile() {
+    try {
+      _setLoading(true);
+      _clearError();
+
+      String filePath = pdfUrl;
+      logger.d('Processing local file path: $filePath');
+
+      if (filePath.startsWith('file://')) {
+        filePath = filePath.substring(7); // Remove 'file://' prefix
+        logger.d('Cleaned file path: $filePath');
+      }
+
+      final file = File(filePath);
+      logger.d('Checking if file exists: ${file.path}');
+
+      if (file.existsSync()) {
+        logger.d('File exists, setting local path: $filePath');
+        _localPath.value = filePath;
+        _setLoading(false);
+      } else {
+        final errorMsg = 'Local file not found: $filePath';
+        logger.e(errorMsg);
+        _setLoading(false);
+        _setError(errorMsg);
+      }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to load video: $e');
+      final errorMsg = 'Failed to load local file: $e';
+      logger.e(errorMsg);
+      _setLoading(false);
+      _setError(errorMsg);
     }
   }
 
-  void _togglePlayPause() {
-    if (_isPlaying) {
-      _controller.pause();
-    } else {
-      _controller.play();
+  Future<void> _downloadPDF() async {
+    try {
+      logger.d('Starting PDF download from: $pdfUrl');
+      _isDownloading.value = true;
+      _clearError();
+
+      final dio = Dio();
+      final tempDir = await getTemporaryDirectory();
+      final fileName = '${pdfId}_${DateTime.now().millisecondsSinceEpoch}.pdf';
+      final filePath = '${tempDir.path}/$fileName';
+
+      logger.d('Downloading to: $filePath');
+
+      await dio.download(pdfUrl, filePath);
+
+      // Verify the downloaded file exists and has content
+      final file = File(filePath);
+      if (file.existsSync()) {
+        final fileSize = await file.length();
+        logger.d('Download completed. File size: $fileSize bytes');
+
+        if (fileSize > 0) {
+          _localPath.value = filePath;
+          _isDownloading.value = false;
+          _setLoading(false);
+        } else {
+          throw Exception('Downloaded file is empty');
+        }
+      } else {
+        throw Exception('Downloaded file does not exist');
+      }
+    } catch (e) {
+      final errorMsg = 'Failed to download PDF: $e';
+      logger.e(errorMsg);
+      _isDownloading.value = false;
+      _setLoading(false);
+      _setError(errorMsg);
     }
   }
 
-  void _seekTo(Duration position) {
-    _controller.seekTo(position);
+  void onPageChanged(int? page, int? total) {
+    logger.d('Page changed - Page: $page, Total: $total');
+    if (page != null) _currentPage.value = page;
+    if (total != null) _totalPages.value = total;
   }
 
-  String _formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final hours = twoDigits(duration.inHours);
-    final minutes = twoDigits(duration.inMinutes.remainder(60));
-    final seconds = twoDigits(duration.inSeconds.remainder(60));
+  void onViewCreated(PDFViewController controller) {
+    logger.d('PDF View created');
+    _pdfViewController = controller;
+    _isReady.value = true;
+  }
 
-    if (duration.inHours > 0) {
-      return '$hours:$minutes:$seconds';
-    } else {
-      return '$minutes:$seconds';
+  void onRender(int? pages) {
+    logger.d('PDF rendered with pages: $pages');
+    if (pages != null) _totalPages.value = pages;
+  }
+
+  void onError(dynamic error) {
+    final errorMsg = 'Failed to load PDF: $error';
+    logger.e(errorMsg);
+    _setError(errorMsg);
+  }
+
+  Future<void> goToPreviousPage() async {
+    if (_pdfViewController != null && _currentPage.value > 0) {
+      await _pdfViewController!.setPage(_currentPage.value - 1);
     }
+  }
+
+  Future<void> goToNextPage() async {
+    if (_pdfViewController != null &&
+        _currentPage.value < _totalPages.value - 1) {
+      await _pdfViewController!.setPage(_currentPage.value + 1);
+    }
+  }
+
+  Future<void> goToPage(int page) async {
+    if (_pdfViewController != null && page >= 0 && page < _totalPages.value) {
+      await _pdfViewController!.setPage(page);
+    }
+  }
+
+  void sharePDF() {
+    // TODO: Implement PDF sharing
+    Get.snackbar('Info', 'Share functionality will be implemented');
+  }
+
+  Future<void> retryInitialization() async {
+    logger.d('Retrying PDF initialization');
+    _clearError();
+    await _initializePDF();
+  }
+
+  void _setLoading(bool loading) {
+    logger.d('Setting loading state: $loading');
+    _isLoading.value = loading;
+  }
+
+  void _setError(String error) {
+    logger.e('Setting error: $error');
+    _errorMessage.value = error;
+  }
+
+  void _clearError() {
+    _errorMessage.value = '';
   }
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            // Video Player
-            Center(
-              child: _isInitialized
-                  ? AspectRatio(
-                      aspectRatio: _controller.value.aspectRatio,
-                      child: VideoPlayer(_controller),
-                    )
-                  : Container(
-                      width: double.infinity,
-                      height: 200,
-                      color: Colors.grey[900],
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CircularProgressIndicator(
-                            color: theme.colorScheme.primary,
-                          ),
-                          SizedBox(height: 16),
-                          Text(
-                            'Loading video...',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-            ),
-
-            // Video Controls
-            if (_isInitialized)
-              Positioned.fill(
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _showControls = !_showControls;
-                    });
-                  },
-                  child: AnimatedOpacity(
-                    opacity: _showControls ? 1.0 : 0.0,
-                    duration: Duration(milliseconds: 300),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.black.withOpacity(0.7),
-                            Colors.transparent,
-                            Colors.transparent,
-                            Colors.black.withOpacity(0.7),
-                          ],
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          // Top Controls
-                          Container(
-                            padding: EdgeInsets.all(16),
-                            child: Row(
-                              children: [
-                                IconButton(
-                                  onPressed: () => Get.back(),
-                                  icon: Icon(
-                                    Icons.arrow_back,
-                                    color: Colors.white,
-                                    size: 28,
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    widget.videoTitle,
-                                    style: theme.textTheme.titleMedium
-                                        ?.copyWith(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                IconButton(
-                                  onPressed: () {
-                                    // TODO: Implement fullscreen toggle
-                                  },
-                                  icon: Icon(
-                                    Icons.fullscreen,
-                                    color: Colors.white,
-                                    size: 28,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          // Center Play Button
-                          Expanded(
-                            child: Center(
-                              child: IconButton(
-                                onPressed: _togglePlayPause,
-                                icon: Icon(
-                                  _isPlaying ? Icons.pause : Icons.play_arrow,
-                                  color: Colors.white,
-                                  size: 64,
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          // Bottom Controls
-                          Container(
-                            padding: EdgeInsets.all(16),
-                            child: Column(
-                              children: [
-                                // Progress Bar
-                                SliderTheme(
-                                  data: SliderTheme.of(context).copyWith(
-                                    activeTrackColor: theme.colorScheme.primary,
-                                    inactiveTrackColor: Colors.white
-                                        .withOpacity(0.3),
-                                    thumbColor: theme.colorScheme.primary,
-                                    overlayColor: theme.colorScheme.primary
-                                        .withOpacity(0.2),
-                                    thumbShape: RoundSliderThumbShape(
-                                      enabledThumbRadius: 8,
-                                    ),
-                                  ),
-                                  child: Slider(
-                                    value: _position.inMilliseconds.toDouble(),
-                                    max: _duration.inMilliseconds.toDouble(),
-                                    onChanged: (value) {
-                                      _seekTo(
-                                        Duration(milliseconds: value.toInt()),
-                                      );
-                                    },
-                                  ),
-                                ),
-
-                                // Time and Controls
-                                Row(
-                                  children: [
-                                    Text(
-                                      _formatDuration(_position),
-                                      style: theme.textTheme.bodySmall
-                                          ?.copyWith(color: Colors.white),
-                                    ),
-                                    Spacer(),
-                                    Text(
-                                      _formatDuration(_duration),
-                                      style: theme.textTheme.bodySmall
-                                          ?.copyWith(color: Colors.white),
-                                    ),
-                                    SizedBox(width: 16),
-                                    IconButton(
-                                      onPressed: _togglePlayPause,
-                                      icon: Icon(
-                                        _isPlaying
-                                            ? Icons.pause
-                                            : Icons.play_arrow,
-                                        color: Colors.white,
-                                        size: 32,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
+  void onClose() {
+    logger.d('Closing PDF Reader Controller');
+    _pdfViewController = null;
+    super.onClose();
   }
 }
