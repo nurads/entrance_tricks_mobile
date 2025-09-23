@@ -17,7 +17,6 @@ class VideoApiService {
       '/app/videos?device=$deviceId&chapter=$chapterId',
       authenticated: true,
     );
-    logger.d(response.data);
     return (response.data as List).map((e) => Video.fromJson(e)).toList();
   }
 

@@ -1,303 +1,407 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:entrance_tricks/models/models.dart';
+import 'package:entrance_tricks/utils/utils.dart';
+import 'package:entrance_tricks/utils/storages/storages.dart';
+import 'package:entrance_tricks/services/services.dart';
+import 'package:entrance_tricks/utils/device/device.dart';
+import 'dart:io';
+
+import 'package:entrance_tricks/views/common/video_player_screen.dart';
+import 'package:entrance_tricks/views/common/pdf_reader_screen.dart';
 
 class DownloadsController extends GetxController {
-  // Observable lists for downloaded content
-  final RxList<Map<String, dynamic>> downloadedVideos =
-      <Map<String, dynamic>>[].obs;
-  final RxList<Map<String, dynamic>> downloadedExams =
-      <Map<String, dynamic>>[].obs;
-  final RxList<Map<String, dynamic>> downloadedNotes =
-      <Map<String, dynamic>>[].obs;
+  // API Services
+  final VideoApiService _videoApiService = VideoApiService();
+  final NoteService _noteApiService = NoteService();
+  final ExamService _examApiService = ExamService();
+
+  // Storage services
+  final HiveVideoStorage _videoStorage = HiveVideoStorage();
+  final HiveNoteStorage _noteStorage = HiveNoteStorage();
+  final HiveExamStorage _examStorage = HiveExamStorage();
+
+  // Observable lists for all content (both downloaded and available)
+  final RxList<Video> allVideos = <Video>[].obs;
+  final RxList<Exam> allExams = <Exam>[].obs;
+  final RxList<Note> allNotes = <Note>[].obs;
 
   // Loading states
-  final RxBool isLoadingVideos = false.obs;
-  final RxBool isLoadingExams = false.obs;
-  final RxBool isLoadingNotes = false.obs;
-
-  // Storage info
-  final RxDouble usedStorage = 0.0.obs;
-  final RxDouble totalStorage = 5.0.obs; // 5GB total storage
+  bool isLoadingVideos = false;
+  bool isLoadingExams = false;
+  bool isLoadingNotes = false;
 
   @override
   void onInit() {
     super.onInit();
-    loadDownloadedContent();
+    loadAllContent();
   }
 
-  // Load all downloaded content
-  Future<void> loadDownloadedContent() async {
-    await Future.wait([
-      loadDownloadedVideos(),
-      loadDownloadedExams(),
-      loadDownloadedNotes(),
-    ]);
-    calculateStorageUsage();
+  // Load all content (both downloaded and available)
+  Future<void> loadAllContent() async {
+    await Future.wait([loadAllVideos(), loadAllExams(), loadAllNotes()]);
   }
 
-  // Load downloaded videos
-  Future<void> loadDownloadedVideos() async {
+  // Load all videos with download states
+  Future<void> loadAllVideos() async {
     try {
-      isLoadingVideos.value = true;
+      isLoadingVideos = true;
+      update();
 
-      // Simulate API call - replace with actual implementation
-      await Future.delayed(const Duration(milliseconds: 500));
+      final device = await UserDevice.getDeviceInfo();
 
-      // Mock data - replace with actual data from local storage
-      downloadedVideos.value = [
-        {
-          'id': 1,
-          'title': 'Introduction to Mathematics',
-          'subject': 'Mathematics',
-          'size': 45.2,
-          'duration': '25:30',
-          'filePath': '/storage/videos/math_intro.mp4',
-          'downloadedAt': DateTime.now().subtract(const Duration(days: 2)),
-        },
-        {
-          'id': 2,
-          'title': 'Physics Fundamentals',
-          'subject': 'Physics',
-          'size': 67.8,
-          'duration': '32:15',
-          'filePath': '/storage/videos/physics_fundamentals.mp4',
-          'downloadedAt': DateTime.now().subtract(const Duration(days: 1)),
-        },
-        {
-          'id': 3,
-          'title': 'Chemistry Basics',
-          'subject': 'Chemistry',
-          'size': 52.1,
-          'duration': '28:45',
-          'filePath': '/storage/videos/chemistry_basics.mp4',
-          'downloadedAt': DateTime.now().subtract(const Duration(hours: 5)),
-        },
-      ];
+      // Get downloaded video info from local storage
+      final downloadedVideoData = await _videoStorage.getDownloadedVideos();
+      final downloadedVideoIds = downloadedVideoData
+          .map((v) => v['id'] as int)
+          .toSet();
+
+      // For now, we'll get videos from all chapters
+      // In a real implementation, you might want to get all available videos
+      // or videos from user's enrolled subjects
+      List<Video> videos = [];
+
+      // This is a simplified approach - you might need to modify based on your API structure
+      try {
+        // Get videos from multiple chapters or subjects
+        // You might need to implement a method to get all available videos
+        final response = await _videoApiService.getVideos(
+          1,
+          deviceId: device.id,
+        );
+        videos.addAll(response);
+      } catch (e) {
+        logger.e('Error loading videos from chapter: $e');
+      }
+
+      // Update download states
+      for (var video in videos) {
+        if (downloadedVideoIds.contains(video.id)) {
+          video.isDownloaded = true;
+          final downloadedVideo = downloadedVideoData.firstWhereOrNull(
+            (v) => v['id'] == video.id,
+          );
+          if (downloadedVideo != null) {
+            video.filePath = downloadedVideo['file_path'];
+          }
+        }
+      }
+
+      allVideos.value = videos;
     } catch (e) {
       Get.snackbar(
         'Error',
-        'Failed to load downloaded videos: $e',
+        'Failed to load videos: $e',
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
     } finally {
-      isLoadingVideos.value = false;
+      isLoadingVideos = false;
+      update();
     }
   }
 
-  // Load downloaded exams
-  Future<void> loadDownloadedExams() async {
+  // Load all exams with download states
+  Future<void> loadAllExams() async {
     try {
-      isLoadingExams.value = true;
+      isLoadingExams = true;
+      update();
 
-      // Simulate API call
-      await Future.delayed(const Duration(milliseconds: 500));
+      final device = await UserDevice.getDeviceInfo();
 
-      // Mock data
-      downloadedExams.value = [
-        {
-          'id': 1,
-          'name': 'Mathematics Practice Test 1',
-          'subject': 'Mathematics',
-          'duration': 60,
-          'questions': 25,
-          'size': 2.3,
-          'filePath': '/storage/exams/math_test_1.json',
-          'downloadedAt': DateTime.now().subtract(const Duration(days: 3)),
-        },
-        {
-          'id': 2,
-          'name': 'Physics Mock Exam',
-          'subject': 'Physics',
-          'duration': 90,
-          'questions': 40,
-          'size': 3.1,
-          'filePath': '/storage/exams/physics_mock.json',
-          'downloadedAt': DateTime.now().subtract(const Duration(days: 1)),
-        },
-      ];
+      // Get all available exams
+      final exams = await _examApiService.getAvailableExams(device.id);
+
+      await _examStorage.setExams(exams);
+
+      allExams.value = await _examStorage.getExams();
     } catch (e) {
       Get.snackbar(
         'Error',
-        'Failed to load downloaded exams: $e',
+        'Failed to load exams: $e',
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
     } finally {
-      isLoadingExams.value = false;
+      isLoadingExams = false;
+      update();
     }
   }
 
-  // Load downloaded notes
-  Future<void> loadDownloadedNotes() async {
+  // Load all notes with download states
+  Future<void> loadAllNotes() async {
+    final device = await UserDevice.getDeviceInfo();
+
     try {
-      isLoadingNotes.value = true;
+      isLoadingNotes = true;
+      update();
 
-      // Simulate API call
-      await Future.delayed(const Duration(milliseconds: 500));
+      List<Note> notes_ = await _noteApiService.getAllNotes(device.id);
+      await _noteStorage.setAllNotes(notes_);
 
-      // Mock data
-      downloadedNotes.value = [
-        {
-          'id': 1,
-          'title': 'Mathematics Formulas',
-          'subject': 'Mathematics',
-          'type': 'pdf',
-          'size': 1.8,
-          'filePath': '/storage/notes/math_formulas.pdf',
-          'downloadedAt': DateTime.now().subtract(const Duration(days: 4)),
-        },
-        {
-          'id': 2,
-          'title': 'Physics Laws and Principles',
-          'subject': 'Physics',
-          'type': 'pdf',
-          'size': 2.5,
-          'filePath': '/storage/notes/physics_laws.pdf',
-          'downloadedAt': DateTime.now().subtract(const Duration(days: 2)),
-        },
-        {
-          'id': 3,
-          'title': 'Chemistry Periodic Table',
-          'subject': 'Chemistry',
-          'type': 'docx',
-          'size': 0.9,
-          'filePath': '/storage/notes/chemistry_periodic.docx',
-          'downloadedAt': DateTime.now().subtract(const Duration(hours: 12)),
-        },
-        {
-          'id': 4,
-          'title': 'Biology Study Guide',
-          'subject': 'Biology',
-          'type': 'pdf',
-          'size': 3.2,
-          'filePath': '/storage/notes/biology_guide.pdf',
-          'downloadedAt': DateTime.now().subtract(const Duration(hours: 6)),
-        },
-      ];
+      allNotes.value = await _noteStorage.getAllNotes();
     } catch (e) {
       Get.snackbar(
         'Error',
-        'Failed to load downloaded notes: $e',
+        'Failed to load notes: $e',
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
+      allNotes.value = await _noteApiService.getAllNotes(device.id);
     } finally {
-      isLoadingNotes.value = false;
+      isLoadingNotes = false;
+      update();
     }
   }
 
-  // Calculate storage usage
-  void calculateStorageUsage() {
-    double totalSize = 0.0;
-
-    // Calculate video sizes
-    for (var video in downloadedVideos) {
-      totalSize += (video['size'] ?? 0.0);
+  // Download video
+  Future<void> downloadVideo(Video video) async {
+    if (video.isDownloaded) {
+      Get.snackbar('Info', 'Video is already downloaded');
+      return;
     }
 
-    // Calculate exam sizes
-    for (var exam in downloadedExams) {
-      totalSize += (exam['size'] ?? 0.0);
+    if (video.isDownloading) {
+      Get.snackbar('Info', 'Video is already being downloaded');
+      return;
     }
 
-    // Calculate note sizes
-    for (var note in downloadedNotes) {
-      totalSize += (note['size'] ?? 0.0);
-    }
+    try {
+      video.isDownloading = true;
+      video.downloadProgress = 0.0;
+      update();
 
-    usedStorage.value = totalSize;
-  }
+      final device = await UserDevice.getDeviceInfo();
 
-  // Play video
-  void playVideo(int videoId) {
-    final video = downloadedVideos.firstWhereOrNull((v) => v['id'] == videoId);
-    if (video != null) {
-      // Navigate to video player with local file
-      Get.snackbar(
-        'Info',
-        'Playing video: ${video['title']}',
-        backgroundColor: Colors.blue,
-        colorText: Colors.white,
+      await _videoApiService.downloadVideo(
+        video.id,
+        deviceId: device.id,
+        onData: (data, progress) {
+          video.downloadProgress = progress / 100.0;
+          update();
+        },
+        onDone: (path) {
+          video.filePath = path;
+          video.isDownloaded = true;
+          video.isDownloading = false;
+          video.downloadProgress = 1.0;
+
+          _videoStorage.addDownloadedVideo(video.id, path);
+          update();
+
+          Get.snackbar(
+            'Success',
+            'Video downloaded successfully',
+            backgroundColor: Colors.green,
+            colorText: Colors.white,
+          );
+        },
+        onError: (error) {
+          video.isDownloading = false;
+          video.downloadProgress = 0.0;
+          update();
+
+          Get.snackbar('Error', 'Failed to download video: $error');
+        },
       );
-      // TODO: Implement video player navigation
+    } catch (e) {
+      video.isDownloading = false;
+      video.downloadProgress = 0.0;
+      update();
+
+      Get.snackbar('Error', 'Failed to download video: $e');
     }
   }
 
-  // Start exam
-  void startExam(int examId) {
-    final exam = downloadedExams.firstWhereOrNull((e) => e['id'] == examId);
-    if (exam != null) {
+  // Download note
+  Future<void> downloadNote(Note note) async {
+    if (note.isDownloaded) {
+      Get.snackbar('Info', 'Note is already downloaded');
+      return;
+    }
+
+    if (note.isDownloading) {
+      Get.snackbar('Info', 'Note is already being downloaded');
+      return;
+    }
+
+    try {
+      note.isDownloading = true;
+      note.downloadProgress = 0.0;
+      update();
+
+      final device = await UserDevice.getDeviceInfo();
+
+      await _noteApiService.downloadNote(
+        note.id,
+        deviceId: device.id,
+        onData: (data, progress) {
+          note.downloadProgress = progress / 100.0;
+          update();
+        },
+        onDone: (path) {
+          note.filePath = path;
+          note.isDownloaded = true;
+          note.isDownloading = false;
+          note.downloadProgress = 1.0;
+
+          _noteStorage.addDownloadedNote(note.id, path);
+          update();
+
+          Get.snackbar(
+            'Success',
+            'Note downloaded successfully',
+            backgroundColor: Colors.green,
+            colorText: Colors.white,
+          );
+        },
+        onError: (error) {
+          note.isDownloading = false;
+          note.downloadProgress = 0.0;
+          update();
+
+          Get.snackbar('Error', 'Failed to download note: $error');
+        },
+      );
+    } catch (e) {
+      note.isDownloading = false;
+      note.downloadProgress = 0.0;
+      update();
+
+      Get.snackbar('Error', 'Failed to download note: $e');
+    }
+  }
+
+  // Download exam (download questions)
+  Future<void> downloadExam(Exam exam) async {
+    if (exam.isDownloaded) {
+      Get.snackbar('Info', 'Exam is already downloaded');
+      return;
+    }
+
+    if (exam.isLoadingQuestion) {
+      Get.snackbar('Info', 'Exam is already being downloaded');
+      return;
+    }
+
+    try {
+      exam.isLoadingQuestion = true;
+      update();
+
+      final device = await UserDevice.getDeviceInfo();
+      final questions = await _examApiService.getQuestions(device.id, exam.id);
+
+      exam.questions = questions;
+      exam.isDownloaded = true;
+      exam.isLoadingQuestion = false;
+
+      update();
+
+      await _examStorage.setQuestions(exam.id, questions);
+
       Get.snackbar(
-        'Info',
-        'Starting exam: ${exam['name']}',
+        'Success',
+        'Exam downloaded successfully',
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
-      // TODO: Implement exam navigation
+    } catch (e) {
+      exam.isLoadingQuestion = false;
+      update();
+
+      logger.e(e);
+      Get.snackbar('Error', 'Failed to download exam: $e');
     }
   }
 
-  // Open note
-  void openNote(int noteId) {
-    final note = downloadedNotes.firstWhereOrNull((n) => n['id'] == noteId);
-    if (note != null) {
-      Get.snackbar(
-        'Info',
-        'Opening note: ${note['title']}',
-        backgroundColor: Colors.orange,
-        colorText: Colors.white,
-      );
-      // TODO: Implement note viewer navigation
+  // Play/Open video
+  void playVideo(Video video) {
+    if (!video.isDownloaded || video.filePath == null) {
+      Get.snackbar('Error', 'Video not downloaded');
+      return;
     }
-  }
 
-  // Delete video
-  void deleteVideo(int videoId) {
-    Get.dialog(
-      AlertDialog(
-        title: const Text('Delete Video'),
-        content: const Text('Are you sure you want to delete this video?'),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
-          TextButton(
-            onPressed: () {
-              downloadedVideos.removeWhere((v) => v['id'] == videoId);
-              calculateStorageUsage();
-              Get.back();
-              Get.snackbar(
-                'Success',
-                'Video deleted successfully',
-                backgroundColor: Colors.green,
-                colorText: Colors.white,
-              );
-            },
-            child: const Text('Delete'),
-          ),
-        ],
+    // Navigate to video player
+    Get.to(
+      () => VideoPlayerScreen(
+        videoUrl: video.filePath!,
+        videoTitle: video.title,
+        videoId: video.id,
       ),
     );
   }
 
-  // Delete exam
-  void deleteExam(int examId) {
+  // Open note
+  void openNote(Note note) {
+    if (!note.isDownloaded || note.filePath == null) {
+      Get.snackbar('Error', 'Note not downloaded');
+      return;
+    }
+
+    // Navigate to PDF reader or appropriate viewer
+
+    if (note.filePath != null) {
+      Get.to(
+        () => PDFReaderScreen(
+          pdfUrl: note.filePath!,
+          pdfTitle: note.title,
+          pdfId: note.id,
+        ),
+      );
+    }
+  }
+
+  // Start exam
+  void startExam(Exam exam) {
+    if (!exam.isDownloaded || exam.questions.isEmpty) {
+      Get.snackbar('Error', 'Exam not downloaded');
+      return;
+    }
+
+    // Navigate to exam screen
+    // TODO: Goto Question Page
+  }
+
+  // Delete video
+  void deleteVideo(Video video) {
     Get.dialog(
       AlertDialog(
-        title: const Text('Delete Exam'),
-        content: const Text('Are you sure you want to delete this exam?'),
+        title: const Text('Delete Video'),
+        content: Text('Are you sure you want to delete "${video.title}"?'),
         actions: [
           TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
           TextButton(
-            onPressed: () {
-              downloadedExams.removeWhere((e) => e['id'] == examId);
-              calculateStorageUsage();
-              Get.back();
-              Get.snackbar(
-                'Success',
-                'Exam deleted successfully',
-                backgroundColor: Colors.green,
-                colorText: Colors.white,
-              );
+            onPressed: () async {
+              try {
+                // Delete file from storage
+                if (video.filePath != null) {
+                  final file = File(video.filePath!);
+                  if (file.existsSync()) {
+                    await file.delete();
+                  }
+                }
+
+                // Remove from local storage
+                await _videoStorage.removeDownloadedVideo(video.id);
+
+                // Update video state
+                video.isDownloaded = false;
+                video.filePath = null;
+                video.downloadProgress = 0.0;
+
+                update();
+
+                Get.back();
+                Get.snackbar(
+                  'Success',
+                  'Video deleted successfully',
+                  backgroundColor: Colors.green,
+                  colorText: Colors.white,
+                );
+              } catch (e) {
+                Get.back();
+                Get.snackbar('Error', 'Failed to delete video: $e');
+              }
             },
             child: const Text('Delete'),
           ),
@@ -307,24 +411,84 @@ class DownloadsController extends GetxController {
   }
 
   // Delete note
-  void deleteNote(int noteId) {
+  void deleteNote(Note note) {
     Get.dialog(
       AlertDialog(
         title: const Text('Delete Note'),
-        content: const Text('Are you sure you want to delete this note?'),
+        content: Text('Are you sure you want to delete "${note.title}"?'),
         actions: [
           TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
           TextButton(
-            onPressed: () {
-              downloadedNotes.removeWhere((n) => n['id'] == noteId);
-              calculateStorageUsage();
-              Get.back();
-              Get.snackbar(
-                'Success',
-                'Note deleted successfully',
-                backgroundColor: Colors.green,
-                colorText: Colors.white,
-              );
+            onPressed: () async {
+              try {
+                // Delete file from storage
+                if (note.filePath != null) {
+                  final file = File(note.filePath!);
+                  if (file.existsSync()) {
+                    await file.delete();
+                  }
+                }
+
+                // Remove from local storage
+                await _noteStorage.removeDownloadedNote(note.id);
+
+                // Update note state
+                note.isDownloaded = false;
+                note.filePath = null;
+                note.downloadProgress = 0.0;
+
+                update();
+
+                Get.back();
+                Get.snackbar(
+                  'Success',
+                  'Note deleted successfully',
+                  backgroundColor: Colors.green,
+                  colorText: Colors.white,
+                );
+              } catch (e) {
+                Get.back();
+                Get.snackbar('Error', 'Failed to delete note: $e');
+              }
+            },
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Delete exam
+  void deleteExam(Exam exam) {
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Delete Exam'),
+        content: Text('Are you sure you want to delete "${exam.name}"?'),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () async {
+              try {
+                // Remove from local storage
+                await _examStorage.removeDownloadedExam(exam.id);
+
+                // Update exam state
+                exam.isDownloaded = false;
+                exam.questions.clear();
+
+                update();
+
+                Get.back();
+                Get.snackbar(
+                  'Success',
+                  'Exam deleted successfully',
+                  backgroundColor: Colors.green,
+                  colorText: Colors.white,
+                );
+              } catch (e) {
+                Get.back();
+                Get.snackbar('Error', 'Failed to delete exam: $e');
+              }
             },
             child: const Text('Delete'),
           ),
@@ -344,18 +508,58 @@ class DownloadsController extends GetxController {
         actions: [
           TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
           TextButton(
-            onPressed: () {
-              downloadedVideos.clear();
-              downloadedExams.clear();
-              downloadedNotes.clear();
-              calculateStorageUsage();
-              Get.back();
-              Get.snackbar(
-                'Success',
-                'All downloads cleared successfully',
-                backgroundColor: Colors.green,
-                colorText: Colors.white,
-              );
+            onPressed: () async {
+              try {
+                // Delete all video files
+                for (var video in allVideos.where((v) => v.isDownloaded)) {
+                  if (video.filePath != null) {
+                    final file = File(video.filePath!);
+                    if (file.existsSync()) {
+                      await file.delete();
+                    }
+                  }
+                  video.isDownloaded = false;
+                  video.filePath = null;
+                  video.downloadProgress = 0.0;
+                }
+
+                // Delete all note files
+                for (var note in allNotes.where((n) => n.isDownloaded)) {
+                  if (note.filePath != null) {
+                    final file = File(note.filePath!);
+                    if (file.existsSync()) {
+                      await file.delete();
+                    }
+                  }
+                  note.isDownloaded = false;
+                  note.filePath = null;
+                  note.downloadProgress = 0.0;
+                }
+
+                // Clear exam downloads
+                for (var exam in allExams.where((e) => e.isDownloaded)) {
+                  exam.isDownloaded = false;
+                  exam.questions.clear();
+                }
+
+                // Clear all storage
+                await _videoStorage.removeAllDownloadedVideos();
+                await _noteStorage.removeAllDownloadedNotes();
+                await _examStorage.removeAllDownloadedExams();
+
+                update();
+
+                Get.back();
+                Get.snackbar(
+                  'Success',
+                  'All downloads cleared successfully',
+                  backgroundColor: Colors.green,
+                  colorText: Colors.white,
+                );
+              } catch (e) {
+                Get.back();
+                Get.snackbar('Error', 'Failed to clear downloads: $e');
+              }
             },
             child: const Text('Clear All'),
           ),
@@ -364,12 +568,20 @@ class DownloadsController extends GetxController {
     );
   }
 
-  // Get storage usage percentage
-  double get storageUsagePercentage =>
-      (usedStorage.value / totalStorage.value).clamp(0.0, 1.0);
+  // Get downloaded videos
+  List<Video> get downloadedVideos =>
+      allVideos.where((v) => v.isDownloaded).toList();
 
-  // Get formatted storage info
-  String get formattedStorageInfo {
-    return '${usedStorage.value.toStringAsFixed(1)} GB / ${totalStorage.value} GB';
+  // Get downloaded exams
+  List<Exam> get downloadedExams =>
+      allExams.where((e) => e.isDownloaded).toList();
+
+  // Get downloaded notes
+  List<Note> get downloadedNotes =>
+      allNotes.where((n) => n.isDownloaded).toList();
+
+  // Refresh all content
+  Future<void> refreshContent() async {
+    await loadAllContent();
   }
 }

@@ -41,6 +41,10 @@ class HiveNoteStorage extends BaseObjectStorage<List<Note>> {
     return _box.put('notes_$chapterId', notes);
   }
 
+  Future<void> setAllNotes(List<Note> notes) {
+    return _box.put('notes', notes);
+  }
+
   Future<List<Note>> getNotes(int chapterId) async {
     final value = _box.get('notes_$chapterId') ?? [];
 
@@ -56,6 +60,22 @@ class HiveNoteStorage extends BaseObjectStorage<List<Note>> {
       }
     }
 
+    return value.cast<Note>();
+  }
+
+  Future<List<Note>> getAllNotes() async {
+    final value = _box.get('notes') ?? [];
+    final downloadedNotes = await getDownloadedNotes();
+    for (var note in value) {
+      final downloadedNote = downloadedNotes.firstWhere(
+        (element) => element['id'] == note.id,
+        orElse: () => {},
+      );
+      note.filePath = downloadedNote['file_path'];
+      if (note.filePath != null) {
+        note.isDownloaded = true;
+      }
+    }
     return value.cast<Note>();
   }
 
@@ -76,5 +96,15 @@ class HiveNoteStorage extends BaseObjectStorage<List<Note>> {
 
   Future<void> setDownloadedNotes(List<Map<String, dynamic>> notes) async {
     _box.put('downloaded_notes', notes);
+  }
+
+  Future<void> removeDownloadedNote(int id) async {
+    final notes = _box.get('downloaded_notes') ?? [];
+    notes.removeWhere((element) => element['id'] == id);
+    _box.put('downloaded_notes', notes);
+  }
+
+  Future<void> removeAllDownloadedNotes() async {
+    _box.put('downloaded_notes', []);
   }
 }

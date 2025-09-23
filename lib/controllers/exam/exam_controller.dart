@@ -61,15 +61,15 @@ class ExamController extends GetxController {
     if (_coreService.hasInternet) {
       try {
         _exams = await _examService.getAvailableExams(device.id);
-        await _hiveExamStorage.write('exams', _exams);
+        await _hiveExamStorage.setExams(_exams);
       } catch (e) {
-        _exams = await _hiveExamStorage.read('exams');
+        _exams = await _hiveExamStorage.getExams();
       } finally {
         _isLoading = false;
         update();
       }
     } else {
-      _exams = await _hiveExamStorage.read('exams');
+      _exams = await _hiveExamStorage.getExams();
       logger.i(_exams);
       _isLoading = false;
       update();
@@ -79,7 +79,7 @@ class ExamController extends GetxController {
   Future<void> selectSubject(int index) async {
     final subject = _subjects[index];
     _selectedSubjectIndex = index;
-    final exams = await _hiveExamStorage.read('exams');
+    final exams = await _hiveExamStorage.getExams();
     if (subject.id == 0) {
       _exams = exams;
     } else {

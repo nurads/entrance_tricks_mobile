@@ -17,7 +17,6 @@ Future<void> initialize() async {
   await HiveUserStorage().init();
   await HiveExamStorage().init();
   await HiveQuizzesStorage().init();
-  await HiveQuestionStorage().init();
   await HiveNoteStorage().init();
   await HiveVideoStorage().init();
   Get.put(AuthService());

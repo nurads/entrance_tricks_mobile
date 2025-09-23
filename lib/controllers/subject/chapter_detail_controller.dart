@@ -419,8 +419,7 @@ class ChapterDetailController extends GetxController {
   }
 
   void startQuiz(int quizId) {
-    Get.snackbar('Info', 'Quiz functionality will be implemented');
-    // TODO: Navigate to quiz taking page
+    // Get.to
   }
 
   void downloadVideo(int videoId) async {

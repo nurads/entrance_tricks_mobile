@@ -26,7 +26,10 @@ class Exam {
   @JsonKey(name: 'is_downloaded')
   bool isDownloaded;
 
-  final List<Question> questions;
+  List<Question> questions;
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool isLoadingQuestion = false;
 
   Exam({
     required this.id,

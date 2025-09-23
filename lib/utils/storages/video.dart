@@ -74,4 +74,14 @@ class HiveVideoStorage extends BaseObjectStorage<List<Video>> {
     videos.add({'id': id, 'file_path': filePath});
     _box?.put('downloaded_videos', videos);
   }
+
+  Future<void> removeDownloadedVideo(int id) async {
+    final videos = _box?.get('downloaded_videos') ?? [];
+    videos.removeWhere((element) => element['id'] == id);
+    _box?.put('downloaded_videos', videos);
+  }
+
+  Future<void> removeAllDownloadedVideos() async {
+    _box?.put('downloaded_videos', []);
+  }
 }

@@ -2,6 +2,7 @@ import 'package:entrance_tricks/services/api/api.dart';
 import 'package:entrance_tricks/models/models.dart';
 import 'package:entrance_tricks/services/api/exceptions.dart';
 import 'package:flutter_file_downloader/flutter_file_downloader.dart';
+import 'package:entrance_tricks/utils/utils.dart';
 
 class NoteService {
   final ApiClient apiClient = ApiClient();
@@ -9,6 +10,14 @@ class NoteService {
   Future<List<Note>> getNotes(String deviceId, {required int chapterId}) async {
     final response = await apiClient.get(
       '/app/notes?chapter=$chapterId&device=$deviceId',
+      authenticated: true,
+    );
+    return (response.data as List).map((e) => Note.fromJson(e)).toList();
+  }
+
+  Future<List<Note>> getAllNotes(String deviceId) async {
+    final response = await apiClient.get(
+      '/app/notes?device=$deviceId',
       authenticated: true,
     );
     return (response.data as List).map((e) => Note.fromJson(e)).toList();

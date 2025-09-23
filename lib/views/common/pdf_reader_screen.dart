@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import '../../controllers/misc/pdf_reader_controller.dart';
 import '../../controllers/controllers.dart';
-import '../../utils/utils.dart';
 import 'dart:io';
 
 class PDFReaderScreen extends StatelessWidget {

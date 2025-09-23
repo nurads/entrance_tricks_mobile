@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/controllers/controllers.dart';
+import 'package:entrance_tricks/models/models.dart';
 
 class DownloadsPage extends StatefulWidget {
   const DownloadsPage({super.key});
@@ -53,18 +54,26 @@ class _DownloadsPageState extends State<DownloadsPage>
           child: SafeArea(
             child: Column(
               children: [
-                _buildModernTopBar(context),
+                _buildModernTopBar(context, controller),
                 _buildTabBar(context),
                 Expanded(child: _buildTabContent(context, controller)),
               ],
             ),
           ),
         ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => controller.refreshContent(),
+          backgroundColor: Colors.white,
+          child: const Icon(Icons.refresh, color: Color(0xFF667eea)),
+        ),
       ),
     );
   }
 
-  Widget _buildModernTopBar(BuildContext context) {
+  Widget _buildModernTopBar(
+    BuildContext context,
+    DownloadsController controller,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       child: Row(
@@ -77,15 +86,15 @@ class _DownloadsPageState extends State<DownloadsPage>
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.3),
+                    color: Colors.white.withValues(alpha: 0.3),
                     width: 1,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -122,7 +131,7 @@ class _DownloadsPageState extends State<DownloadsPage>
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withValues(alpha: 0.8),
                     letterSpacing: 0.2,
                   ),
                 ),
@@ -130,35 +139,34 @@ class _DownloadsPageState extends State<DownloadsPage>
             ),
           ),
 
-          // Storage Info
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.3),
-                width: 1,
+          // Clear All Button
+          GestureDetector(
+            onTap: () => controller.clearAllDownloads(),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Colors.red.withValues(alpha: 0.3),
+                  width: 1,
+                ),
               ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.storage_rounded,
-                  color: Colors.white,
-                  size: 16,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  '2.1 GB',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.9),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.clear_all_rounded, color: Colors.white, size: 16),
+                  SizedBox(width: 6),
+                  Text(
+                    'Clear All',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -170,20 +178,23 @@ class _DownloadsPageState extends State<DownloadsPage>
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
+        color: Colors.white.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.2),
+          width: 1,
+        ),
       ),
       child: TabBar(
         controller: _tabController,
         indicator: BoxDecoration(
-          color: Colors.white.withOpacity(0.2),
+          color: Colors.white.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(12),
         ),
         indicatorSize: TabBarIndicatorSize.tab,
         dividerColor: Colors.transparent,
         labelColor: Colors.white,
-        unselectedLabelColor: Colors.white.withOpacity(0.7),
+        unselectedLabelColor: Colors.white.withValues(alpha: 0.7),
         labelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         unselectedLabelStyle: const TextStyle(
           fontSize: 16,
@@ -252,15 +263,15 @@ class _VideosTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<DownloadsController>(
       builder: (controller) {
-        if (controller.isLoadingVideos.value) {
+        if (controller.isLoadingVideos) {
           return _buildLoadingState('Loading videos...');
         }
 
-        if (controller.downloadedVideos.isEmpty) {
+        if (controller.allVideos.isEmpty) {
           return _buildEmptyState(
             icon: Icons.video_library_outlined,
-            title: 'No Downloaded Videos',
-            subtitle: 'Download videos to watch them offline',
+            title: 'No Videos Available',
+            subtitle: 'No videos found in your library',
           );
         }
 
@@ -268,9 +279,9 @@ class _VideosTab extends StatelessWidget {
           margin: const EdgeInsets.all(24),
           child: ListView.builder(
             physics: const BouncingScrollPhysics(),
-            itemCount: controller.downloadedVideos.length,
+            itemCount: controller.allVideos.length,
             itemBuilder: (context, index) {
-              final video = controller.downloadedVideos[index];
+              final video = controller.allVideos[index];
               return _buildVideoItem(context, video, controller, index);
             },
           ),
@@ -281,7 +292,7 @@ class _VideosTab extends StatelessWidget {
 
   Widget _buildVideoItem(
     BuildContext context,
-    dynamic video,
+    Video video,
     DownloadsController controller,
     int index,
   ) {
@@ -300,7 +311,7 @@ class _VideosTab extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -309,28 +320,64 @@ class _VideosTab extends StatelessWidget {
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
-                  onTap: () => controller.playVideo(video['id']),
+                  onTap: video.isDownloaded && !video.isLocked
+                      ? () => controller.playVideo(video)
+                      : null,
                   borderRadius: BorderRadius.circular(20),
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Row(
                       children: [
-                        // Video Thumbnail
+                        // Video Thumbnail with status
                         Container(
                           width: 80,
                           height: 60,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(12),
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                            gradient: LinearGradient(
+                              colors: video.isLocked
+                                  ? [Colors.grey.shade400, Colors.grey.shade600]
+                                  : [
+                                      const Color(0xFF667eea),
+                                      const Color(0xFF764ba2),
+                                    ],
                             ),
                           ),
-                          child: const Center(
-                            child: Icon(
-                              Icons.play_arrow_rounded,
-                              color: Colors.white,
-                              size: 24,
-                            ),
+                          child: Stack(
+                            children: [
+                              Center(
+                                child: Icon(
+                                  video.isLocked
+                                      ? Icons.lock_rounded
+                                      : Icons.play_arrow_rounded,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
+                              ),
+                              if (video.isDownloaded && !video.isLocked)
+                                const Positioned(
+                                  top: 4,
+                                  right: 4,
+                                  child: Icon(
+                                    Icons.download_done,
+                                    color: Colors.green,
+                                    size: 16,
+                                  ),
+                                ),
+                              if (video.isDownloading)
+                                Positioned.fill(
+                                  child: Center(
+                                    child: CircularProgressIndicator(
+                                      value: video.downloadProgress,
+                                      strokeWidth: 3,
+                                      valueColor:
+                                          const AlwaysStoppedAnimation<Color>(
+                                            Colors.white,
+                                          ),
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -340,31 +387,115 @@ class _VideosTab extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                video['title'] ?? 'Video Title',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black87,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      video.title,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: video.isLocked
+                                            ? Colors.grey.shade600
+                                            : Colors.black87,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  if (video.isLocked)
+                                    Container(
+                                      margin: const EdgeInsets.only(left: 8),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.orange.withValues(
+                                          alpha: 0.1,
+                                        ),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: const Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.lock_rounded,
+                                            size: 10,
+                                            color: Colors.orange,
+                                          ),
+                                          SizedBox(width: 2),
+                                          Text(
+                                            'LOCKED',
+                                            style: TextStyle(
+                                              fontSize: 8,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.orange,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                ],
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                video['subject'] ?? 'Subject',
+                                '${video.duration} minutes',
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Colors.grey.shade600,
                                 ),
                               ),
                               const SizedBox(height: 4),
-                              Text(
-                                '${video['size'] ?? '0'} MB',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey.shade500,
-                                ),
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: video.isLocked
+                                          ? Colors.orange.withValues(alpha: 0.1)
+                                          : video.isDownloaded
+                                          ? Colors.green.withValues(alpha: 0.1)
+                                          : video.isDownloading
+                                          ? Colors.blue.withValues(alpha: 0.1)
+                                          : Colors.grey.withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      video.isLocked
+                                          ? 'LOCKED'
+                                          : video.isDownloaded
+                                          ? 'DOWNLOADED'
+                                          : video.isDownloading
+                                          ? 'DOWNLOADING'
+                                          : 'AVAILABLE',
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
+                                        color: video.isLocked
+                                            ? Colors.orange
+                                            : video.isDownloaded
+                                            ? Colors.green
+                                            : video.isDownloading
+                                            ? Colors.blue
+                                            : Colors.grey,
+                                      ),
+                                    ),
+                                  ),
+                                  if (video.isDownloading) ...[
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      '${(video.downloadProgress * 100).toInt()}%',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey.shade500,
+                                      ),
+                                    ),
+                                  ],
+                                ],
                               ),
                             ],
                           ),
@@ -373,22 +504,47 @@ class _VideosTab extends StatelessWidget {
                         // Actions
                         Column(
                           children: [
-                            IconButton(
-                              onPressed: () =>
-                                  controller.playVideo(video['id']),
-                              icon: const Icon(
-                                Icons.play_circle_outline_rounded,
-                                color: Color(0xFF667eea),
+                            if (video.isLocked) ...[
+                              IconButton(
+                                onPressed: null,
+                                icon: Icon(
+                                  Icons.lock_rounded,
+                                  color: Colors.grey.shade400,
+                                ),
                               ),
-                            ),
-                            IconButton(
-                              onPressed: () =>
-                                  controller.deleteVideo(video['id']),
-                              icon: const Icon(
-                                Icons.delete_outline_rounded,
-                                color: Colors.red,
+                            ] else if (video.isDownloaded) ...[
+                              IconButton(
+                                onPressed: () => controller.playVideo(video),
+                                icon: const Icon(
+                                  Icons.play_circle_outline_rounded,
+                                  color: Color(0xFF667eea),
+                                ),
                               ),
-                            ),
+                              IconButton(
+                                onPressed: () => controller.deleteVideo(video),
+                                icon: const Icon(
+                                  Icons.delete_outline_rounded,
+                                  color: Colors.red,
+                                ),
+                              ),
+                            ] else if (video.isDownloading) ...[
+                              const IconButton(
+                                onPressed: null,
+                                icon: Icon(
+                                  Icons.downloading_rounded,
+                                  color: Colors.blue,
+                                ),
+                              ),
+                            ] else ...[
+                              IconButton(
+                                onPressed: () =>
+                                    controller.downloadVideo(video),
+                                icon: const Icon(
+                                  Icons.download_rounded,
+                                  color: Colors.green,
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ],
@@ -412,7 +568,7 @@ class _VideosTab extends StatelessWidget {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(15),
             ),
             child: const Center(
@@ -428,7 +584,7 @@ class _VideosTab extends StatelessWidget {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.white.withValues(alpha: 0.9),
             ),
           ),
         ],
@@ -449,10 +605,14 @@ class _VideosTab extends StatelessWidget {
             width: 120,
             height: 120,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(30),
             ),
-            child: Icon(icon, size: 60, color: Colors.white.withOpacity(0.6)),
+            child: Icon(
+              icon,
+              size: 60,
+              color: Colors.white.withValues(alpha: 0.6),
+            ),
           ),
           const SizedBox(height: 24),
           Text(
@@ -468,7 +628,7 @@ class _VideosTab extends StatelessWidget {
             subtitle,
             style: TextStyle(
               fontSize: 16,
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
             ),
             textAlign: TextAlign.center,
           ),
@@ -487,15 +647,15 @@ class _ExamsTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<DownloadsController>(
       builder: (controller) {
-        if (controller.isLoadingExams.value) {
+        if (controller.isLoadingExams) {
           return _buildLoadingState('Loading exams...');
         }
 
-        if (controller.downloadedExams.isEmpty) {
+        if (controller.allExams.isEmpty) {
           return _buildEmptyState(
             icon: Icons.quiz_outlined,
-            title: 'No Downloaded Exams',
-            subtitle: 'Download exams to practice offline',
+            title: 'No Exams Available',
+            subtitle: 'No exams found in your library',
           );
         }
 
@@ -503,9 +663,9 @@ class _ExamsTab extends StatelessWidget {
           margin: const EdgeInsets.all(24),
           child: ListView.builder(
             physics: const BouncingScrollPhysics(),
-            itemCount: controller.downloadedExams.length,
+            itemCount: controller.allExams.length,
             itemBuilder: (context, index) {
-              final exam = controller.downloadedExams[index];
+              final exam = controller.allExams[index];
               return _buildExamItem(context, exam, controller, index);
             },
           ),
@@ -516,7 +676,7 @@ class _ExamsTab extends StatelessWidget {
 
   Widget _buildExamItem(
     BuildContext context,
-    dynamic exam,
+    Exam exam,
     DownloadsController controller,
     int index,
   ) {
@@ -535,7 +695,7 @@ class _ExamsTab extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -544,28 +704,62 @@ class _ExamsTab extends StatelessWidget {
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
-                  onTap: () => controller.startExam(exam['id']),
+                  onTap: exam.isDownloaded && !exam.isLocked
+                      ? () => controller.startExam(exam)
+                      : null,
                   borderRadius: BorderRadius.circular(20),
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Row(
                       children: [
-                        // Exam Icon
+                        // Exam Icon with status
                         Container(
                           width: 80,
                           height: 60,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(12),
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFFf093fb), Color(0xFFf5576c)],
+                            gradient: LinearGradient(
+                              colors: exam.isLocked
+                                  ? [Colors.grey.shade400, Colors.grey.shade600]
+                                  : [
+                                      const Color(0xFFf093fb),
+                                      const Color(0xFFf5576c),
+                                    ],
                             ),
                           ),
-                          child: const Center(
-                            child: Icon(
-                              Icons.quiz_rounded,
-                              color: Colors.white,
-                              size: 24,
-                            ),
+                          child: Stack(
+                            children: [
+                              Center(
+                                child: Icon(
+                                  exam.isLocked
+                                      ? Icons.lock_rounded
+                                      : Icons.quiz_rounded,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
+                              ),
+                              if (exam.isDownloaded && !exam.isLocked)
+                                const Positioned(
+                                  top: 4,
+                                  right: 4,
+                                  child: Icon(
+                                    Icons.download_done,
+                                    color: Colors.green,
+                                    size: 16,
+                                  ),
+                                ),
+                              if (exam.isLoadingQuestion)
+                                const Positioned.fill(
+                                  child: Center(
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 3,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -575,54 +769,111 @@ class _ExamsTab extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                exam['name'] ?? 'Exam Title',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black87,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      exam.name,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: exam.isLocked
+                                            ? Colors.grey.shade600
+                                            : Colors.black87,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  if (exam.isLocked)
+                                    Container(
+                                      margin: const EdgeInsets.only(left: 8),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.orange.withValues(
+                                          alpha: 0.1,
+                                        ),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: const Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.lock_rounded,
+                                            size: 10,
+                                            color: Colors.orange,
+                                          ),
+                                          SizedBox(width: 2),
+                                          Text(
+                                            'LOCKED',
+                                            style: TextStyle(
+                                              fontSize: 8,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.orange,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                ],
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                exam['subject'] ?? 'Subject',
+                                exam.examType,
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Colors.grey.shade600,
                                 ),
                               ),
                               const SizedBox(height: 4),
+                              // First row with status badge
                               Row(
                                 children: [
-                                  Icon(
-                                    Icons.timer_outlined,
-                                    size: 14,
-                                    color: Colors.grey.shade500,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    '${exam['duration'] ?? 0} min',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey.shade500,
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: exam.isLocked
+                                          ? Colors.orange.withValues(alpha: 0.1)
+                                          : exam.isDownloaded
+                                          ? Colors.green.withValues(alpha: 0.1)
+                                          : exam.isLoadingQuestion
+                                          ? Colors.blue.withValues(alpha: 0.1)
+                                          : Colors.grey.withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      exam.isDownloaded
+                                          ? 'DOWNLOADED'
+                                          : exam.isLoadingQuestion
+                                          ? 'DOWNLOADING'
+                                          : 'AVAILABLE',
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
+                                        color: exam.isDownloaded
+                                            ? Colors.green
+                                            : exam.isLoadingQuestion
+                                            ? Colors.blue
+                                            : Colors.grey,
+                                      ),
                                     ),
                                   ),
-                                  const SizedBox(width: 12),
-                                  Icon(
-                                    Icons.help_outline_rounded,
-                                    size: 14,
-                                    color: Colors.grey.shade500,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    '${exam['questions'] ?? 0} questions',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey.shade500,
+                                  if (exam.isLoadingQuestion) ...[
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      '...',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey.shade500,
+                                      ),
                                     ),
-                                  ),
+                                  ],
                                 ],
                               ),
                             ],
@@ -632,21 +883,38 @@ class _ExamsTab extends StatelessWidget {
                         // Actions
                         Column(
                           children: [
-                            IconButton(
-                              onPressed: () => controller.startExam(exam['id']),
-                              icon: const Icon(
-                                Icons.play_circle_outline_rounded,
-                                color: Color(0xFFf093fb),
+                            if (exam.isDownloaded) ...[
+                              IconButton(
+                                onPressed: () => controller.startExam(exam),
+                                icon: const Icon(
+                                  Icons.play_circle_outline_rounded,
+                                  color: Color(0xFF667eea),
+                                ),
                               ),
-                            ),
-                            IconButton(
-                              onPressed: () =>
-                                  controller.deleteExam(exam['id']),
-                              icon: const Icon(
-                                Icons.delete_outline_rounded,
-                                color: Colors.red,
+                              IconButton(
+                                onPressed: () => controller.deleteExam(exam),
+                                icon: const Icon(
+                                  Icons.delete_outline_rounded,
+                                  color: Colors.red,
+                                ),
                               ),
-                            ),
+                            ] else if (exam.isLoadingQuestion) ...[
+                              const IconButton(
+                                onPressed: null,
+                                icon: Icon(
+                                  Icons.downloading_rounded,
+                                  color: Colors.blue,
+                                ),
+                              ),
+                            ] else ...[
+                              IconButton(
+                                onPressed: () => controller.downloadExam(exam),
+                                icon: const Icon(
+                                  Icons.download_rounded,
+                                  color: Colors.green,
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ],
@@ -670,7 +938,7 @@ class _ExamsTab extends StatelessWidget {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(15),
             ),
             child: const Center(
@@ -686,7 +954,7 @@ class _ExamsTab extends StatelessWidget {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.white.withValues(alpha: 0.9),
             ),
           ),
         ],
@@ -707,10 +975,14 @@ class _ExamsTab extends StatelessWidget {
             width: 120,
             height: 120,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(30),
             ),
-            child: Icon(icon, size: 60, color: Colors.white.withOpacity(0.6)),
+            child: Icon(
+              icon,
+              size: 60,
+              color: Colors.white.withValues(alpha: 0.6),
+            ),
           ),
           const SizedBox(height: 24),
           Text(
@@ -726,7 +998,7 @@ class _ExamsTab extends StatelessWidget {
             subtitle,
             style: TextStyle(
               fontSize: 16,
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
             ),
             textAlign: TextAlign.center,
           ),
@@ -745,15 +1017,15 @@ class _NotesTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<DownloadsController>(
       builder: (controller) {
-        if (controller.isLoadingNotes.value) {
+        if (controller.isLoadingNotes) {
           return _buildLoadingState('Loading notes...');
         }
 
-        if (controller.downloadedNotes.isEmpty) {
+        if (controller.allNotes.isEmpty) {
           return _buildEmptyState(
             icon: Icons.description_outlined,
-            title: 'No Downloaded Notes',
-            subtitle: 'Download notes to read them offline',
+            title: 'No Notes Available',
+            subtitle: 'No notes found in your library',
           );
         }
 
@@ -761,9 +1033,9 @@ class _NotesTab extends StatelessWidget {
           margin: const EdgeInsets.all(24),
           child: ListView.builder(
             physics: const BouncingScrollPhysics(),
-            itemCount: controller.downloadedNotes.length,
+            itemCount: controller.allNotes.length,
             itemBuilder: (context, index) {
-              final note = controller.downloadedNotes[index];
+              final note = controller.allNotes[index];
               return _buildNoteItem(context, note, controller, index);
             },
           ),
@@ -774,10 +1046,13 @@ class _NotesTab extends StatelessWidget {
 
   Widget _buildNoteItem(
     BuildContext context,
-    dynamic note,
+    Note note,
     DownloadsController controller,
     int index,
   ) {
+    // For notes, we'll assume they're locked if they're in a locked chapter
+    // You might need to add a proper isLocked field to the Note model
+
     return TweenAnimationBuilder<double>(
       duration: Duration(milliseconds: 300 + (index * 100)),
       tween: Tween(begin: 0.0, end: 1.0),
@@ -793,7 +1068,7 @@ class _NotesTab extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -802,28 +1077,64 @@ class _NotesTab extends StatelessWidget {
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
-                  onTap: () => controller.openNote(note['id']),
+                  onTap: note.isDownloaded && !note.isLocked
+                      ? () => controller.openNote(note)
+                      : null,
                   borderRadius: BorderRadius.circular(20),
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Row(
                       children: [
-                        // Note Icon
+                        // Note Icon with status
                         Container(
                           width: 80,
                           height: 60,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(12),
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF4facfe), Color(0xFF00f2fe)],
+                            gradient: LinearGradient(
+                              colors: note.isLocked
+                                  ? [Colors.grey.shade400, Colors.grey.shade600]
+                                  : [
+                                      const Color(0xFF4facfe),
+                                      const Color(0xFF00f2fe),
+                                    ],
                             ),
                           ),
-                          child: Center(
-                            child: Icon(
-                              _getFileTypeIcon(note['type'] ?? 'pdf'),
-                              color: Colors.white,
-                              size: 24,
-                            ),
+                          child: Stack(
+                            children: [
+                              Center(
+                                child: Icon(
+                                  note.isLocked
+                                      ? Icons.lock_rounded
+                                      : Icons.picture_as_pdf,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
+                              ),
+                              if (note.isDownloaded && !note.isLocked)
+                                const Positioned(
+                                  top: 4,
+                                  right: 4,
+                                  child: Icon(
+                                    Icons.download_done,
+                                    color: Colors.green,
+                                    size: 16,
+                                  ),
+                                ),
+                              if (note.isDownloading)
+                                Positioned.fill(
+                                  child: Center(
+                                    child: CircularProgressIndicator(
+                                      value: note.downloadProgress,
+                                      strokeWidth: 3,
+                                      valueColor:
+                                          const AlwaysStoppedAnimation<Color>(
+                                            Colors.white,
+                                          ),
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -833,19 +1144,60 @@ class _NotesTab extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                note['title'] ?? 'Note Title',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black87,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      note.title,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: note.isLocked
+                                            ? Colors.grey.shade600
+                                            : Colors.black87,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  if (note.isLocked)
+                                    Container(
+                                      margin: const EdgeInsets.only(left: 8),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.orange.withValues(
+                                          alpha: 0.1,
+                                        ),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: const Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.lock_rounded,
+                                            size: 10,
+                                            color: Colors.orange,
+                                          ),
+                                          SizedBox(width: 2),
+                                          Text(
+                                            'LOCKED',
+                                            style: TextStyle(
+                                              fontSize: 8,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.orange,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                ],
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                note['subject'] ?? 'Subject',
+                                'Chapter ${note.chapter}',
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Colors.grey.shade600,
@@ -860,30 +1212,56 @@ class _NotesTab extends StatelessWidget {
                                       vertical: 2,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: _getFileTypeColor(
-                                        note['type'] ?? 'pdf',
-                                      ).withOpacity(0.1),
+                                      color: note.isLocked
+                                          ? Colors.orange.withValues(alpha: 0.1)
+                                          : note.isDownloaded
+                                          ? Colors.green.withValues(alpha: 0.1)
+                                          : note.isDownloading
+                                          ? Colors.blue.withValues(alpha: 0.1)
+                                          : Colors.grey.withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Text(
-                                      (note['type'] ?? 'pdf').toUpperCase(),
+                                      note.isLocked
+                                          ? 'LOCKED'
+                                          : note.isDownloaded
+                                          ? 'DOWNLOADED'
+                                          : note.isDownloading
+                                          ? 'DOWNLOADING'
+                                          : 'AVAILABLE',
                                       style: TextStyle(
                                         fontSize: 10,
                                         fontWeight: FontWeight.w600,
-                                        color: _getFileTypeColor(
-                                          note['type'] ?? 'pdf',
-                                        ),
+                                        color: note.isLocked
+                                            ? Colors.orange
+                                            : note.isDownloaded
+                                            ? Colors.green
+                                            : note.isDownloading
+                                            ? Colors.blue
+                                            : Colors.grey,
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    '${note['size'] ?? '0'} MB',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey.shade500,
+                                  if (note.isDownloading) ...[
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      '${(note.downloadProgress * 100).toInt()}%',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey.shade500,
+                                      ),
                                     ),
-                                  ),
+                                  ],
+                                  if (note.size != null) ...[
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      '${note.size} MB',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey.shade500,
+                                      ),
+                                    ),
+                                  ],
                                 ],
                               ),
                             ],
@@ -893,21 +1271,46 @@ class _NotesTab extends StatelessWidget {
                         // Actions
                         Column(
                           children: [
-                            IconButton(
-                              onPressed: () => controller.openNote(note['id']),
-                              icon: const Icon(
-                                Icons.open_in_new_rounded,
-                                color: Color(0xFF4facfe),
+                            if (note.isLocked) ...[
+                              IconButton(
+                                onPressed: null,
+                                icon: Icon(
+                                  Icons.lock_rounded,
+                                  color: Colors.grey.shade400,
+                                ),
                               ),
-                            ),
-                            IconButton(
-                              onPressed: () =>
-                                  controller.deleteNote(note['id']),
-                              icon: const Icon(
-                                Icons.delete_outline_rounded,
-                                color: Colors.red,
+                            ] else if (note.isDownloaded) ...[
+                              IconButton(
+                                onPressed: () => controller.openNote(note),
+                                icon: const Icon(
+                                  Icons.open_in_new_rounded,
+                                  color: Color(0xFF4facfe),
+                                ),
                               ),
-                            ),
+                              IconButton(
+                                onPressed: () => controller.deleteNote(note),
+                                icon: const Icon(
+                                  Icons.delete_outline_rounded,
+                                  color: Colors.red,
+                                ),
+                              ),
+                            ] else if (note.isDownloading) ...[
+                              const IconButton(
+                                onPressed: null,
+                                icon: Icon(
+                                  Icons.downloading_rounded,
+                                  color: Colors.blue,
+                                ),
+                              ),
+                            ] else ...[
+                              IconButton(
+                                onPressed: () => controller.downloadNote(note),
+                                icon: const Icon(
+                                  Icons.download_rounded,
+                                  color: Colors.green,
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ],
@@ -922,42 +1325,6 @@ class _NotesTab extends StatelessWidget {
     );
   }
 
-  IconData _getFileTypeIcon(String type) {
-    switch (type.toLowerCase()) {
-      case 'pdf':
-        return Icons.picture_as_pdf;
-      case 'doc':
-      case 'docx':
-        return Icons.description;
-      case 'ppt':
-      case 'pptx':
-        return Icons.slideshow;
-      case 'markdown':
-      case 'md':
-        return Icons.code;
-      default:
-        return Icons.insert_drive_file;
-    }
-  }
-
-  Color _getFileTypeColor(String type) {
-    switch (type.toLowerCase()) {
-      case 'pdf':
-        return const Color(0xFFE53E3E);
-      case 'doc':
-      case 'docx':
-        return const Color(0xFF3182CE);
-      case 'ppt':
-      case 'pptx':
-        return const Color(0xFFDD6B20);
-      case 'markdown':
-      case 'md':
-        return const Color(0xFF805AD5);
-      default:
-        return const Color(0xFF718096);
-    }
-  }
-
   Widget _buildLoadingState(String message) {
     return Center(
       child: Column(
@@ -967,7 +1334,7 @@ class _NotesTab extends StatelessWidget {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(15),
             ),
             child: const Center(
@@ -983,7 +1350,7 @@ class _NotesTab extends StatelessWidget {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.white.withValues(alpha: 0.9),
             ),
           ),
         ],
@@ -1004,10 +1371,14 @@ class _NotesTab extends StatelessWidget {
             width: 120,
             height: 120,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(30),
             ),
-            child: Icon(icon, size: 60, color: Colors.white.withOpacity(0.6)),
+            child: Icon(
+              icon,
+              size: 60,
+              color: Colors.white.withValues(alpha: 0.6),
+            ),
           ),
           const SizedBox(height: 24),
           Text(
@@ -1023,7 +1394,7 @@ class _NotesTab extends StatelessWidget {
             subtitle,
             style: TextStyle(
               fontSize: 16,
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
             ),
             textAlign: TextAlign.center,
           ),

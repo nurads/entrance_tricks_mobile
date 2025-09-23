@@ -3,56 +3,14 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 import 'base.dart';
 
-class HiveQuestionStorage extends BaseObjectStorage<List<Question>> {
-  final String _boxName = 'questionStorage';
-  static Box<List<dynamic>>? _box;
-  @override
-  Future<void> init() async {
-    Hive.registerAdapter<Question>(QuestionTypeAdapter());
-    if (!Hive.isBoxOpen(_boxName)) {
-      _box = await Hive.openBox<List<dynamic>>(_boxName);
-    } else {
-      _box = Hive.box<List<dynamic>>(_boxName);
-    }
-  }
-
-  @override
-  Future<void> clear() async {
-    _box?.clear();
-  }
-
-  @override
-  void listen(void Function(List<Question>) callback, String key) {
-    _box?.watch(key: key).listen((event) => callback(event.value));
-  }
-
-  @override
-  Future<List<Question>?> read(String key) async {
-    final values = _box?.get(key) ?? [];
-    return values.cast<Question>();
-  }
-
-  @override
-  Future<void> write(String key, List<Question> value) async {
-    _box?.put(key, value);
-  }
-
-  Future<List<Question>> getQuestions(int examId) async {
-    final value = _box?.get('questions_$examId') ?? [];
-    return value.cast<Question>();
-  }
-
-  Future<void> setQuestions(int examId, List<Question> questions) async {
-    _box?.put('questions_$examId', questions);
-  }
-}
-
 class HiveExamStorage extends BaseObjectStorage<List<Exam>> {
   final String _boxName = 'examStorage';
   static late Box<List<dynamic>> _box;
   @override
   Future<void> init() async {
     Hive.registerAdapter<Exam>(ExamTypeAdapter());
+    Hive.registerAdapter<Question>(QuestionTypeAdapter());
+    Hive.registerAdapter<Choice>(ChoiceTypeAdapter());
     if (!Hive.isBoxOpen(_boxName)) {
       _box = await Hive.openBox<List<dynamic>>(_boxName);
     } else {
@@ -81,12 +39,65 @@ class HiveExamStorage extends BaseObjectStorage<List<Exam>> {
     return _box.put(key, value);
   }
 
+  Future<List<Exam>> getExams() async {
+    final value = _box.get('exams') ?? [];
+    for (var exam in value) {
+      exam.questions = await getQuestions(exam.id);
+      if (exam.questions.isNotEmpty) {
+        exam.isDownloaded = true;
+      }
+    }
+
+    return value.cast<Exam>();
+  }
+
+  Future<void> setExams(List<Exam> exams) {
+    return _box.put('exams', exams);
+  }
+
   Future<void> setQuizzes(int chapterId, List<Exam> quizzes) {
     return _box.put('quizzes_$chapterId', quizzes);
   }
 
   Future<List<Exam>> getQuizzes(int chapterId) async {
     final value = _box.get('quizzes_$chapterId') ?? [];
+    for (var quiz in value) {
+      quiz.questions = await getQuestions(quiz.id);
+      if (quiz.questions.isNotEmpty) {
+        quiz.isDownloaded = true;
+      }
+    }
     return value.cast<Exam>();
+  }
+
+  Future<List<Question>> getQuestions(int examId) async {
+    final value = _box.get('questions_$examId') ?? [];
+    for (var question in value) {
+      question.imagePath = await getQuestionImages(question.id);
+    }
+    return value.cast<Question>();
+  }
+
+  Future<void> setQuestions(int examId, List<Question> questions) {
+    return _box.put('questions_$examId', questions);
+  }
+
+  Future<String?> getQuestionImages(int questionId) async {
+    final value = _box.get('question_images_$questionId') ?? [];
+    return value.cast<String>().firstOrNull;
+  }
+
+  Future<void> setQuestionImages(int questionId, String image) {
+    return _box.put('question_images_$questionId', [image]);
+  }
+
+  Future<void> removeDownloadedExam(int id) async {
+    final exams = _box.get('downloaded_exams') ?? [];
+    exams.removeWhere((element) => element['id'] == id);
+    _box.put('downloaded_exams', exams);
+  }
+
+  Future<void> removeAllDownloadedExams() async {
+    _box.put('downloaded_exams', []);
   }
 }

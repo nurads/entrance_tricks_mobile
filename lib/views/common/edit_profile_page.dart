@@ -8,8 +8,6 @@ class EditProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<ProfileController>();
-
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
@@ -30,11 +28,8 @@ class EditProfilePage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Profile Picture Section
-              // _buildProfilePictureSection(controller),
               SizedBox(height: 30),
 
-              // Profile Information
               Text(
                 'Profile Information',
                 style: TextStyle(
@@ -76,7 +71,7 @@ class EditProfilePage extends StatelessWidget {
                       onPressed: controller.hasChangeOnEditProfile
                           ? controller.updateUserOnSave
                           : null,
-                      // onPressed: () => controller.updateUserOnSave(),
+
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue[600],
                         foregroundColor: Colors.white,
@@ -98,70 +93,6 @@ class EditProfilePage extends StatelessWidget {
       ),
     );
   }
-
-  // Widget _buildProfilePictureSection(ProfileController controller) {
-  //   return Center(
-  //     child: Column(
-  //       children: [
-  //         Stack(
-  //           children: [
-  //             Container(
-  //               width: 120,
-  //               height: 120,
-  //               decoration: BoxDecoration(
-  //                 shape: BoxShape.circle,
-  //                 border: Border.all(color: Colors.blue[300]!, width: 4),
-  //                 boxShadow: [
-  //                   BoxShadow(
-  //                     color: Colors.blue.withValues(alpha: 0.2),
-  //                     blurRadius: 20,
-  //                     offset: Offset(0, 8),
-  //                   ),
-  //                 ],
-  //               ),
-  //               child: ClipOval(
-  //                 child: Container(
-  //                   color: Colors.grey[200],
-  //                   child: Icon(
-  //                     Icons.person,
-  //                     size: 60,
-  //                     color: Colors.grey[600],
-  //                   ),
-  //                 ),
-  //               ),
-  //             ),
-  //             Positioned(
-  //               bottom: 0,
-  //               right: 0,
-  //               child: Container(
-  //                 width: 36,
-  //                 height: 36,
-  //                 decoration: BoxDecoration(
-  //                   color: Colors.blue[600],
-  //                   shape: BoxShape.circle,
-  //                   border: Border.all(color: Colors.white, width: 3),
-  //                   boxShadow: [
-  //                     BoxShadow(
-  //                       color: Colors.black.withValues(alpha: 0.2),
-  //                       blurRadius: 8,
-  //                       offset: Offset(0, 2),
-  //                     ),
-  //                   ],
-  //                 ),
-  //                 child: Icon(Icons.camera_alt, color: Colors.white, size: 18),
-  //               ),
-  //             ),
-  //           ],
-  //         ),
-  //         SizedBox(height: 12),
-  //         Text(
-  //           'Tap to change photo',
-  //           style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   Widget _buildProfileField(
     BuildContext context,
@@ -292,7 +223,6 @@ class EditProfilePage extends StatelessWidget {
   }
 
   void _saveProfile(ProfileController controller) {
-    // TODO: Implement save profile functionality
     Get.snackbar(
       'Success',
       'Profile updated successfully',

@@ -10,10 +10,11 @@ Note _$NoteFromJson(Map<String, dynamic> json) => Note(
   id: (json['id'] as num).toInt(),
   title: json['title'] as String,
   content: json['content'] as String,
-  chapter: (json['chapter'] as num).toInt(),
+  chapter: (json['chapter'] as num?)?.toInt(),
   size: (json['size'] as num?)?.toInt() ?? 0,
   filePath: json['file_path'] as String?,
   isDownloaded: json['is_downloaded'] as bool? ?? false,
+  isLocked: json['isLocked'] as bool? ?? true,
 );
 
 Map<String, dynamic> _$NoteToJson(Note instance) => <String, dynamic>{
@@ -24,4 +25,5 @@ Map<String, dynamic> _$NoteToJson(Note instance) => <String, dynamic>{
   'is_downloaded': instance.isDownloaded,
   'file_path': instance.filePath,
   'size': instance.size,
+  'isLocked': instance.isLocked,
 };

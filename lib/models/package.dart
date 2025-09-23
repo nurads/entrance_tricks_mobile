@@ -1,5 +1,4 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:entrance_tricks/models/models.dart';
 
 part 'package.g.dart';
 
@@ -16,6 +15,8 @@ class Package {
   final int? grade;
   @JsonKey(name: 'is_locked')
   final bool isLocked;
+  @JsonKey(name: 'is_currently_paid')
+  final bool isCurrentlyPaid;
 
   Package({
     required this.id,
@@ -27,6 +28,7 @@ class Package {
     required this.subjects,
     required this.grade,
     required this.isLocked,
+    this.isCurrentlyPaid = false,
   });
 
   factory Package.fromJson(Map<String, dynamic> json) =>

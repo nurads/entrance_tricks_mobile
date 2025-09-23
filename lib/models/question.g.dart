@@ -13,6 +13,7 @@ Question _$QuestionFromJson(Map<String, dynamic> json) => Question(
   choices: (json['choices'] as List<dynamic>)
       .map((e) => Choice.fromJson(e as Map<String, dynamic>))
       .toList(),
+  imagePath: json['image_path'] as String?,
 );
 
 Map<String, dynamic> _$QuestionToJson(Question instance) => <String, dynamic>{
@@ -20,6 +21,7 @@ Map<String, dynamic> _$QuestionToJson(Question instance) => <String, dynamic>{
   'content': instance.content,
   'image': instance.image,
   'choices': instance.choices,
+  'image_path': instance.imagePath,
 };
 
 Choice _$ChoiceFromJson(Map<String, dynamic> json) =>

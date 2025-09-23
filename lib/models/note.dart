@@ -8,14 +8,15 @@ class Note {
   final int id;
   final String title;
   final String content;
-  final int chapter;
+  final int? chapter;
   @JsonKey(name: 'is_downloaded')
   bool isDownloaded;
 
   @JsonKey(name: 'file_path')
   String? filePath;
-
   final int? size;
+
+  bool isLocked;
 
   // Add these new properties for download progress
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -32,6 +33,7 @@ class Note {
     this.size = 0,
     this.filePath,
     this.isDownloaded = false,
+    this.isLocked = true,
   });
 
   factory Note.fromJson(Map<String, dynamic> json) => _$NoteFromJson(json);

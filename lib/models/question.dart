@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 part 'question.g.dart';
 
@@ -10,11 +10,15 @@ class Question {
   final String? image;
   final List<Choice> choices;
 
+  @JsonKey(name: 'image_path')
+  String? imagePath;
+
   Question({
     required this.id,
     required this.content,
     this.image,
     required this.choices,
+    this.imagePath,
   });
 
   factory Question.fromJson(Map<String, dynamic> json) =>
@@ -55,10 +59,12 @@ class QuestionTypeAdapter implements TypeAdapter<Question> {
   read(BinaryReader reader) {
     final json = reader.read() as Map<dynamic, dynamic>;
     final json_ = Map<String, dynamic>.from(json);
+
+    final choices = json_['choices'].cast<Choice>();
     return Question(
       id: json_['id'],
       content: json_['content'],
-      choices: json_['choices'],
+      choices: choices,
       image: json_['image'],
     );
   }

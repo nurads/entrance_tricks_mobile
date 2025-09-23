@@ -1,7 +1,6 @@
 import 'package:entrance_tricks/models/user.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:entrance_tricks/utils/utils.dart';
 
 part 'session.g.dart';
 

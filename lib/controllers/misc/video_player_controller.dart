@@ -2,7 +2,6 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 import 'dart:io'; // Added for File
-import 'package:flutter/material.dart';
 import 'package:entrance_tricks/utils/utils.dart';
 
 class CustomVideoPlayerController extends GetxController {
