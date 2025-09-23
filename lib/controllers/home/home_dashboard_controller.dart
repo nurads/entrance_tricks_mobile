@@ -161,7 +161,7 @@ class HomeDashboardController extends GetxController {
     try {
       final notificationsController = Get.find<NotificationsController>();
       _notificationCount = notificationsController.notifications
-          .where((n) => !n['isRead'])
+          .where((n) => !n.isRead)
           .length;
       update();
     } catch (e) {

@@ -1,6 +1,8 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Notification;
 import 'package:get/get.dart';
 import 'package:entrance_tricks/controllers/controllers.dart';
+
+import 'package:entrance_tricks/models/models.dart';
 
 class NotificationsPage extends StatelessWidget {
   const NotificationsPage({super.key});
@@ -112,16 +114,16 @@ class NotificationsPage extends StatelessWidget {
 
   Widget _buildNotificationItem(
     BuildContext context,
-    Map<String, dynamic> notification,
+    Notification notification,
     NotificationsController controller,
   ) {
-    final isRead = notification['isRead'] ?? false;
-    final type = notification['type'] ?? 'general';
+    final isRead = notification.isRead;
+    final type = notification.type;
 
     return Container(
       margin: EdgeInsets.only(bottom: 12),
       child: Dismissible(
-        key: Key(notification['id'].toString()),
+        key: Key(notification.id.toString()),
         direction: DismissDirection.endToStart,
         background: Container(
           alignment: Alignment.centerRight,
@@ -130,7 +132,7 @@ class NotificationsPage extends StatelessWidget {
           child: Icon(Icons.delete, color: Colors.white),
         ),
         onDismissed: (direction) {
-          controller.deleteNotification(notification['id']);
+          controller.deleteNotification(notification.id);
         },
         child: Container(
           padding: EdgeInsets.all(16),
@@ -145,7 +147,7 @@ class NotificationsPage extends StatelessWidget {
                 ? []
                 : [
                     BoxShadow(
-                      color: Colors.blue.withOpacity(0.1),
+                      color: Colors.blue.withValues(alpha: 0.1),
                       blurRadius: 8,
                       offset: Offset(0, 2),
                     ),
@@ -159,7 +161,7 @@ class NotificationsPage extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: _getNotificationColor(type).withOpacity(0.1),
+                  color: _getNotificationColor(type).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Icon(
@@ -180,7 +182,7 @@ class NotificationsPage extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            notification['title'] ?? '',
+                            notification.title,
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: isRead
@@ -205,7 +207,7 @@ class NotificationsPage extends StatelessWidget {
                     SizedBox(height: 4),
 
                     Text(
-                      notification['message'] ?? '',
+                      notification.message,
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.grey[600],
@@ -218,7 +220,7 @@ class NotificationsPage extends StatelessWidget {
                     SizedBox(height: 8),
 
                     Text(
-                      notification['time'] ?? '',
+                      notification.createdAt.toString(),
                       style: TextStyle(fontSize: 12, color: Colors.grey[500]),
                     ),
                   ],
@@ -270,7 +272,7 @@ class NotificationsPage extends StatelessWidget {
 
   void _showNotificationActions(
     BuildContext context,
-    Map<String, dynamic> notification,
+    Notification notification,
     NotificationsController controller,
   ) {
     showModalBottomSheet(
@@ -284,7 +286,7 @@ class NotificationsPage extends StatelessWidget {
               leading: Icon(Icons.mark_email_read, color: Colors.blue[600]),
               title: Text('Mark as read'),
               onTap: () {
-                controller.markAsRead(notification['id']);
+                controller.markAsRead(notification.id);
                 Navigator.pop(context);
               },
             ),
@@ -292,7 +294,7 @@ class NotificationsPage extends StatelessWidget {
               leading: Icon(Icons.delete, color: Colors.red[600]),
               title: Text('Delete'),
               onTap: () {
-                controller.deleteNotification(notification['id']);
+                controller.deleteNotification(notification.id);
                 Navigator.pop(context);
               },
             ),

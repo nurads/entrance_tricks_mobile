@@ -10,3 +10,5 @@ export 'core.dart';
 export 'api/news.dart';
 export 'api/notes.dart';
 export 'api/video.dart';
+
+export 'api/notification.dart';
