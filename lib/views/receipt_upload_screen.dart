@@ -241,7 +241,7 @@ class ReceiptUploadScreen extends StatelessWidget {
                 () => ElevatedButton(
                   onPressed:
                       controller.selectedReceiptImage.value != null &&
-                          !controller.isCreatingPayment.value
+                          !controller.isCreatingPayment
                       ? () => _submitPayment(
                           context,
                           controller,
@@ -257,7 +257,7 @@ class ReceiptUploadScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: controller.isCreatingPayment.value
+                  child: controller.isCreatingPayment
                       ? const SizedBox(
                           height: 20,
                           width: 20,

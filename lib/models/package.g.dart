@@ -20,7 +20,6 @@ Package _$PackageFromJson(Map<String, dynamic> json) => Package(
       .toList(),
   grade: (json['grade'] as num?)?.toInt(),
   isLocked: json['is_locked'] as bool,
-  isCurrentlyPaid: json['is_currently_paid'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$PackageToJson(Package instance) => <String, dynamic>{
@@ -33,5 +32,4 @@ Map<String, dynamic> _$PackageToJson(Package instance) => <String, dynamic>{
   'subjects': instance.subjects,
   'grade': instance.grade,
   'is_locked': instance.isLocked,
-  'is_currently_paid': instance.isCurrentlyPaid,
 };

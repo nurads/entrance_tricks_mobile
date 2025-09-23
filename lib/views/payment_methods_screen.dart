@@ -26,7 +26,7 @@ class PaymentMethodsScreen extends StatelessWidget {
         foregroundColor: Colors.white,
       ),
       body: Obx(() {
-        if (controller.isLoading.value) {
+        if (controller.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
 

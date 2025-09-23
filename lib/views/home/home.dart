@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/controllers/home/main_navigation_controller.dart';
 import 'package:entrance_tricks/views/home/home_dashboard.dart';
 import 'package:entrance_tricks/views/exam/exam_page.dart';
 import 'package:entrance_tricks/views/news/news_page.dart';
 import 'package:entrance_tricks/views/common/profile_page.dart';
+import 'package:entrance_tricks/controllers/controllers.dart';
 
 class Home extends StatelessWidget {
   const Home({super.key});
@@ -18,7 +18,12 @@ class Home extends StatelessWidget {
       ProfilePage(),
     ];
 
-    Get.put(MainNavigationController());
+    Get.put(MainNavigationController(), permanent: true);
+    Get.put(HomeDashboardController(), permanent: true);
+    Get.put(ProfileController(), permanent: true);
+    Get.put(ExamController(), permanent: true);
+    Get.put(NewsController(), permanent: true);
+    Get.put(DownloadsController(), permanent: true);
 
     return GetBuilder<MainNavigationController>(
       builder: (controller) => PopScope(

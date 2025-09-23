@@ -28,33 +28,13 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false, // Remove debug banner
       home: const Home(),
       getPages: [
-        GetPage(
-          name: VIEWS.home.path,
-          page: () => const Home(),
-          bindings: [
-            BindingsBuilder(() {
-              Get.lazyPut(() => HomeDashboardController());
-            }),
-            BindingsBuilder(() {
-              Get.lazyPut(() => MainNavigationController());
-            }),
-            BindingsBuilder(() {
-              Get.lazyPut(() => DownloadsController());
-            }),
-            BindingsBuilder(() {
-              Get.lazyPut(() => ProfileController());
-            }),
-            BindingsBuilder(() {
-              Get.lazyPut(() => ExamController());
-            }),
-          ],
-        ),
+        GetPage(name: VIEWS.home.path, page: () => const Home()),
         GetPage(
           name: VIEWS.login.path,
           page: () => Login(),
           bindings: [
             BindingsBuilder(() {
-              Get.lazyPut(() => LoginController());
+              Get.put(LoginController(), permanent: true);
             }),
             BindingsBuilder(() {
               Get.lazyPut(() => MainNavigationController());

@@ -39,7 +39,6 @@ class _DownloadsPageState extends State<DownloadsPage>
 
   @override
   Widget build(BuildContext context) {
-    Get.put(DownloadsController());
     return GetBuilder<DownloadsController>(
       builder: (controller) => Scaffold(
         body: Container(

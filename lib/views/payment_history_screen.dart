@@ -5,62 +5,70 @@ import '../controllers/misc/payment_controller.dart';
 import 'package:entrance_tricks/models/models.dart';
 
 class PaymentHistoryScreen extends StatelessWidget {
-  const PaymentHistoryScreen({Key? key}) : super(key: key);
+  const PaymentHistoryScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final PaymentController controller = Get.put(PaymentController());
+    Get.put(PaymentController());
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Payment History'),
-        backgroundColor: Theme.of(context).primaryColor,
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: controller.loadUserPayments,
+    return GetBuilder<PaymentController>(
+      builder: (controller) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Payment History'),
+            backgroundColor: Theme.of(context).primaryColor,
+            foregroundColor: Colors.white,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.refresh),
+                onPressed: controller.loadUserPayments,
+              ),
+            ],
           ),
-        ],
-      ),
-      body: Obx(() {
-        if (controller.isLoadingPayments.value) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (controller.userPayments.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.payment, size: 64, color: Colors.grey.shade400),
-                const SizedBox(height: 16),
-                Text(
-                  'No payments found',
-                  style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
+          body: controller.isLoadingPayments
+              ? const Center(child: CircularProgressIndicator())
+              : controller.userPayments.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.payment,
+                        size: 64,
+                        color: Colors.grey.shade400,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'No payments found',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Your payment history will appear here',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey.shade500,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : RefreshIndicator(
+                  onRefresh: controller.loadUserPayments,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: controller.userPayments.length,
+                    itemBuilder: (context, index) {
+                      final payment = controller.userPayments[index];
+                      return _buildPaymentCard(context, controller, payment);
+                    },
+                  ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Your payment history will appear here',
-                  style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
-                ),
-              ],
-            ),
-          );
-        }
-
-        return RefreshIndicator(
-          onRefresh: controller.loadUserPayments,
-          child: ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: controller.userPayments.length,
-            itemBuilder: (context, index) {
-              final payment = controller.userPayments[index];
-              return _buildPaymentCard(context, controller, payment);
-            },
-          ),
         );
-      }),
+      },
     );
   }
 
@@ -87,7 +95,7 @@ class PaymentHistoryScreen extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    payment.package?.name ?? 'Unknown Package',
+                    payment.package.toString(),
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -149,60 +157,16 @@ class PaymentHistoryScreen extends StatelessWidget {
 
             _buildDetailItem(
               'Date',
-              dateFormat.format(DateTime.parse(payment.paymentDate)),
+              dateFormat.format(payment.createdAt),
               Icons.calendar_today,
             ),
 
-            // Admin notes if rejected
-            if (payment.status == PaymentStatus.rejected &&
-                payment.adminNotes != null &&
-                payment.adminNotes!.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.red.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.red.shade200),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.info, size: 16, color: Colors.red.shade700),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Admin Notes',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.red.shade700,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      payment.adminNotes!,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.red.shade600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-
             // Approved date if approved
-            if (payment.status == PaymentStatus.approved &&
-                payment.approvedAt != null) ...[
+            if (payment.status == PaymentStatus.approved) ...[
               const SizedBox(height: 8),
               _buildDetailItem(
                 'Approved',
-                dateFormat.format(DateTime.parse(payment.approvedAt!)),
+                dateFormat.format(payment.createdAt),
                 Icons.check_circle,
                 color: Colors.green,
               ),
@@ -287,13 +251,13 @@ class PaymentHistoryScreen extends StatelessWidget {
   }
 
   void _retryPayment(BuildContext context, Payment payment) {
-    if (payment.package != null) {
+    if (payment.package != 0) {
       Get.toNamed(
         '/payment/methods',
         arguments: {
-          'subjectId': payment.package!.id,
+          'subjectId': payment.package,
           'amount': payment.amount,
-          'subjectTitle': payment.package!.name,
+          'subjectTitle': payment.package.toString(),
         },
       );
     }

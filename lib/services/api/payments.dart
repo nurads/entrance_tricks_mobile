@@ -3,6 +3,7 @@ import 'api.dart';
 import 'exceptions.dart';
 import '../../utils/utils.dart';
 import '../../models/models.dart';
+import 'dart:io';
 
 class PaymentService extends GetxController {
   final ApiClient apiClient = ApiClient();
@@ -55,11 +56,12 @@ class PaymentService extends GetxController {
   }
 
   // Get user's payments
-  Future<List<Payment>> getUserPayments() async {
+  Future<List<Payment>> getUserPayments(String deviceId) async {
     try {
       final response = await apiClient.get(
         '/app/payments/',
         authenticated: true,
+        queryParameters: {'device': deviceId},
       );
 
       if (response.statusCode == 200) {
@@ -77,37 +79,43 @@ class PaymentService extends GetxController {
     }
   }
 
-  // Upload receipt image
-  Future<String> uploadReceipt(String imagePath) async {
-    try {
-      final response = await apiClient.uploadFile(
-        '/upload',
-        filePath: imagePath,
-      );
+  Future<Payment> uploadReceipt({
+    required File file,
+    required int package,
+    required int paymentMethod,
+    required String device,
+    required int amount,
+  }) async {
+    final response = await apiClient.postMultipart(
+      '/app/payments/',
+      file: file,
+      additionalData: {
+        'package': package,
+        'method': paymentMethod,
+        'device': device,
+        'amount': amount,
+      },
+    );
 
-      if (response.statusCode == 200) {
-        final List<dynamic> data = response.data ?? [];
-        if (data.isNotEmpty) {
-          final fileId = data[0]['id'].toString();
-          return fileId;
-        }
-      }
-
-      throw ApiException('Failed to upload receipt');
-    } catch (e) {
-      logger.e('Error uploading receipt: $e');
-      throw ApiException('Failed to upload receipt');
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      logger.d(response.data);
+      final payment = Payment.fromJson(response.data);
+      return payment;
     }
+    logger.e(response.data);
+
+    throw ApiException('Failed to upload receipt');
   }
 
   // Get all available packages
-  Future<List<Package>> getPackages() async {
+  Future<List<Package>> getPackages(String deviceId) async {
     try {
       final response = await apiClient.get(
         '/app/packages/',
-        authenticated: false,
+        authenticated: true,
+        queryParameters: {'device': deviceId},
       );
-
+      logger.d(response.data);
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
         final packages = data.map((json) => Package.fromJson(json)).toList();

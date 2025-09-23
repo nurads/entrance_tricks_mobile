@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:entrance_tricks/utils/device/device.dart';
+import 'package:entrance_tricks/views/views.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -17,10 +19,9 @@ class PaymentController extends GetxController {
   final Rx<PaymentMethod?> selectedPaymentMethod = Rx<PaymentMethod?>(null);
   final Rx<File?> selectedReceiptImage = Rx<File?>(null);
 
-  final RxBool isLoading = false.obs;
-  final RxBool isLoadingPayments = false.obs;
-  final RxBool isCreatingPayment = false.obs;
-  final RxBool isUploadingImage = false.obs;
+  bool isLoading = false;
+  bool isLoadingPayments = false;
+  bool isCreatingPayment = false;
 
   @override
   void onInit() {
@@ -47,7 +48,8 @@ class PaymentController extends GetxController {
   // Load available payment methods
   Future<void> loadPaymentMethods() async {
     try {
-      isLoading.value = true;
+      isLoading = true;
+      update();
       final paymentMethods_ = await _paymentService.getPaymentMethods();
       paymentMethods.value = paymentMethods_;
     } catch (e) {
@@ -59,15 +61,18 @@ class PaymentController extends GetxController {
         colorText: Colors.white,
       );
     } finally {
-      isLoading.value = false;
+      isLoading = false;
+      update();
     }
   }
 
   // Load user's payment history
   Future<void> loadUserPayments() async {
     try {
-      isLoadingPayments.value = true;
-      final userPayments_ = await _paymentService.getUserPayments();
+      isLoadingPayments = true;
+      update();
+      final device = await UserDevice.getDeviceInfo();
+      final userPayments_ = await _paymentService.getUserPayments(device.id);
       userPayments.value = userPayments_;
     } catch (e) {
       Get.snackbar(
@@ -77,7 +82,7 @@ class PaymentController extends GetxController {
         colorText: Colors.white,
       );
     } finally {
-      isLoadingPayments.value = false;
+      isLoadingPayments = false;
       update();
     }
   }
@@ -136,8 +141,11 @@ class PaymentController extends GetxController {
   // Load available packages
   Future<void> loadPackages() async {
     try {
-      isLoading.value = true;
-      final packages_ = await _paymentService.getPackages();
+      isLoading = true;
+      update();
+      final device = await UserDevice.getDeviceInfo();
+      final packages_ = await _paymentService.getPackages(device.id);
+      logger.d(packages_);
       packages.value = packages_;
     } catch (e) {
       Get.snackbar(
@@ -147,12 +155,16 @@ class PaymentController extends GetxController {
         colorText: Colors.white,
       );
     } finally {
-      isLoading.value = false;
+      isLoading = false;
+      update();
     }
   }
 
   // Create payment
   Future<bool> createPayment(int packageId, int amount) async {
+    isCreatingPayment = true;
+    update();
+
     if (selectedPaymentMethod.value == null) {
       Get.snackbar(
         'Error',
@@ -174,21 +186,16 @@ class PaymentController extends GetxController {
     }
 
     try {
-      isCreatingPayment.value = true;
-      // First upload the receipt image
-      final uploadResponse = await _paymentService.uploadReceipt(
-        selectedReceiptImage.value!.path,
-      );
-
-      // Create payment request
-      final paymentRequest = PaymentCreateRequest(
+      isCreatingPayment = true;
+      update();
+      final device = await UserDevice.getDeviceInfo();
+      await _paymentService.uploadReceipt(
+        file: selectedReceiptImage.value!,
         package: packageId,
         paymentMethod: selectedPaymentMethod.value!.id,
         amount: amount,
-        receipt: int.parse(uploadResponse),
+        device: device.id,
       );
-
-      await _paymentService.createPayment(paymentRequest);
 
       Get.snackbar(
         'Success',
@@ -205,8 +212,10 @@ class PaymentController extends GetxController {
       // Refresh user payments
       loadUserPayments();
 
+      Get.offAllNamed(VIEWS.home.path);
       return true;
     } catch (e) {
+      logger.e(e);
       Get.snackbar(
         'Error',
         e is ApiException ? e.message : 'Failed to create payment',
@@ -215,7 +224,8 @@ class PaymentController extends GetxController {
       );
       return false;
     } finally {
-      isCreatingPayment.value = false;
+      isCreatingPayment = false;
+      update();
     }
   }
 

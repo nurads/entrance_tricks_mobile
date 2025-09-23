@@ -204,6 +204,26 @@ class BaseApiClient {
     return response;
   }
 
+  Future<Response> postMultipart(
+    String path, {
+    required File file,
+    Map<String, dynamic>? additionalData,
+    Map<String, dynamic>? queryParameters,
+  }) async {
+    final formData = FormData.fromMap({
+      'receipt': await MultipartFile.fromFile(file.path),
+      ...?additionalData,
+    });
+
+    final response = await dio.post(
+      path,
+      data: formData,
+      queryParameters: queryParameters,
+      options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
+    );
+    return response;
+  }
+
   // File upload method
   Future<Response> uploadFile(
     String path, {

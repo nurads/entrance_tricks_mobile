@@ -21,45 +21,31 @@ extension PaymentStatusExtension on PaymentStatus {
 @JsonSerializable()
 class Payment {
   final int id;
-  final int amount;
-  @JsonKey(name: 'payment_date')
-  final String paymentDate;
-  @JsonKey(name: 'is_completed')
-  final bool isCompleted;
-  final dynamic
-  receipt; // Changed to dynamic to handle both string URL and media object
-  @JsonKey(name: 'admin_notes')
-  final String? adminNotes;
-  @JsonKey(name: 'approved_at')
-  final String? approvedAt;
-  final User? user;
-  final Package? package;
+  final String amount;
+  @JsonKey(name: 'successful')
+  final bool successful;
+  final String receipt;
+  final int package;
   @JsonKey(name: 'payment_method')
   final PaymentMethod? paymentMethod;
-  final String createdAt;
-  final String updatedAt;
+
+  @JsonKey(name: 'created_at')
+  final DateTime createdAt;
 
   Payment({
     required this.id,
     required this.amount,
-    required this.paymentDate,
-    required this.isCompleted,
-    this.receipt,
-    this.adminNotes,
-    this.approvedAt,
-    this.user,
-    this.package,
+    required this.successful,
+    required this.receipt,
+    required this.package,
     this.paymentMethod,
     required this.createdAt,
-    required this.updatedAt,
   });
 
   // Get payment status based on isCompleted and adminNotes
   PaymentStatus get status {
-    if (isCompleted && approvedAt != null) {
+    if (successful) {
       return PaymentStatus.approved;
-    } else if (adminNotes != null && adminNotes!.isNotEmpty) {
-      return PaymentStatus.rejected;
     } else {
       return PaymentStatus.pending;
     }
@@ -75,12 +61,14 @@ class PaymentCreateRequest {
   final int package;
   @JsonKey(name: 'payment_method')
   final int paymentMethod;
+  final String device;
   final int amount;
-  final int receipt; // Changed from String to int (file ID)
+  final String receipt; // Changed from String to int (file ID)
 
   PaymentCreateRequest({
     required this.package,
     required this.paymentMethod,
+    required this.device,
     required this.amount,
     required this.receipt,
   });

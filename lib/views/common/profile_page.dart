@@ -8,8 +8,6 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(ProfileController());
-
     return GetBuilder<ProfileController>(
       builder: (controller) => Scaffold(
         backgroundColor: Colors.grey[50],

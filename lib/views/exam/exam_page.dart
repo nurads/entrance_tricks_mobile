@@ -11,7 +11,6 @@ class ExamPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(ExamController());
     return GetBuilder<ExamController>(
       builder: (controller) => Scaffold(
         backgroundColor: Colors.white,

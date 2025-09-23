@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:entrance_tricks/utils/utils.dart';
+import 'package:entrance_tricks/views/views.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -154,7 +156,7 @@ class PaymentPage extends StatelessWidget {
     BuildContext context,
     PaymentController controller,
   ) {
-    if (controller.isLoading.value) {
+    if (controller.isLoading  ) {
       return _buildLoadingState();
     }
 
@@ -229,7 +231,7 @@ class PaymentPage extends StatelessWidget {
 
   Widget _buildPaymentStatusSection(PaymentController controller) {
     final completedPayments = controller.userPayments
-        .where((payment) => payment.isCompleted)
+        .where((payment) => payment.successful)
         .toList();
 
     return Container(
@@ -338,7 +340,7 @@ class PaymentPage extends StatelessWidget {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              '${payment.package?.name ?? 'Package'} - Active',
+                              '${payment.package} - Active',
                               style: const TextStyle(
                                 color: Colors.green,
                                 fontSize: 14,
@@ -371,10 +373,6 @@ class PaymentPage extends StatelessWidget {
     PaymentController controller,
     int index,
   ) {
-    final isPaid = controller.userPayments.any(
-      (payment) => payment.package?.id == package.id && payment.isCompleted,
-    );
-
     return TweenAnimationBuilder<double>(
       duration: Duration(milliseconds: 300 + (index * 100)),
       tween: Tween(begin: 0.0, end: 1.0),
@@ -399,9 +397,9 @@ class PaymentPage extends StatelessWidget {
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
-                  onTap: isPaid
-                      ? null
-                      : () => _navigateToPaymentMethod(package, controller),
+                  onTap: package.isLocked
+                      ? () => _navigateToPaymentMethod(package, controller)
+                      : null,
                   borderRadius: BorderRadius.circular(24),
                   child: Padding(
                     padding: const EdgeInsets.all(24),
@@ -418,22 +416,22 @@ class PaymentPage extends StatelessWidget {
                                 gradient: LinearGradient(
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
-                                  colors: isPaid
+                                  colors: package.isLocked
                                       ? [
-                                          Colors.green.shade400,
-                                          Colors.green.shade600,
-                                        ]
-                                      : [
                                           const Color(0xFF667eea),
                                           const Color(0xFF764ba2),
+                                        ]
+                                      : [
+                                          Colors.green.shade400,
+                                          Colors.green.shade600,
                                         ],
                                 ),
                                 borderRadius: BorderRadius.circular(16),
                               ),
                               child: Icon(
-                                isPaid
-                                    ? Icons.check_circle
-                                    : Icons.star_rounded,
+                                package.isLocked
+                                    ? Icons.star_rounded
+                                    : Icons.check_circle,
                                 color: Colors.white,
                                 size: 28,
                               ),
@@ -463,7 +461,7 @@ class PaymentPage extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            if (isPaid)
+                            if (!package.isLocked)
                               Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 12,
@@ -568,7 +566,7 @@ class PaymentPage extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            if (!isPaid)
+                            if (package.isLocked)
                               Container(
                                 decoration: BoxDecoration(
                                   gradient: const LinearGradient(
@@ -1056,7 +1054,9 @@ class _ReceiptUploadPageState extends State<_ReceiptUploadPage> {
               SizedBox(
                 height: 48,
                 child: ElevatedButton(
-                  onPressed: controller.selectedReceiptImage.value != null
+                  onPressed:
+                      controller.selectedReceiptImage.value != null &&
+                          !controller.isCreatingPayment
                       ? () => _submitPayment()
                       : null,
                   style: ElevatedButton.styleFrom(
@@ -1065,7 +1065,7 @@ class _ReceiptUploadPageState extends State<_ReceiptUploadPage> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: controller.isCreatingPayment.value
+                  child: controller.isCreatingPayment
                       ? const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -1128,14 +1128,9 @@ class _ReceiptUploadPageState extends State<_ReceiptUploadPage> {
 
   void _submitPayment() async {
     final controller = widget.controller;
-    final success = await controller.createPayment(
+    await controller.createPayment(
       widget.package.id,
       double.parse(widget.package.price).toInt(),
     );
-
-    if (success) {
-      Get.back(); // Go back to payment page
-      Get.back(); // Go back to main page
-    }
   }
 }
