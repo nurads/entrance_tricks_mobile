@@ -18,13 +18,6 @@ class Home extends StatelessWidget {
       ProfilePage(),
     ];
 
-    Get.put(MainNavigationController(), permanent: true);
-    Get.put(HomeDashboardController(), permanent: true);
-    Get.put(ProfileController(), permanent: true);
-    Get.put(ExamController(), permanent: true);
-    Get.put(NewsController(), permanent: true);
-    Get.put(DownloadsController(), permanent: true);
-
     return GetBuilder<MainNavigationController>(
       builder: (controller) => PopScope(
         canPop: false,

@@ -25,10 +25,20 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       title: 'Entrance Tricks',
       theme: lightTheme(context),
-      debugShowCheckedModeBanner: false, // Remove debug banner
-      home: const Home(),
+      debugShowCheckedModeBanner: true, // Remove debug banner
       getPages: [
-        GetPage(name: VIEWS.home.path, page: () => const Home()),
+        GetPage(
+          name: VIEWS.home.path,
+          page: () => const Home(),
+          binding: BindingsBuilder(() {
+            Get.put(MainNavigationController(), permanent: true);
+            Get.put(HomeDashboardController(), permanent: true);
+            Get.put(ProfileController(), permanent: true);
+            Get.put(ExamController(), permanent: true);
+            Get.put(NewsController(), permanent: true);
+            Get.put(DownloadsController(), permanent: true);
+          }),
+        ),
         GetPage(
           name: VIEWS.login.path,
           page: () => Login(),

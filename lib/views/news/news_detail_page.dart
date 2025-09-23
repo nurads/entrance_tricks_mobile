@@ -50,48 +50,7 @@ class NewsDetailPage extends StatelessWidget {
           onPressed: () => Get.back(),
         ),
       ),
-      actions: [
-        Container(
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.9),
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: IconButton(
-            icon: const Icon(Icons.share, color: Color(0xFF2D3748)),
-            onPressed: () {
-              // TODO: Implement share functionality
-            },
-          ),
-        ),
-        Container(
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.9),
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: IconButton(
-            icon: const Icon(Icons.bookmark_border, color: Color(0xFF2D3748)),
-            onPressed: () {
-              // TODO: Implement bookmark functionality
-            },
-          ),
-        ),
-      ],
+      
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
           decoration: BoxDecoration(
@@ -301,8 +260,7 @@ class NewsDetailPage extends StatelessWidget {
             const SizedBox(height: 32),
 
             // Action Buttons
-            _buildActionButtons(),
-
+            // _buildActionButtons(),
             const SizedBox(height: 40),
           ],
         ),

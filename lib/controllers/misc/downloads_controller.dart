@@ -17,7 +17,7 @@ class DownloadsController extends GetxController {
   final VideoApiService _videoApiService = VideoApiService();
   final NoteService _noteApiService = NoteService();
   final ExamService _examApiService = ExamService();
-
+  final CoreService _coreService = Get.find<CoreService>();
   // Storage services
   final HiveVideoStorage _videoStorage = HiveVideoStorage();
   final HiveNoteStorage _noteStorage = HiveNoteStorage();
@@ -109,8 +109,13 @@ class DownloadsController extends GetxController {
 
       final device = await UserDevice.getDeviceInfo();
 
+      final grade = _coreService.authService.user.value?.grade;
+
       // Get all available exams
-      final exams = await _examApiService.getAvailableExams(device.id);
+      final exams = await _examApiService.getAvailableExams(
+        device.id,
+        gradeId: grade?.id,
+      );
 
       await _examStorage.setExams(exams);
 
@@ -135,8 +140,12 @@ class DownloadsController extends GetxController {
     try {
       isLoadingNotes = true;
       update();
+      final grade = _coreService.authService.user.value?.grade;
 
-      List<Note> notes_ = await _noteApiService.getAllNotes(device.id);
+      List<Note> notes_ = await _noteApiService.getAllNotes(
+        device.id,
+        gradeId: grade?.id,
+      );
       await _noteStorage.setAllNotes(notes_);
 
       allNotes.value = await _noteStorage.getAllNotes();

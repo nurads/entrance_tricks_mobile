@@ -17,7 +17,10 @@ class UserService extends GetxController {
   }
 
   Future<bool> deleteUser() async {
-    final response = await apiClient.delete('/auth/me', authenticated: true);
+    final response = await apiClient.delete(
+      '/auth/me/delete-account/',
+      authenticated: true,
+    );
     if (response.statusCode == 200 || response.statusCode == 204) {
       return true;
     }

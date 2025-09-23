@@ -87,7 +87,6 @@ class RegisterController extends GetxController {
 
       try {
         // Simulate API call
-        // await Future.delayed(Duration(seconds: 2));
         final response = await UserService().registerUser(
           nameController.text,
           '9${phoneController.text}',
@@ -98,7 +97,9 @@ class RegisterController extends GetxController {
         logger.i(response);
 
         await AuthService().saveAuthToken(response.tokens);
-        await AuthService().saveUser(response.toUser());
+        final user = await UserService().getUser();
+        await AuthService().saveUser(user);
+
         BaseApiClient.setTokens(
           response.tokens.access,
           response.tokens.refresh,

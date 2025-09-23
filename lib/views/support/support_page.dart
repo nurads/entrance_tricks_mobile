@@ -444,7 +444,7 @@ class SupportPage extends StatelessWidget {
   }
 
   void _launchTelegram() async {
-    const telegramUrl = 'https://t.me/entrance_tricks_support';
+    const telegramUrl = 'https://t.me/entrance_tricks';
     final uri = Uri.parse(telegramUrl);
 
     try {
@@ -495,7 +495,7 @@ class SupportPage extends StatelessWidget {
   }
 
   void _launchPhone() async {
-    const phoneUrl = 'tel:+251911234567';
+    const phoneUrl = 'tel:+251919568649';
     final uri = Uri.parse(phoneUrl);
 
     try {

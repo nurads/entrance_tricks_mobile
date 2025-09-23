@@ -60,8 +60,11 @@ class ExamController extends GetxController {
 
     if (_coreService.hasInternet) {
       try {
-        final exams_ = await _examService.getAvailableExams(device.id);
-        // _exams = exams;
+        final grade = _coreService.authService.user.value?.grade;
+        final exams_ = await _examService.getAvailableExams(
+          device.id,
+          gradeId: grade?.id,
+        );
         await _hiveExamStorage.setExams(exams_);
         _exams = await _hiveExamStorage.getExams();
       } catch (e) {

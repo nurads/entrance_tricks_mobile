@@ -12,6 +12,7 @@ class ExamService extends GetxService {
     String? examType,
     int? subjectId,
     int? chapterId,
+    int? gradeId,
   }) async {
     final queryParams = <String, dynamic>{};
 
@@ -25,6 +26,9 @@ class ExamService extends GetxService {
     if (chapterId != null) {
       queryParams['chapter'] = chapterId;
     }
+    if (gradeId != null) {
+      queryParams['grade'] = gradeId;
+    }
 
     final response = await apiClient.get(
       '/app/exams/?device=$deviceId',
@@ -36,7 +40,7 @@ class ExamService extends GetxService {
       final data = response.data as List;
       return data.map((e) => Exam.fromJson(e)).toList();
     } else {
-      throw ApiException(response.data['message'] ?? 'Failed to fetch exams');
+      throw ApiException(response.data['detail'] ?? 'Failed to fetch exams');
     }
   }
 
@@ -46,6 +50,12 @@ class ExamService extends GetxService {
       authenticated: true,
       queryParameters: {'device': deviceId, 'exam': examId},
     );
-    return (response.data as List).map((e) => Question.fromJson(e)).toList();
+    if (response.statusCode == 200) {
+      return (response.data as List).map((e) => Question.fromJson(e)).toList();
+    } else {
+      throw ApiException(
+        response.data['detail'] ?? 'Failed to fetch questions',
+      );
+    }
   }
 }

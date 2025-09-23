@@ -14,7 +14,11 @@ class NoteService {
     return (response.data as List).map((e) => Note.fromJson(e)).toList();
   }
 
-  Future<List<Note>> getAllNotes(String deviceId) async {
+  Future<List<Note>> getAllNotes(String deviceId, {int? gradeId}) async {
+    final queryParams = <String, dynamic>{};
+    if (gradeId != null) {
+      queryParams['grade'] = gradeId;
+    }
     final response = await apiClient.get(
       '/app/notes?device=$deviceId',
       authenticated: true,

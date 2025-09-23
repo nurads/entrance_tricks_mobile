@@ -306,22 +306,31 @@ class ExamPage extends StatelessWidget {
     }
 
     if (controller.exams.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.quiz, size: 48, color: Colors.grey),
-            SizedBox(height: 16),
-            Text(
-              'No exams available',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      return RefreshIndicator(
+        onRefresh: controller.refreshExams,
+        child: SingleChildScrollView(
+          physics: AlwaysScrollableScrollPhysics(),
+          child: Container(
+            height: MediaQuery.of(context).size.height * 0.6,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.quiz, size: 48, color: Colors.grey),
+                  SizedBox(height: 16),
+                  Text(
+                    'No exams available',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Check back later for new exams',
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
+                ],
+              ),
             ),
-            SizedBox(height: 8),
-            Text(
-              'Check back later for new exams',
-              style: TextStyle(color: Colors.grey[600]),
-            ),
-          ],
+          ),
         ),
       );
     }
@@ -331,23 +340,33 @@ class ExamPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: EdgeInsets.only(bottom: 12), // Reduced spacing
-            child: Text(
-              'Available Exams',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
+          Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: 12),
+                  child: Text(
+                    'Available Exams',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
               ),
-            ),
+              IconButton(
+                onPressed: () => controller.refreshExams(),
+                icon: Icon(Icons.refresh, color: Colors.black87, size: 20),
+                tooltip: 'Refresh exams',
+              ),
+            ],
           ),
-          // This Expanded widget ensures the ListView takes up all remaining space
           Expanded(
             child: RefreshIndicator(
               onRefresh: controller.refreshExams,
               child: ListView.builder(
-                physics: BouncingScrollPhysics(), // Better scrolling experience
+                physics: AlwaysScrollableScrollPhysics(),
                 itemCount: controller.exams.length,
                 itemBuilder: (context, index) {
                   final exam = controller.exams[index];

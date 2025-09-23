@@ -1,3 +1,4 @@
+import 'package:entrance_tricks/utils/storages/storages.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/views/views.dart';
 import 'package:entrance_tricks/services/services.dart';
@@ -88,10 +89,6 @@ class ProfileController extends GetxController {
         _selectedGrade = user.grade;
       } catch (e) {
         logger.e(e);
-
-        // AuthService().logout();
-        // Get.offAllNamed(VIEWS.login.path);
-        // Get.snackbar('Error', 'Failed to load user data');
       } finally {
         _isLoading = false;
         update();
@@ -122,7 +119,7 @@ class ProfileController extends GetxController {
       _selectedGrade = _authService.user.value?.grade;
       update();
     } catch (e) {
-      Get.snackbar('Error', 'Failed to load grades');
+      AppSnackbar.showError('Error', 'Failed to load grades');
     }
   }
 
@@ -170,10 +167,10 @@ class ProfileController extends GetxController {
         _selectedGrade = user.grade;
       } catch (e) {
         logger.e(e);
-        Get.snackbar('Error', 'Failed to update user');
+        AppSnackbar.showError('Error', 'Failed to update user');
       }
     } else {
-      Get.snackbar('Error', 'No internet connection');
+      AppSnackbar.showError('Error', 'No internet connection');
     }
     nameEditController.text = _userName;
     phoneEditController.text = _userPhone;
@@ -190,13 +187,11 @@ class ProfileController extends GetxController {
   }
 
   void openSupport() {
-    // TODO: Navigate to support page
-    Get.snackbar('Info', 'Support page will be implemented');
+    AppSnackbar.showInfo('Info', 'Support page will be implemented');
   }
 
   void openAppInfo() {
-    // TODO: Navigate to app info page
-    Get.snackbar('Info', 'App information page will be implemented');
+    AppSnackbar.showInfo('Info', 'App information page will be implemented');
   }
 
   void logout() {
@@ -298,66 +293,78 @@ class ProfileController extends GetxController {
     Get.back(); // Close the first dialog
 
     Get.dialog(
-      AlertDialog(
-        title: Text(
-          'Final Confirmation',
-          style: TextStyle(color: Colors.red[700], fontWeight: FontWeight.bold),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.warning_amber_rounded, color: Colors.red[600], size: 48),
-            SizedBox(height: 16),
-            Text(
-              'Type "DELETE" to confirm account deletion:',
-              style: TextStyle(fontSize: 16),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 16),
-            TextField(
-              controller: _deleteConfirmationController,
-              decoration: InputDecoration(
-                hintText: 'Type DELETE here',
-                border: OutlineInputBorder(),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.red[600]!),
-                ),
+      GetBuilder<ProfileController>(
+        builder: (controller) {
+          return AlertDialog(
+            title: Text(
+              'Final Confirmation',
+              style: TextStyle(
+                color: Colors.red[700],
+                fontWeight: FontWeight.bold,
               ),
-              onChanged: (value) => update(),
             ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              _deleteConfirmationController.clear();
-              Get.back();
-            },
-            child: Text('Cancel'),
-          ),
-          TextButton(
-            onPressed:
-                _deleteConfirmationController.text.trim() == 'DELETE' &&
-                    !_isDeletingAccount
-                ? () => _deleteAccount()
-                : null,
-            child: _isDeletingAccount
-                ? SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(
-                    'Delete Forever',
-                    style: TextStyle(
-                      color:
-                          _deleteConfirmationController.text.trim() == 'DELETE'
-                          ? Colors.red[600]
-                          : Colors.grey[400],
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.warning_amber_rounded,
+                  color: Colors.red[600],
+                  size: 48,
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'Type "DELETE" to confirm account deletion:',
+                  style: TextStyle(fontSize: 16),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 16),
+                TextField(
+                  controller: _deleteConfirmationController,
+                  decoration: InputDecoration(
+                    hintText: 'Type DELETE here',
+                    border: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.red[600]!),
                     ),
                   ),
-          ),
-        ],
+                  onChanged: (value) => update(),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  _deleteConfirmationController.clear();
+                  Get.back();
+                },
+                child: Text('Cancel'),
+              ),
+              TextButton(
+                onPressed:
+                    _deleteConfirmationController.text.trim() == 'DELETE' &&
+                        !_isDeletingAccount
+                    ? () => _deleteAccount()
+                    : null,
+                child: _isDeletingAccount
+                    ? SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(
+                        'Delete Forever',
+                        style: TextStyle(
+                          color:
+                              _deleteConfirmationController.text.trim() ==
+                                  'DELETE'
+                              ? Colors.red[600]
+                              : Colors.grey[400],
+                        ),
+                      ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -382,11 +389,9 @@ class ProfileController extends GetxController {
       Get.back(); // Close the confirmation dialog
 
       // Show success message
-      Get.snackbar(
+      AppSnackbar.showSuccess(
         'Account Deleted',
         'Your account has been permanently deleted',
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
         duration: Duration(seconds: 3),
       );
 
@@ -397,11 +402,9 @@ class ProfileController extends GetxController {
 
       Get.back(); // Close the confirmation dialog
 
-      Get.snackbar(
+      AppSnackbar.showError(
         'Error',
         'Failed to delete account: ${e.toString()}',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
         duration: Duration(seconds: 5),
       );
     } finally {
@@ -415,6 +418,15 @@ class ProfileController extends GetxController {
     try {
       // Clear authentication data
       await _authService.logout();
+
+      await HiveSubjectsStorage().clear();
+      await HiveChaptersStorage().clear();
+      await HiveAuthStorage().clear();
+      await HiveUserStorage().clear();
+      await HiveExamStorage().clear();
+      await HiveQuizzesStorage().clear();
+      await HiveNoteStorage().clear();
+      await HiveVideoStorage().clear();
 
       // Clear any other local storage if available
       // You might want to add more clearing logic here based on your app's needs

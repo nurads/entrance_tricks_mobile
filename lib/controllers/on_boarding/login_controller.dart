@@ -5,6 +5,7 @@ import 'package:entrance_tricks/services/services.dart';
 import 'package:entrance_tricks/services/api/exceptions.dart';
 import 'package:entrance_tricks/views/views.dart';
 import 'package:entrance_tricks/services/api/device.dart';
+import 'package:entrance_tricks/utils/utils.dart';
 
 class LoginController extends GetxController {
   final authService = Get.find<AuthService>();
@@ -25,44 +26,21 @@ class LoginController extends GetxController {
 
         final response = await UserService().loginUser(phone, password);
 
-        authService.saveAuthToken(response.tokens);
-        authService.saveUser(response.user);
+        final user = await UserService().getUser();
 
-        Get.snackbar(
-          'Success',
-          'Login successful!',
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
+        await authService.saveAuthToken(response.tokens);
+        await authService.saveUser(user);
 
         await DeviceService().registerDevice();
 
+        AppSnackbar.showSuccess('Success', 'Login successful!');
         Get.offAllNamed(VIEWS.home.path);
       } on DioException catch (e) {
-        Get.snackbar(
-          'Login Failed',
-          e.message ?? 'Failed to login',
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        AppSnackbar.showError('Login Failed', e.message ?? 'Failed to login');
       } on ApiException catch (e) {
-        Get.snackbar(
-          'Login Failed',
-          e.message,
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        AppSnackbar.showError('Login Failed', e.message);
       } catch (e) {
-        Get.snackbar(
-          'Login Failed',
-          e.toString(),
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        AppSnackbar.showError('Login Failed', e.toString());
       } finally {
         _setLoading(false);
       }
