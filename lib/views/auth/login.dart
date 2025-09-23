@@ -5,11 +5,10 @@ import 'package:entrance_tricks/controllers/on_boarding/login_controller.dart';
 import 'package:entrance_tricks/components/components.dart';
 
 class Login extends StatelessWidget {
-  Login({super.key});
+  const Login({super.key});
 
   @override
   Widget build(BuildContext context) {
-    Get.put(LoginController());
     return Scaffold(
       body: SingleChildScrollView(
         physics: BouncingScrollPhysics(),
@@ -88,19 +87,6 @@ class Login extends StatelessWidget {
                   ],
                 ),
                 SizedBox(height: 20),
-                TextButton(
-                  onPressed: () {
-                    // Navigate to OTP-based login if needed
-                    Get.toNamed(VIEWS.verifyPhone.path);
-                  },
-                  child: Text(
-                    'Login with Telegram Bot instead',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ),
               ],
             ),
           ),

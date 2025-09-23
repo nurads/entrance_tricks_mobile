@@ -20,7 +20,7 @@ class NewsPage extends StatelessWidget {
           ),
           backgroundColor: Colors.white,
           elevation: 0,
-          leading: null,
+          automaticallyImplyLeading: false, // Change this line
           actions: [IconButton(icon: Icon(Icons.search), onPressed: () {})],
         ),
         body: SafeArea(

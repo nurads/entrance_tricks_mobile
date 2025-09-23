@@ -16,9 +16,12 @@ class UserService extends GetxController {
     throw ApiException(response.data['detail'] ?? "Failed to get user");
   }
 
-  Future<Response<User>> deleteUser() async {
-    final response = await apiClient.delete('/auth/me');
-    return response.data;
+  Future<bool> deleteUser() async {
+    final response = await apiClient.delete('/auth/me', authenticated: true);
+    if (response.statusCode == 200 || response.statusCode == 204) {
+      return true;
+    }
+    throw ApiException(response.data['detail'] ?? "Failed to delete user");
   }
 
   Future<RegisterResponse> registerUser(

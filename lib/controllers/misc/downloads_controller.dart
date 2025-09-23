@@ -9,6 +9,8 @@ import 'dart:io';
 
 import 'package:entrance_tricks/views/common/video_player_screen.dart';
 import 'package:entrance_tricks/views/common/pdf_reader_screen.dart';
+import 'package:entrance_tricks/views/exam/exam_detail_page.dart';
+import 'package:entrance_tricks/controllers/exam/exam_controller.dart';
 
 class DownloadsController extends GetxController {
   // API Services
@@ -34,12 +36,10 @@ class DownloadsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    loadAllContent();
-  }
+    loadAllVideos();
 
-  // Load all content (both downloaded and available)
-  Future<void> loadAllContent() async {
-    await Future.wait([loadAllVideos(), loadAllExams(), loadAllNotes()]);
+    loadAllExams();
+    loadAllNotes();
   }
 
   // Load all videos with download states
@@ -305,6 +305,11 @@ class DownloadsController extends GetxController {
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
+
+      // Refresh exam controller if it exists
+      if (Get.isRegistered<ExamController>()) {
+        Get.find<ExamController>().refreshExamDownloadStatus();
+      }
     } catch (e) {
       exam.isLoadingQuestion = false;
       update();
@@ -359,7 +364,8 @@ class DownloadsController extends GetxController {
     }
 
     // Navigate to exam screen
-    // TODO: Goto Question Page
+
+    Get.to(() => ExamDetailPage(exam: exam));
   }
 
   // Delete video
@@ -582,6 +588,8 @@ class DownloadsController extends GetxController {
 
   // Refresh all content
   Future<void> refreshContent() async {
-    await loadAllContent();
+    await loadAllVideos();
+    await loadAllExams();
+    await loadAllNotes();
   }
 }

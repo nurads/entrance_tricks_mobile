@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/controllers/exam/exam_controller.dart';
+import 'package:entrance_tricks/controllers/misc/downloads_controller.dart';
 import 'package:entrance_tricks/models/exam.dart';
 import 'package:entrance_tricks/models/models.dart';
 import 'package:entrance_tricks/utils/utils.dart';
@@ -25,6 +26,7 @@ class ExamPage extends StatelessWidget {
           ),
           backgroundColor: Colors.transparent,
           elevation: 0,
+          automaticallyImplyLeading: false, // Change this line
           actions: [
             IconButton(
               onPressed: () {},
@@ -39,10 +41,6 @@ class ExamPage extends StatelessWidget {
             children: [
               // Promotional Banner - Made more compact
               _buildPromotionalBanner(context),
-
-              // Search Bar
-              // _buildSearchBar(context),
-
               // Subject Categories
               _buildSubjectCategories(context, controller),
 
@@ -354,7 +352,14 @@ class ExamPage extends StatelessWidget {
                 itemCount: controller.exams.length,
                 itemBuilder: (context, index) {
                   final exam = controller.exams[index];
-                  return _buildExamCard(context, exam, controller);
+                  return GetBuilder<DownloadsController>(
+                    builder: (downloadsController) => _buildExamCard(
+                      context,
+                      exam,
+                      controller,
+                      downloadsController,
+                    ),
+                  );
                 },
               ),
             ),
@@ -366,8 +371,9 @@ class ExamPage extends StatelessWidget {
 
   Widget _buildExamCard(
     BuildContext context,
-    Exam exam, // Change parameter type to Exam
+    Exam exam,
     ExamController controller,
+    DownloadsController downloadsController,
   ) {
     return Container(
       margin: EdgeInsets.only(bottom: 8),
@@ -431,7 +437,7 @@ class ExamPage extends StatelessWidget {
 
             SizedBox(width: 12),
 
-            // Exam Details - Simplified
+            // Exam Details - Enhanced with download status
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -474,63 +480,181 @@ class ExamPage extends StatelessWidget {
                       ),
                     ],
                   ),
+                  SizedBox(height: 4),
+                  // Download status indicator
+                  Row(
+                    children: [
+                      Icon(
+                        exam.isDownloaded
+                            ? Icons.download_done
+                            : Icons.cloud_download,
+                        size: 12,
+                        color: exam.isDownloaded
+                            ? Colors.green[600]
+                            : Colors.orange[600],
+                      ),
+                      SizedBox(width: 4),
+                      Text(
+                        exam.isDownloaded ? "Downloaded" : "Not Downloaded",
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: exam.isDownloaded
+                              ? Colors.green[600]
+                              : Colors.orange[600],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
 
             SizedBox(width: 8),
 
-            // Action Button
+            // Action Button - Enhanced with download functionality
             SizedBox(
-              width: 80, // Increased width to accommodate icon + text
-              child: ElevatedButton(
-                onPressed: exam.isLocked
-                    ? null
-                    : () => controller.startExam(exam.id),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: exam.isLocked
-                      ? Colors.grey[200]
-                      : Colors.blue[600],
-                  foregroundColor: exam.isLocked
-                      ? Colors.grey[500]
-                      : Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 6,
-                  ), // Reduced horizontal padding
-                  minimumSize: Size(0, 0),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment:
-                      MainAxisAlignment.center, // Center the content
-                  children: [
-                    Icon(
-                      exam.isLocked ? Icons.lock : Icons.lock_open,
-                      size: 10, // Slightly smaller icon
-                      color: exam.isLocked ? Colors.grey[500] : Colors.white,
-                    ),
-                    SizedBox(width: 3), // Reduced spacing
-                    Flexible(
-                      // Allow text to wrap if needed
-                      child: Text(
-                        exam.isLocked ? "Locked" : "Unlocked",
-                        style: TextStyle(
-                          fontSize: 10, // Slightly smaller text
-                          fontWeight: FontWeight.w600,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
+              width: 85,
+              child: _buildExamActionButton(
+                exam,
+                controller,
+                downloadsController,
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildExamActionButton(
+    Exam exam,
+    ExamController controller,
+    DownloadsController downloadsController,
+  ) {
+    if (exam.isLocked) {
+      // Locked exam
+      return ElevatedButton(
+        onPressed: null,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.grey[200],
+          foregroundColor: Colors.grey[500],
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          padding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+          minimumSize: Size(0, 0),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.lock, size: 10, color: Colors.grey[500]),
+            SizedBox(width: 3),
+            Flexible(
+              child: Text(
+                "Locked",
+                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (exam.isLoadingQuestion) {
+      // Downloading exam
+      return ElevatedButton(
+        onPressed: null,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.orange[100],
+          foregroundColor: Colors.orange[700],
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          padding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+          minimumSize: Size(0, 0),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 10,
+              height: 10,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.orange[700]!),
+              ),
+            ),
+            SizedBox(width: 3),
+            Flexible(
+              child: Text(
+                "Loading",
+                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (exam.isDownloaded) {
+      // Downloaded exam - can start
+      return ElevatedButton(
+        onPressed: () => downloadsController.startExam(exam),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.green[600],
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          padding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+          minimumSize: Size(0, 0),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.play_arrow, size: 10, color: Colors.white),
+            SizedBox(width: 3),
+            Flexible(
+              child: Text(
+                "Start",
+                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Not downloaded exam - download and start
+    return ElevatedButton(
+      onPressed: () async {
+        await downloadsController.downloadExam(exam);
+        if (exam.isDownloaded) {
+          downloadsController.startExam(exam);
+        }
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.blue[600],
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+        padding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+        minimumSize: Size(0, 0),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.download, size: 10, color: Colors.white),
+          SizedBox(width: 3),
+          Flexible(
+            child: Text(
+              "Download",
+              style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
       ),
     );
   }

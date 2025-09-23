@@ -11,8 +11,6 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(MainNavigationController());
-
     final List<Widget> pages = [
       HomeDashboard(),
       ExamPage(),
@@ -20,60 +18,65 @@ class Home extends StatelessWidget {
       ProfilePage(),
     ];
 
+    Get.put(MainNavigationController());
+
     return GetBuilder<MainNavigationController>(
-      builder: (controller) => Scaffold(
-        body: IndexedStack(index: controller.currentIndex, children: pages),
-        bottomNavigationBar: Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 20,
-                offset: const Offset(0, -5),
-              ),
-            ],
-          ),
-          child: SafeArea(
-            child: Container(
-              height: 80,
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildNavItem(
-                    context: context,
-                    controller: controller,
-                    index: 0,
-                    icon: Icons.home_rounded,
-                    activeIcon: Icons.home_rounded,
-                    label: 'Home',
-                  ),
-                  _buildNavItem(
-                    context: context,
-                    controller: controller,
-                    index: 1,
-                    icon: Icons.quiz_rounded,
-                    activeIcon: Icons.quiz_rounded,
-                    label: 'Exams',
-                  ),
-                  _buildNavItem(
-                    context: context,
-                    controller: controller,
-                    index: 2,
-                    icon: Icons.newspaper_rounded,
-                    activeIcon: Icons.newspaper_rounded,
-                    label: 'News',
-                  ),
-                  _buildNavItem(
-                    context: context,
-                    controller: controller,
-                    index: 3,
-                    icon: Icons.person_rounded,
-                    activeIcon: Icons.person_rounded,
-                    label: 'Profile',
-                  ),
-                ],
+      builder: (controller) => PopScope(
+        canPop: false,
+        child: Scaffold(
+          body: IndexedStack(index: controller.currentIndex, children: pages),
+          bottomNavigationBar: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 20,
+                  offset: const Offset(0, -5),
+                ),
+              ],
+            ),
+            child: SafeArea(
+              child: Container(
+                height: 80,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildNavItem(
+                      context: context,
+                      controller: controller,
+                      index: 0,
+                      icon: Icons.home_rounded,
+                      activeIcon: Icons.home_rounded,
+                      label: 'Home',
+                    ),
+                    _buildNavItem(
+                      context: context,
+                      controller: controller,
+                      index: 1,
+                      icon: Icons.quiz_rounded,
+                      activeIcon: Icons.quiz_rounded,
+                      label: 'Exams',
+                    ),
+                    _buildNavItem(
+                      context: context,
+                      controller: controller,
+                      index: 2,
+                      icon: Icons.newspaper_rounded,
+                      activeIcon: Icons.newspaper_rounded,
+                      label: 'News',
+                    ),
+                    _buildNavItem(
+                      context: context,
+                      controller: controller,
+                      index: 3,
+                      icon: Icons.person_rounded,
+                      activeIcon: Icons.person_rounded,
+                      label: 'Profile',
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

@@ -24,10 +24,14 @@ Map<String, dynamic> _$QuestionToJson(Question instance) => <String, dynamic>{
   'image_path': instance.imagePath,
 };
 
-Choice _$ChoiceFromJson(Map<String, dynamic> json) =>
-    Choice(id: (json['id'] as num).toInt(), content: json['content'] as String);
+Choice _$ChoiceFromJson(Map<String, dynamic> json) => Choice(
+  id: (json['id'] as num).toInt(),
+  content: json['content'] as String,
+  isCorrect: json['is_correct'] as bool,
+);
 
 Map<String, dynamic> _$ChoiceToJson(Choice instance) => <String, dynamic>{
   'id': instance.id,
   'content': instance.content,
+  'is_correct': instance.isCorrect,
 };

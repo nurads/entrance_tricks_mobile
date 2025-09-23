@@ -33,13 +33,13 @@ class ProfilePage extends StatelessWidget {
     BuildContext context,
     ProfileController controller,
   ) {
-    final authService = Get.find<AuthService>();
     return SliverAppBar(
       expandedHeight: 280,
       floating: false,
       pinned: true,
       backgroundColor: Colors.blue[600],
       elevation: 0,
+      automaticallyImplyLeading: false, // Add this line
       actions: [
         IconButton(
           icon: Icon(Icons.edit, color: Colors.white),
@@ -208,6 +208,18 @@ class ProfilePage extends StatelessWidget {
 
           SizedBox(height: 32),
 
+          // Delete Account Button
+          _buildActionButton(
+            context,
+            Icons.delete_forever,
+            "Delete Account",
+            "Permanently delete your account and data",
+            () => controller.showDeleteAccountDialog(),
+            isDestructive: true,
+          ),
+
+          SizedBox(height: 20),
+
           // Logout Button
           SizedBox(
             width: double.infinity,
@@ -296,12 +308,16 @@ class ProfilePage extends StatelessWidget {
     IconData icon,
     String title,
     String subtitle,
-    VoidCallback onTap,
-  ) {
+    VoidCallback onTap, {
+    bool isDestructive = false,
+  }) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
+        border: isDestructive
+            ? Border.all(color: Colors.red[200]!, width: 1)
+            : null,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),
@@ -323,10 +339,14 @@ class ProfilePage extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: Colors.grey[100],
+                    color: isDestructive ? Colors.red[50] : Colors.grey[100],
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(icon, color: Colors.grey[700], size: 20),
+                  child: Icon(
+                    icon,
+                    color: isDestructive ? Colors.red[600] : Colors.grey[700],
+                    size: 20,
+                  ),
                 ),
                 SizedBox(width: 16),
                 Expanded(
@@ -338,19 +358,26 @@ class ProfilePage extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Colors.grey[800],
+                          color: isDestructive
+                              ? Colors.red[700]
+                              : Colors.grey[800],
                         ),
                       ),
                       Text(
                         subtitle,
-                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: isDestructive
+                              ? Colors.red[500]
+                              : Colors.grey[600],
+                        ),
                       ),
                     ],
                   ),
                 ),
                 Icon(
                   Icons.arrow_forward_ios,
-                  color: Colors.grey[400],
+                  color: isDestructive ? Colors.red[300] : Colors.grey[400],
                   size: 16,
                 ),
               ],

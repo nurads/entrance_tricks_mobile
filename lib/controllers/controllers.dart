@@ -13,3 +13,6 @@ export 'misc/pdf_reader_controller.dart';
 export 'subject/subject_controller.dart';
 export 'subject/chapter_detail_controller.dart';
 export 'exam/exam_controller.dart';
+export "on_boarding/login_controller.dart";
+export "on_boarding/register_controller.dart";
+export "on_boarding/verify_phone_controller.dart";

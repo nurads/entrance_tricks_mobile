@@ -9,4 +9,3 @@ export 'ui/loading_components.dart';
 export 'ui/exam/question_card.dart';
 export 'ui/exam/choice_card.dart';
 export 'ui/exam/unified_question_widget.dart';
-export 'ui/exam/exam_example.dart';

@@ -60,8 +60,10 @@ class ExamController extends GetxController {
 
     if (_coreService.hasInternet) {
       try {
-        _exams = await _examService.getAvailableExams(device.id);
-        await _hiveExamStorage.setExams(_exams);
+        final exams_ = await _examService.getAvailableExams(device.id);
+        // _exams = exams;
+        await _hiveExamStorage.setExams(exams_);
+        _exams = await _hiveExamStorage.getExams();
       } catch (e) {
         _exams = await _hiveExamStorage.getExams();
       } finally {
@@ -74,6 +76,17 @@ class ExamController extends GetxController {
       _isLoading = false;
       update();
     }
+
+    // Update download status for all exams
+    await _updateExamDownloadStatus();
+  }
+
+  Future<void> _updateExamDownloadStatus() async {
+    for (var exam in _exams) {
+      final questions = await _hiveExamStorage.getQuestions(exam.id);
+      exam.isDownloaded = questions.isNotEmpty;
+    }
+    update();
   }
 
   Future<void> selectSubject(int index) async {
@@ -85,20 +98,29 @@ class ExamController extends GetxController {
     } else {
       _exams = exams.where((e) => e.subject?.id == subject.id).toList();
     }
-    update();
+    // Update download status for filtered exams
+    await _updateExamDownloadStatus();
   }
 
   void startExam(int examId) {
     // Navigate to exam detail page
-    Get.to(() => ExamDetailPage(), arguments: {'examId': examId});
+    Get.to(
+      () => ExamDetailPage(exam: _exams.firstWhere((e) => e.id == examId)),
+    );
   }
 
   void navigateToExamDetail(int examId) {
     // Navigate to exam detail page
-    Get.to(() => ExamDetailPage(), arguments: {'examId': examId});
+    Get.to(
+      () => ExamDetailPage(exam: _exams.firstWhere((e) => e.id == examId)),
+    );
   }
 
   Future<void> refreshExams() async {
     await loadExams();
+  }
+
+  Future<void> refreshExamDownloadStatus() async {
+    await _updateExamDownloadStatus();
   }
 }

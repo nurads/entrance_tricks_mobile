@@ -4,6 +4,7 @@ import 'package:flutter_tex/flutter_tex.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/models/models.dart';
 import 'package:entrance_tricks/controllers/exam/question_page_controller.dart';
+import 'package:entrance_tricks/utils/utils.dart';
 
 class QuestionPage extends StatelessWidget {
   final String title;

@@ -20,6 +20,9 @@ class NoteService {
       '/app/notes?device=$deviceId',
       authenticated: true,
     );
+    if (response.statusCode != 200) {
+      throw ApiException('Failed to get all notes');
+    }
     return (response.data as List).map((e) => Note.fromJson(e)).toList();
   }
 
@@ -35,7 +38,7 @@ class NoteService {
       authenticated: true,
     );
     if (response.statusCode != 200) {
-      throw ApiException(response.data['message']);
+      throw ApiException('Failed to download note');
     }
 
     final url = response.data['file'];

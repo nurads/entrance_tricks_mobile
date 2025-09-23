@@ -30,8 +30,10 @@ class Question {
 class Choice {
   final int id;
   final String content;
+  @JsonKey(name: 'is_correct')
+  final bool isCorrect;
 
-  Choice({required this.id, required this.content});
+  Choice({required this.id, required this.content, required this.isCorrect});
 
   factory Choice.fromJson(Map<String, dynamic> json) => _$ChoiceFromJson(json);
   Map<String, dynamic> toJson() => _$ChoiceToJson(this);
