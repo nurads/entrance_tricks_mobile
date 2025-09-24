@@ -62,12 +62,19 @@ class _ExamDetailPageState extends State<ExamDetailPage> {
     List<int> userAnswers,
     List<Question> questions,
   ) {
-    // Define correct answers for each question
-    final correctAnswers = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
-
+    // Remove hardcoded answers and use actual question data
     int correct = 0;
     for (int i = 0; i < userAnswers.length && i < questions.length; i++) {
-      if (userAnswers[i] == correctAnswers[i]) {
+      final question = questions[i];
+      final userAnswerId = userAnswers[i];
+      
+      // Find the correct choice for this question
+      final correctChoice = question.choices.firstWhere(
+        (choice) => choice.isCorrect,
+        orElse: () => question.choices.first, // fallback if no correct choice found
+      );
+      
+      if (userAnswerId == correctChoice.id) {
         correct++;
       }
     }

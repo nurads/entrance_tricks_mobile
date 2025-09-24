@@ -26,6 +26,8 @@ class LoginController extends GetxController {
 
         final response = await UserService().loginUser(phone, password);
 
+        BaseApiClient.setTokens(response.tokens.access, response.tokens.refresh);
+        
         final user = await UserService().getUser();
 
         await authService.saveAuthToken(response.tokens);
