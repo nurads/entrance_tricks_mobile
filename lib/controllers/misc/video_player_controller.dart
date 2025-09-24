@@ -14,6 +14,7 @@ class CustomVideoPlayerController extends GetxController {
   final Rx<Duration> position = Duration.zero.obs;
   final Rx<Duration> duration = Duration.zero.obs;
   final RxBool isLoading = true.obs;
+  final RxBool isFullscreen = false.obs; // Add fullscreen state
 
   String videoUrl = '';
   String videoTitle = '';
@@ -36,7 +37,9 @@ class CustomVideoPlayerController extends GetxController {
   @override
   void onClose() {
     _controller.dispose();
+    // Reset orientation and system UI when leaving
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     super.onClose();
   }
 
@@ -79,9 +82,11 @@ class CustomVideoPlayerController extends GetxController {
   }
 
   void _videoListener() {
-    position.value = _controller.value.position;
-    duration.value = _controller.value.duration;
-    isPlaying.value = _controller.value.isPlaying;
+    if (_controller.value.isInitialized) {
+      position.value = _controller.value.position;
+      duration.value = _controller.value.duration;
+      isPlaying.value = _controller.value.isPlaying;
+    }
   }
 
   void togglePlayPause() {
@@ -118,6 +123,23 @@ class CustomVideoPlayerController extends GetxController {
   }
 
   void toggleFullscreen() {
-    // TODO: Implement fullscreen toggle functionality
+    isFullscreen.value = !isFullscreen.value;
+    
+    if (isFullscreen.value) {
+      // Enter fullscreen - landscape orientation
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+      // Hide system UI for fullscreen experience
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    } else {
+      // Exit fullscreen - portrait orientation
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+      ]);
+      // Show system UI
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    }
   }
 }

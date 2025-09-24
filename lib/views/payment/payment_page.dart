@@ -1,6 +1,4 @@
 import 'dart:io';
-import 'package:entrance_tricks/utils/utils.dart';
-import 'package:entrance_tricks/views/views.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -85,15 +83,15 @@ class PaymentPage extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.3),
+                    color: Colors.white.withValues(alpha: 0.3),
                     width: 1,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -156,7 +154,7 @@ class PaymentPage extends StatelessWidget {
     BuildContext context,
     PaymentController controller,
   ) {
-    if (controller.isLoading  ) {
+    if (controller.isLoading) {
       return _buildLoadingState();
     }
 

@@ -12,6 +12,7 @@ import 'package:entrance_tricks/utils/utils.dart';
 class PaymentController extends GetxController {
   final PaymentService _paymentService = PaymentService();
   final ImagePicker _picker = ImagePicker();
+  final CoreService _coreService = Get.find<CoreService>();
 
   final RxList<PaymentMethod> paymentMethods = <PaymentMethod>[].obs;
   final RxList<Payment> userPayments = <Payment>[].obs;
@@ -144,7 +145,11 @@ class PaymentController extends GetxController {
       isLoading = true;
       update();
       final device = await UserDevice.getDeviceInfo();
-      final packages_ = await _paymentService.getPackages(device.id);
+      final grade = _coreService.authService.user.value?.grade;
+      final packages_ = await _paymentService.getPackages(
+        device.id,
+        grade: grade?.id,
+      );
       logger.d(packages_);
       packages.value = packages_;
     } catch (e) {

@@ -78,10 +78,10 @@ class VideoPlayerScreen extends StatelessWidget {
                                   begin: Alignment.topCenter,
                                   end: Alignment.bottomCenter,
                                   colors: [
-                                    Colors.black.withOpacity(0.7),
+                                    Colors.black.withValues(alpha: 0.7),
                                     Colors.transparent,
                                     Colors.transparent,
-                                    Colors.black.withOpacity(0.7),
+                                    Colors.black.withValues(alpha: 0.7),
                                   ],
                                 ),
                               ),
@@ -137,9 +137,17 @@ class VideoPlayerScreen extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          IconButton(
-            onPressed: controller.toggleFullscreen,
-            icon: const Icon(Icons.fullscreen, color: Colors.white, size: 28),
+          Obx(
+            () => IconButton(
+              onPressed: controller.toggleFullscreen,
+              icon: Icon(
+                controller.isFullscreen.value
+                    ? Icons.fullscreen_exit
+                    : Icons.fullscreen,
+                color: Colors.white,
+                size: 28,
+              ),
+            ),
           ),
         ],
       ),
@@ -176,20 +184,25 @@ class VideoPlayerScreen extends StatelessWidget {
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
               activeTrackColor: theme.colorScheme.primary,
-              inactiveTrackColor: Colors.white.withOpacity(0.3),
+              inactiveTrackColor: Colors.white.withValues(alpha: 0.3),
               thumbColor: theme.colorScheme.primary,
-              overlayColor: theme.colorScheme.primary.withOpacity(0.2),
+              overlayColor: theme.colorScheme.primary.withValues(alpha: 0.2),
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
             ),
-            child: Obx(
-              () => Slider(
-                value: controller.position.value.inMilliseconds.toDouble(),
-                max: controller.duration.value.inMilliseconds.toDouble(),
+            child: Obx(() {
+              final duration = controller.duration.value.inMilliseconds
+                  .toDouble();
+              final position = controller.position.value.inMilliseconds
+                  .toDouble();
+
+              return Slider(
+                value: duration > 0 ? position.clamp(0.0, duration) : 0.0,
+                max: duration > 0 ? duration : 1.0,
                 onChanged: (value) {
                   controller.seekTo(Duration(milliseconds: value.toInt()));
                 },
-              ),
-            ),
+              );
+            }),
           ),
 
           // Time and Controls

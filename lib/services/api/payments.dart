@@ -108,12 +108,16 @@ class PaymentService extends GetxController {
   }
 
   // Get all available packages
-  Future<List<Package>> getPackages(String deviceId) async {
+  Future<List<Package>> getPackages(String deviceId, {int? grade}) async {
     try {
+      final queryParameters = <String, dynamic>{'device': deviceId};
+      if (grade != null) {
+        queryParameters['grade'] = grade;
+      }
       final response = await apiClient.get(
         '/app/packages/',
         authenticated: true,
-        queryParameters: {'device': deviceId},
+        queryParameters: queryParameters,
       );
       logger.d(response.data);
       if (response.statusCode == 200) {

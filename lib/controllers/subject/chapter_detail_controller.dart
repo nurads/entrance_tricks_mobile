@@ -51,7 +51,6 @@ class ChapterDetailController extends GetxController {
 
   @override
   void onInit() {
-    super.onInit();
     chapterId = Get.arguments?['chapterId'] ?? 1;
     subjectId = Get.arguments?['subjectId'] ?? 1;
     loadChapterDetail();
@@ -59,6 +58,7 @@ class ChapterDetailController extends GetxController {
     loadNotes();
     loadQuizzes();
     _loadDownloadedNotes(); // Add this line
+    super.onInit();
   }
 
   void loadVideos() async {
