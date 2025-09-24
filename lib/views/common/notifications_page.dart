@@ -64,11 +64,28 @@ class NotificationsPage extends StatelessWidget {
               ),
           ],
         ),
-        body: controller.isLoading
-            ? Center(child: CircularProgressIndicator())
-            : controller.notifications.isEmpty
-            ? _buildEmptyState()
-            : _buildNotificationsList(context, controller),
+        body: RefreshIndicator(
+          onRefresh: () async {
+            await controller.loadNotifications();
+          },
+          child: controller.isLoading
+              ? SingleChildScrollView(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  child: Container(
+                    height: MediaQuery.of(context).size.height * 0.7,
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                )
+              : controller.notifications.isEmpty
+              ? SingleChildScrollView(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  child: Container(
+                    height: MediaQuery.of(context).size.height * 0.7,
+                    child: _buildEmptyState(),
+                  ),
+                )
+              : _buildNotificationsList(context, controller),
+        ),
       ),
     );
   }

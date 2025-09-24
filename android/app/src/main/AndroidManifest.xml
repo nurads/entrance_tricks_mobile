@@ -9,7 +9,7 @@
         tools:ignore="ScopedStorage" />
 
     <application
-        android:label="entrance_tricks"
+        android:label="Entrance Tricks"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true"

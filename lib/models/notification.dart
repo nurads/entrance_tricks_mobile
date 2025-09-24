@@ -8,6 +8,7 @@ class Notification {
   final int id;
   final String title;
   final String message;
+  @JsonKey(name: 'created_at')
   final DateTime createdAt;
   @JsonKey(name: 'is_read')
   bool isRead;

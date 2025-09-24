@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:entrance_tricks/models/models.dart';
 import 'package:entrance_tricks/utils/storages/notification.dart';
 import 'package:entrance_tricks/services/services.dart';
+import 'package:entrance_tricks/utils/utils.dart';
 
 class NotificationsController extends GetxController {
   List<Notification> _notifications = [];
@@ -32,6 +33,7 @@ class NotificationsController extends GetxController {
       _unreadCount = _notifications.where((n) => !n.isRead).length;
       await _notificationStorage.setNotifications(_notifications);
     } catch (e) {
+      logger.e(e);
       Get.snackbar('Error', 'Failed to load notifications');
     } finally {
       _isLoading = false;

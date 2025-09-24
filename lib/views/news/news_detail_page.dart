@@ -50,7 +50,7 @@ class NewsDetailPage extends StatelessWidget {
           onPressed: () => Get.back(),
         ),
       ),
-      
+
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
           decoration: BoxDecoration(
@@ -96,9 +96,9 @@ class NewsDetailPage extends StatelessWidget {
           children: [
             // Article Title
             Text(
-              news.title,
+              news.title.capitalize!,
               style: const TextStyle(
-                fontSize: 28,
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF2D3748),
                 height: 1.3,
@@ -251,7 +251,7 @@ class NewsDetailPage extends StatelessWidget {
                   // TODO: Handle link taps
                   if (href != null) {
                     // You can implement URL launcher here
-                    print('Tapped link: $href');
+                    logger.d('Tapped link: $href');
                   }
                 },
               ),
@@ -262,81 +262,6 @@ class NewsDetailPage extends StatelessWidget {
             // Action Buttons
             // _buildActionButtons(),
             const SizedBox(height: 40),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActionButtons() {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildActionButton(
-            icon: Icons.thumb_up_outlined,
-            label: "Like",
-            onTap: () {
-              // TODO: Implement like functionality
-            },
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _buildActionButton(
-            icon: Icons.share,
-            label: "Share",
-            onTap: () {
-              // TODO: Implement share functionality
-            },
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _buildActionButton(
-            icon: Icons.bookmark_border,
-            label: "Save",
-            onTap: () {
-              // TODO: Implement save functionality
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildActionButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey[200]!),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: const Color(0xFF667eea), size: 24),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: const TextStyle(
-                color: Color(0xFF667eea),
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
           ],
         ),
       ),

@@ -50,108 +50,6 @@ class NewsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildCleanHeader(BuildContext context, NewsController controller) {
-    return SliverAppBar(
-      expandedHeight: 140,
-      floating: false,
-      pinned: true,
-      backgroundColor: Colors.white,
-      elevation: 0,
-      flexibleSpace: FlexibleSpaceBar(
-        background: Container(
-          decoration: const BoxDecoration(color: Colors.white),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Title and Subtitle
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              "News",
-                              style: TextStyle(
-                                fontSize: 32,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF1A202C),
-                                letterSpacing: -0.5,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              "Stay informed with latest updates",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey[600],
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      // Notification Icon
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF7FAFC),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.grey[200]!),
-                        ),
-                        child: Icon(
-                          Icons.notifications_outlined,
-                          color: Colors.grey[700],
-                          size: 20,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  // Search Bar
-                  // Container(
-                  //   height: 48,
-                  //   decoration: BoxDecoration(
-                  //     color: const Color(0xFFF7FAFC),
-                  //     borderRadius: BorderRadius.circular(12),
-                  //     border: Border.all(color: Colors.grey[200]!),
-                  //   ),
-                  //   child: TextField(
-                  //     decoration: InputDecoration(
-                  //       hintText: "Search articles...",
-                  //       hintStyle: TextStyle(
-                  //         color: Colors.grey[500],
-                  //         fontSize: 16,
-                  //       ),
-                  //       prefixIcon: Icon(
-                  //         Icons.search,
-                  //         color: Colors.grey[500],
-                  //         size: 20,
-                  //       ),
-                  //       border: InputBorder.none,
-                  //       contentPadding: const EdgeInsets.symmetric(
-                  //         horizontal: 16,
-                  //         vertical: 12,
-                  //       ),
-                  //     ),
-                  //     style: const TextStyle(fontSize: 16),
-                  //     onChanged: (value) {
-                  //       // TODO: Implement search functionality
-                  //     },
-                  //   ),
-                  // ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildFeaturedNewsCard(
     BuildContext context,
     NewsController controller,
@@ -265,7 +163,7 @@ class NewsPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      featuredNews.title,
+                      featuredNews.title.capitalize!,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 20,
@@ -333,7 +231,10 @@ class NewsPage extends StatelessWidget {
     BuildContext context,
     NewsController controller,
   ) {
-    final categories = ['All', 'Education', 'Technology', 'Science', 'Health'];
+    final categories = controller.news
+        .map((e) => e.category.capitalize!)
+        .toSet()
+        .toList();
 
     return SliverToBoxAdapter(
       child: Container(
@@ -550,7 +451,7 @@ class NewsPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        news.title,
+                        news.title.capitalize!,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,

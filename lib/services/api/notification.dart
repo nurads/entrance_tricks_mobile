@@ -1,5 +1,6 @@
 import 'package:entrance_tricks/services/api/api.dart';
 import 'package:entrance_tricks/models/models.dart';
+import "package:entrance_tricks/utils/utils.dart";
 
 class NotificationService {
   final ApiClient apiClient = ApiClient();
@@ -9,6 +10,7 @@ class NotificationService {
       '/app/notifications',
       authenticated: true,
     );
+    logger.d(response.data);
     return (response.data as List)
         .map((e) => Notification.fromJson(e))
         .toList();
