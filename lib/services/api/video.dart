@@ -20,17 +20,33 @@ class VideoApiService {
     return (response.data as List).map((e) => Video.fromJson(e)).toList();
   }
 
+  Future<List<Video>> getAllVideos({
+    required int gradeId,
+    required String deviceId,
+  }) async {
+    final queryParams = {'device': deviceId, 'grade': gradeId};
+
+    final response = await apiClient.get(
+      '/app/videos',
+      queryParameters: queryParams,
+      authenticated: true,
+    );
+    return (response.data as List).map((e) => Video.fromJson(e)).toList();
+  }
+
   Future<Video> getVideo(int videoId, {required String deviceId}) async {
     final response = await apiClient.get(
       '/app/videos/$videoId?device=$deviceId',
       authenticated: true,
     );
 
+    logger.d(response.data);
+
     if (response.statusCode == 200) {
       return Video.fromJson(response.data);
     }
 
-    throw ApiException(response.data['message']);
+    throw ApiException(response.data['detail'] ?? 'Failed to get video');
   }
 
   Future<void> downloadVideo(
@@ -46,10 +62,16 @@ class VideoApiService {
         authenticated: true,
       );
       if (response.statusCode != 200) {
-        throw ApiException(response.data['message']);
+        throw ApiException(
+          response.data['detail'] ?? 'Failed to download video',
+        );
       }
 
       final url = response.data['file'];
+
+      if (url == null) {
+        throw ApiException('Locked content');
+      }
 
       // Get app documents directory for storing videos
       final Directory appDocDir = await getApplicationDocumentsDirectory();
@@ -66,6 +88,7 @@ class VideoApiService {
       final String fullPath = '$videosDir/$fileName';
 
       logger.d('Downloading video to: $fullPath');
+      logger.d('Downloading video from: $url');
 
       FileDownloader.downloadFile(
         url: url,

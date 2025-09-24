@@ -10,6 +10,7 @@ class ExamService extends GetxService {
   Future<List<Exam>> getAvailableExams(
     String deviceId, {
     String? examType,
+    String? excludeExamType,
     int? subjectId,
     int? chapterId,
     int? gradeId,
@@ -18,6 +19,10 @@ class ExamService extends GetxService {
 
     if (examType != null) {
       queryParams['exam_type'] = examType;
+    }
+
+    if (excludeExamType != null) {
+      queryParams['exclude_exam_type'] = excludeExamType;
     }
 
     if (subjectId != null) {

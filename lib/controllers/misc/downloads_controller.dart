@@ -49,45 +49,20 @@ class DownloadsController extends GetxController {
       update();
 
       final device = await UserDevice.getDeviceInfo();
-
-      // Get downloaded video info from local storage
-      final downloadedVideoData = await _videoStorage.getDownloadedVideos();
-      final downloadedVideoIds = downloadedVideoData
-          .map((v) => v['id'] as int)
-          .toSet();
-
-      // For now, we'll get videos from all chapters
-      // In a real implementation, you might want to get all available videos
-      // or videos from user's enrolled subjects
-      List<Video> videos = [];
-
+      final grade = _coreService.authService.user.value?.grade;
       // This is a simplified approach - you might need to modify based on your API structure
       try {
         // Get videos from multiple chapters or subjects
-        // You might need to implement a method to get all available videos
-        final response = await _videoApiService.getVideos(
-          1,
+        final videos = await _videoApiService.getAllVideos(
+          gradeId: grade?.id ?? 0,
           deviceId: device.id,
         );
-        videos.addAll(response);
+        _videoStorage.setAllVideos(videos);
       } catch (e) {
         logger.e('Error loading videos from chapter: $e');
       }
 
-      // Update download states
-      for (var video in videos) {
-        if (downloadedVideoIds.contains(video.id)) {
-          video.isDownloaded = true;
-          final downloadedVideo = downloadedVideoData.firstWhereOrNull(
-            (v) => v['id'] == video.id,
-          );
-          if (downloadedVideo != null) {
-            video.filePath = downloadedVideo['file_path'];
-          }
-        }
-      }
-
-      allVideos.value = videos;
+      allVideos.value = await _videoStorage.getAllVideos();
     } catch (e) {
       Get.snackbar(
         'Error',
@@ -283,6 +258,16 @@ class DownloadsController extends GetxController {
 
   // Download exam (download questions)
   Future<void> downloadExam(Exam exam) async {
+    if (exam.isLocked) {
+      Get.snackbar(
+        'Access Denied',
+        'This exam is locked and cannot be downloaded',
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
     if (exam.isDownloaded) {
       Get.snackbar('Info', 'Exam is already downloaded');
       return;
@@ -299,6 +284,7 @@ class DownloadsController extends GetxController {
 
       final device = await UserDevice.getDeviceInfo();
       final questions = await _examApiService.getQuestions(device.id, exam.id);
+      logger.d(questions);
 
       exam.questions = questions;
       exam.isDownloaded = true;

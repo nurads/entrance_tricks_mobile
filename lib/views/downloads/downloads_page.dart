@@ -882,7 +882,15 @@ class _ExamsTab extends StatelessWidget {
                         // Actions
                         Column(
                           children: [
-                            if (exam.isDownloaded) ...[
+                            if (exam.isLocked) ...[
+                              IconButton(
+                                onPressed: null,
+                                icon: Icon(
+                                  Icons.lock_rounded,
+                                  color: Colors.grey.shade400,
+                                ),
+                              ),
+                            ] else if (exam.isDownloaded) ...[
                               IconButton(
                                 onPressed: () => controller.startExam(exam),
                                 icon: const Icon(

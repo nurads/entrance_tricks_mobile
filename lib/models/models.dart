@@ -13,3 +13,4 @@ export 'config.dart';
 export 'package.dart';
 export 'payment_methods.dart';
 export 'notification.dart';
+export "faq.dart";

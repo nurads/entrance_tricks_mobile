@@ -187,7 +187,7 @@ class ProfileController extends GetxController {
   }
 
   void openSupport() {
-    AppSnackbar.showInfo('Info', 'Support page will be implemented');
+    Get.toNamed(VIEWS.support.path);
   }
 
   void openAppInfo() {

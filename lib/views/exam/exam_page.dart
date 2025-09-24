@@ -52,28 +52,6 @@ class ExamPage extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.only(
-        left: 20,
-        right: 10,
-        top: 12,
-      ), // Reduced vertical padding
-      child: Row(
-        children: [
-          Text(
-            "Let's test your knowledge",
-            style: TextStyle(
-              fontSize: 22, // Slightly smaller font
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildPromotionalBanner(BuildContext context) {
     return Container(
       margin: EdgeInsets.symmetric(
@@ -156,28 +134,6 @@ class ExamPage extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSearchBar(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.symmetric(
-        horizontal: 10,
-        vertical: 12,
-      ), // Reduced margins
-      padding: EdgeInsets.symmetric(horizontal: 10), // Reduced padding
-      decoration: BoxDecoration(
-        // color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: TextField(
-        decoration: InputDecoration(
-          hintText: "Search",
-          border: InputBorder.none,
-          hintStyle: TextStyle(color: Colors.grey[600]),
-          prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
-        ),
       ),
     );
   }
@@ -310,7 +266,7 @@ class ExamPage extends StatelessWidget {
         onRefresh: controller.refreshExams,
         child: SingleChildScrollView(
           physics: AlwaysScrollableScrollPhysics(),
-          child: Container(
+          child: SizedBox(
             height: MediaQuery.of(context).size.height * 0.6,
             child: Center(
               child: Column(

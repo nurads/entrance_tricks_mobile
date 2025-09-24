@@ -540,7 +540,7 @@ class HomeDashboard extends StatelessWidget {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.blue.withOpacity(0.3),
+                    color: Colors.blue.withValues(alpha: 0.3),
                     blurRadius: 10,
                     offset: Offset(0, 5),
                   ),
@@ -552,10 +552,10 @@ class HomeDashboard extends StatelessWidget {
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
+                      color: Colors.white.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(15),
                       border: Border.all(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         width: 1,
                       ),
                     ),
@@ -596,6 +596,7 @@ class HomeDashboard extends StatelessWidget {
             Expanded(
               child: ListView(
                 padding: EdgeInsets.symmetric(vertical: 10),
+                physics: BouncingScrollPhysics(),
                 children: [
                   _buildSectionHeader('Main Navigation'),
                   _buildModernDrawerMenuItem(
@@ -746,10 +747,12 @@ class HomeDashboard extends StatelessWidget {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       decoration: BoxDecoration(
-        color: isSelected ? Colors.blue.withOpacity(0.1) : Colors.transparent,
+        color: isSelected
+            ? Colors.blue.withValues(alpha: 0.1)
+            : Colors.transparent,
         borderRadius: BorderRadius.circular(12),
         border: isSelected
-            ? Border.all(color: Colors.blue.withOpacity(0.3), width: 1)
+            ? Border.all(color: Colors.blue.withValues(alpha: 0.3), width: 1)
             : null,
       ),
       child: ListTile(
@@ -758,10 +761,10 @@ class HomeDashboard extends StatelessWidget {
           padding: EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: isDestructive
-                ? Colors.red.withOpacity(0.1)
+                ? Colors.red.withValues(alpha: 0.1)
                 : isSelected
-                ? Colors.blue.withOpacity(0.2)
-                : Colors.grey.withOpacity(0.1),
+                ? Colors.blue.withValues(alpha: 0.2)
+                : Colors.grey.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(

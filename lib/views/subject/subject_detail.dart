@@ -47,9 +47,10 @@ class SubjectDetail extends StatelessWidget {
 
           Text(
             controller.subjectName,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
               color: Colors.black87,
             ),
           ),
@@ -105,10 +106,10 @@ class SubjectDetail extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.withOpacity(0.2), width: 1),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.2), width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.05),
+            color: Colors.grey.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: Offset(0, 2),
           ),
@@ -192,22 +193,6 @@ class SubjectDetail extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-
-  void _navigateToPayment(
-    BuildContext context,
-    int subjectId,
-    int amount,
-    String subjectTitle,
-  ) {
-    Get.toNamed(
-      '/payment/methods',
-      arguments: {
-        'subjectId': subjectId,
-        'amount': amount,
-        'subjectTitle': subjectTitle,
-      },
     );
   }
 }

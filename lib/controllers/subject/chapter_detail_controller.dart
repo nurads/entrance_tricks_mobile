@@ -194,11 +194,13 @@ class ChapterDetailController extends GetxController {
 
         // Use local file path for downloaded videos
         logger.d('Playing video from: ${video.filePath}');
-        if (video.file != null) {
+
+        if (video.filePath != null) {
+          logger.f('Playing video from: ${video.filePath}');
           Get.to(
             VideoPlayerScreen(
               videoId: video.id,
-              videoUrl: video.filePath ?? video.file!, // Use local file path
+              videoUrl: video.filePath!, // Use local file path
               videoTitle: video.title,
             ),
           );

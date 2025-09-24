@@ -72,7 +72,13 @@ class MyApp extends StatelessWidget {
         GetPage(name: VIEWS.downloads.path, page: () => DownloadsPage()),
         GetPage(name: VIEWS.support.path, page: () => SupportPage()),
         GetPage(name: VIEWS.about.path, page: () => AboutPage()),
-        GetPage(name: VIEWS.faq.path, page: () => FAQPage()),
+        GetPage(
+          name: VIEWS.faq.path,
+          page: () => FAQPage(),
+          binding: BindingsBuilder(() {
+            Get.put(FAQController());
+          }),
+        ),
       ],
       initialRoute: service.user.value != null
           ? VIEWS.home.path

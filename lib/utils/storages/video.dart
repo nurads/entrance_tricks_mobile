@@ -40,6 +40,24 @@ class HiveVideoStorage extends BaseObjectStorage<List<Video>> {
   Future<void> setVideos(int chapterId, List<Video> videos) async {
     _box?.put('videos_$chapterId', videos);
   }
+  Future<List<Video>> getAllVideos() async {
+    final videos = _box?.get('videos') ?? [];
+    final downloadedVideos = await getDownloadedVideos();
+    for (var video in videos) {
+      final downloadedVideo = downloadedVideos.firstWhere(
+        (element) => element['id'] == video.id,
+        orElse: () => {},
+      );
+      video.filePath = downloadedVideo['file_path'];
+      if (video.filePath != null) {
+        video.isDownloaded = true;
+      }
+    }
+    return videos.cast<Video>();
+  }
+  Future<void> setAllVideos(List<Video> videos) async {
+    _box?.put('videos', videos);
+  }
 
   Future<List<Video>> getVideos(int chapterId) async {
     final videos = await read('videos_$chapterId');
