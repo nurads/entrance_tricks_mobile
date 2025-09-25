@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/controllers/controllers.dart';
-import 'package:entrance_tricks/views/subject/subject_detail.dart';
 import 'package:entrance_tricks/components/components.dart';
 
 class SearchPage extends StatelessWidget {
-  SearchPage({super.key});
+  const SearchPage({super.key});
 
   @override
   Widget build(BuildContext context) {

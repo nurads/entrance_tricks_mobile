@@ -44,6 +44,16 @@ class ExamController extends GetxController {
         loadExams();
       }
     });
+
+    _hiveExamStorage.listen((event) {
+      _exams = event;
+      update();
+    }, 'exams');
+
+    HiveSubjectsStorage().listen((event) {
+      _subjects = [_allPlaceholderSubject, ...event];
+      update();
+    }, 'subjects');
   }
 
   Future<void> loadSubjects() async {

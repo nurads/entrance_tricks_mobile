@@ -24,9 +24,7 @@ class HiveSubjectsStorage extends BaseObjectStorage<List<Subject>> {
 
   @override
   void listen(void Function(List<Subject>) callback, String key) {
-    Hive.box<List<Subject>>(
-      _boxName,
-    ).watch(key: key).listen((event) => callback(event.value));
+    _box.watch(key: key).listen((event) => callback(event.value));
   }
 
   @override

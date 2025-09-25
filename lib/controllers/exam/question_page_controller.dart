@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/models/models.dart';
+import 'package:entrance_tricks/views/exam/exam_result_page.dart';
 
 class QuestionPageController extends GetxController {
   // Observable variables
@@ -120,6 +121,13 @@ class QuestionPageController extends GetxController {
   void submitQuiz() {
     _timer?.cancel();
     isCompleted.value = true;
+    Get.to(
+      () => ExamResultPage(
+        score: calculateCorrectAnswers(),
+        totalQuestions: questions.length,
+        correctAnswers: calculateCorrectAnswers(),
+      ),
+    );
   }
 
   void reviewAnswers() {
@@ -141,8 +149,11 @@ class QuestionPageController extends GetxController {
       final userAnswer = userAnswers[i];
       if (userAnswer != null) {
         final question = questions[i];
-        if (question.choices.isNotEmpty &&
-            userAnswer == question.choices.first.id) {
+        // Find the correct choice by checking isCorrect property
+        final correctChoice = question.choices.firstWhereOrNull(
+          (choice) => choice.isCorrect,
+        );
+        if (userAnswer == correctChoice?.id) {
           correct++;
         }
       }

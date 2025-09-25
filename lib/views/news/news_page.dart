@@ -54,8 +54,6 @@ class NewsPage extends StatelessWidget {
     BuildContext context,
     NewsController controller,
   ) {
-    final featuredNews = controller.news.first;
-
     return Container(
       margin: const EdgeInsets.all(20),
       height: 280,
@@ -80,7 +78,7 @@ class NewsPage extends StatelessWidget {
               decoration: BoxDecoration(
                 image: DecorationImage(
                   image: NetworkImage(
-                    featuredNews.coverImage ??
+                    controller.featuredNews?.coverImage ??
                         'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400&h=280&fit=crop',
                   ),
                   fit: BoxFit.cover,
@@ -142,7 +140,7 @@ class NewsPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  featuredNews.category.capitalize!,
+                  controller.featuredNews?.category.capitalize ?? '',
                   style: TextStyle(
                     color: const Color(0xFF667eea),
                     fontSize: 12,
@@ -163,7 +161,7 @@ class NewsPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      featuredNews.title.capitalize!,
+                      controller.featuredNews?.title.capitalize ?? '',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 20,
@@ -183,7 +181,10 @@ class NewsPage extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          toAgoDate(featuredNews.createdAt),
+                          toAgoDate(
+                            controller.featuredNews?.createdAt ??
+                                DateTime.now(),
+                          ),
                           style: const TextStyle(
                             color: Colors.white70,
                             fontSize: 14,
@@ -191,8 +192,9 @@ class NewsPage extends StatelessWidget {
                         ),
                         const Spacer(),
                         GestureDetector(
-                          onTap: () =>
-                              controller.openNewsDetail(featuredNews.id),
+                          onTap: () => controller.openNewsDetail(
+                            controller.featuredNews?.id ?? 0,
+                          ),
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
@@ -231,11 +233,6 @@ class NewsPage extends StatelessWidget {
     BuildContext context,
     NewsController controller,
   ) {
-    final categories = controller.news
-        .map((e) => e.category.capitalize!)
-        .toSet()
-        .toList();
-
     return SliverToBoxAdapter(
       child: Container(
         height: 50,
@@ -243,18 +240,15 @@ class NewsPage extends StatelessWidget {
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          itemCount: categories.length,
+          itemCount: controller.categories.length,
           itemBuilder: (context, index) {
-            final category = categories[index];
-            final isSelected =
-                index == 0; // TODO: Implement category selection logic
+            final category = controller.categories[index];
+            final isSelected = index == controller.selectedCategoryIndex;
 
             return Container(
               margin: const EdgeInsets.only(right: 12),
               child: GestureDetector(
-                onTap: () {
-                  // TODO: Implement category filtering
-                },
+                onTap: () => controller.changeCategory(index),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,

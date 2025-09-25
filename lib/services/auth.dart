@@ -42,4 +42,12 @@ class AuthService extends GetxService {
     authToken.value = null;
     user.value = null;
   }
+
+  void listenToken(void Function(AuthToken?) callback) {
+    _hiveAuthStorage.listen(callback, 'authToken');
+  }
+
+  void listenUser(void Function(User?) callback) {
+    _hiveUserStorage.listen(callback, 'user');
+  }
 }

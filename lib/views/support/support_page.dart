@@ -469,8 +469,7 @@ class SupportPage extends StatelessWidget {
   }
 
   void _launchEmail() async {
-    const emailUrl =
-        'mailto:support@entrancetricks.com?subject=Support Request';
+    const emailUrl = 'mailto:entrancetricks@gmail.com?subject=Support Request';
     final uri = Uri.parse(emailUrl);
 
     try {
@@ -495,7 +494,7 @@ class SupportPage extends StatelessWidget {
   }
 
   void _launchPhone() async {
-    const phoneUrl = 'tel:+251919568649';
+    const phoneUrl = 'tel:+251920308061';
     final uri = Uri.parse(phoneUrl);
 
     try {

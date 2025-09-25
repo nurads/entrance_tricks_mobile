@@ -20,21 +20,11 @@ class ProfileController extends GetxController {
   final nameEditController = TextEditingController();
 
   final CoreService _coreService = Get.find<CoreService>();
+  User? _user;
+  User? get user => _user;
+  String get fullName => "${_user?.firstName} ${_user?.lastName ?? ''}";
 
   late StreamSubscription<InternetStatus> _internetStatusSubscription;
-
-  String get userName => _userName;
-
-  String get userClass => _userClass;
-
-  String _userName = '';
-  String _userPhone = '';
-  String _userClass = '';
-  String get userPhone => _userPhone;
-
-  String _profileImageUrl =
-      'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face';
-  String get profileImageUrl => _profileImageUrl;
 
   List<Grade> _availableGrades = [];
   List<Grade> get availableGrades => _availableGrades;
@@ -54,8 +44,18 @@ class ProfileController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+
     loadUserData();
+
     loadGrades();
+
+    _user = _authService.user.value;
+
+    _authService.listenUser((event) {
+      _user = event;
+      update();
+    });
+
     _internetStatusSubscription = InternetConnection().onStatusChange.listen((
       event,
     ) {
@@ -83,10 +83,6 @@ class ProfileController extends GetxController {
         final user = await UserService().getUser();
 
         await AuthService().saveUser(user);
-        _userName = "${user.firstName} ${user.lastName ?? ''}".trim();
-        _userClass = user.grade.name;
-        _userPhone = user.phoneNumber;
-        _selectedGrade = user.grade;
       } catch (e) {
         logger.e(e);
       } finally {
@@ -94,18 +90,12 @@ class ProfileController extends GetxController {
         update();
       }
     } else {
-      _userName =
-          "${_authService.user.value?.firstName ?? ''} ${_authService.user.value?.lastName ?? ''}"
-              .trim();
-
-      _userClass = _authService.user.value?.grade.name ?? '';
-      _userPhone = _authService.user.value?.phoneNumber ?? '';
       _selectedGrade = _authService.user.value?.grade;
       update();
     }
+    phoneEditController.text = user?.phoneNumber ?? '';
+    nameEditController.text = fullName;
 
-    phoneEditController.text = _userPhone;
-    nameEditController.text = _userName;
     _currentGrade = _authService.user.value?.grade;
 
     _isLoading = false;
@@ -124,14 +114,14 @@ class ProfileController extends GetxController {
   }
 
   void updateUserName(String name) {
-    if (name.trim() != _userName) {
+    if (name.trim() != fullName) {
       hasChangeOnEditProfile = true;
     }
     update();
   }
 
   void updateUserPhone(String phone) {
-    if (phone.trim() != _userPhone) {
+    if (phone.trim() != user?.phoneNumber) {
       hasChangeOnEditProfile = true;
     }
     update();
@@ -161,10 +151,7 @@ class ProfileController extends GetxController {
           grade: _selectedGrade?.id ?? 0,
         );
         await AuthService().saveUser(user);
-        _userName = "${user.firstName} ${user.lastName ?? ''}".trim();
-        _userClass = user.grade.name;
-        _userPhone = user.phoneNumber;
-        _selectedGrade = user.grade;
+        hasChangeOnEditProfile = false;
       } catch (e) {
         logger.e(e);
         AppSnackbar.showError('Error', 'Failed to update user');
@@ -172,14 +159,16 @@ class ProfileController extends GetxController {
     } else {
       AppSnackbar.showError('Error', 'No internet connection');
     }
-    nameEditController.text = _userName;
-    phoneEditController.text = _userPhone;
 
-    _selectedGrade = _authService.user.value?.grade;
+    _selectedGrade = user?.grade;
+
+    phoneEditController.text = user?.phoneNumber ?? '';
+    nameEditController.text = fullName;
 
     logger.i('Updated user to ${_authService.user.value?.grade.name}');
     isUpdating = false;
     update();
+    Get.back();
   }
 
   void navigateToEditProfile() {

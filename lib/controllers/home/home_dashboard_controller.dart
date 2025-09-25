@@ -1,3 +1,4 @@
+import 'package:entrance_tricks/utils/storages/storages.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/views/views.dart';
 import 'package:entrance_tricks/controllers/home/main_navigation_controller.dart';
@@ -23,6 +24,7 @@ class HomeDashboardController extends GetxController {
 
   List<Subject> _subjects = [];
   List<Subject> get subjects => _subjects;
+  User? _user;
 
   @override
   void onInit() async {
@@ -30,6 +32,7 @@ class HomeDashboardController extends GetxController {
 
     loadSubjects();
     _deviceInfo = await UserDevice.getDeviceInfo();
+    _user = await HiveUserStorage().getUser();
 
     InternetConnection().onStatusChange.listen((event) {
       logger.i('Internet status changed: $event');
@@ -37,6 +40,12 @@ class HomeDashboardController extends GetxController {
         loadSubjects();
       }
     });
+
+    HiveUserStorage().listen((event) {
+      _user = event;
+      loadSubjects();
+      update();
+    }, 'user');
   }
 
   Future<void> loadSubjects() async {
@@ -45,7 +54,7 @@ class HomeDashboardController extends GetxController {
     if (_coreService.hasInternet) {
       try {
         logger.i('Loading subjects from api');
-        final gradeId = _coreService.authService.user.value?.grade.id;
+        final gradeId = _user?.grade.id;
 
         _subjects = await SubjectsService().getSubjects(
           _deviceInfo.id,

@@ -104,7 +104,7 @@ class ProfilePage extends StatelessWidget {
                   ),
                   SizedBox(height: 12),
                   Text(
-                    controller.userName,
+                    controller.fullName,
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -112,7 +112,7 @@ class ProfilePage extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    controller.userClass,
+                    controller.user?.grade.name ?? '',
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.white.withValues(alpha: 0.9),
@@ -131,7 +131,6 @@ class ProfilePage extends StatelessWidget {
     BuildContext context,
     ProfileController controller,
   ) {
-    final authService = Get.find<AuthService>();
     return Container(
       padding: EdgeInsets.all(20),
       child: Column(
@@ -152,7 +151,7 @@ class ProfilePage extends StatelessWidget {
             context,
             Icons.person_outline,
             "Full Name",
-            controller.userName,
+            controller.fullName,
           ),
 
           SizedBox(height: 20),
@@ -161,7 +160,7 @@ class ProfilePage extends StatelessWidget {
             context,
             Icons.school_outlined,
             "Class/Grade",
-            authService.user.value?.grade.name ?? '',
+            controller.user?.grade.name ?? '',
           ),
 
           SizedBox(height: 20),
@@ -170,7 +169,7 @@ class ProfilePage extends StatelessWidget {
             context,
             Icons.phone_outlined,
             "Phone Number",
-            authService.user.value?.phoneNumber ?? '',
+            controller.user?.phoneNumber ?? '',
           ),
 
           SizedBox(height: 40),

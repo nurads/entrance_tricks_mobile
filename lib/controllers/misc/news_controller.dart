@@ -10,6 +10,15 @@ class NewsController extends GetxController {
 
   List<News> _news = [];
   List<News> get news => _news;
+  List<News> _allNews = [];
+  News? featuredNews;
+  int selectedCategoryIndex = 0;
+  List<String> categories = [];
+
+  setSelectedCategoryIndex(int index) {
+    selectedCategoryIndex = index;
+    update();
+  }
 
   @override
   void onInit() {
@@ -23,6 +32,9 @@ class NewsController extends GetxController {
 
     try {
       _news = await NewsService().getNews();
+      _allNews = _news;
+      featuredNews = _allNews.first;
+      categories = _allNews.map((e) => e.category).toSet().toList();
     } catch (e) {
       Get.snackbar('Error', 'Failed to load news');
       logger.e(e);
@@ -35,6 +47,13 @@ class NewsController extends GetxController {
   void openNewsDetail(int newsId) {
     final news = _news.firstWhere((n) => n.id == newsId);
     Get.to(() => NewsDetailPage(news: news));
+  }
+
+  void changeCategory(int index) {
+    selectedCategoryIndex = index;
+    final category = categories[index];
+    _news = _allNews.where((n) => n.category == category).toList();
+    update();
   }
 
   void refreshNews() {

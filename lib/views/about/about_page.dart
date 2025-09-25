@@ -63,15 +63,15 @@ class _AboutPageState extends State<AboutPage> {
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.3),
+                    color: Colors.white.withValues(alpha: 0.3),
                     width: 1,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -108,7 +108,7 @@ class _AboutPageState extends State<AboutPage> {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withValues(alpha: 0.8),
                     letterSpacing: 0.2,
                   ),
                 ),
@@ -121,7 +121,7 @@ class _AboutPageState extends State<AboutPage> {
             width: 8,
             height: 8,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.6),
+              color: Colors.white.withValues(alpha: 0.6),
               shape: BoxShape.circle,
             ),
           ),
@@ -136,30 +136,30 @@ class _AboutPageState extends State<AboutPage> {
       child: Column(
         children: [
           const SizedBox(height: 20),
-          
+
           // App Info Card
           _buildAppInfoCard(),
-          
+
           const SizedBox(height: 24),
-          
+
           // Mission & Vision
           _buildMissionVisionCard(),
-          
+
           const SizedBox(height: 24),
-          
+
           // Features
           _buildFeaturesCard(),
-          
+
           const SizedBox(height: 24),
-          
+
           // Team & Contact
           _buildTeamContactCard(),
-          
+
           const SizedBox(height: 24),
-          
+
           // App Version
           _buildVersionCard(),
-          
+
           const SizedBox(height: 24),
         ],
       ),
@@ -174,7 +174,7 @@ class _AboutPageState extends State<AboutPage> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -198,9 +198,9 @@ class _AboutPageState extends State<AboutPage> {
               size: 50,
             ),
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           const Text(
             'Entrance Tricks',
             style: TextStyle(
@@ -209,9 +209,9 @@ class _AboutPageState extends State<AboutPage> {
               color: Colors.black87,
             ),
           ),
-          
+
           const SizedBox(height: 8),
-          
+
           Text(
             'Your Ultimate Study Companion',
             style: TextStyle(
@@ -220,9 +220,9 @@ class _AboutPageState extends State<AboutPage> {
               fontWeight: FontWeight.w500,
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           Text(
             'Entrance Tricks is a comprehensive educational platform designed to help students excel in their entrance examinations. We provide high-quality study materials, practice tests, and expert guidance to ensure your success.',
             style: TextStyle(
@@ -245,7 +245,7 @@ class _AboutPageState extends State<AboutPage> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -262,22 +262,24 @@ class _AboutPageState extends State<AboutPage> {
               color: Colors.black87,
             ),
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           _buildMissionVisionItem(
             icon: Icons.flag_rounded,
             title: 'Mission',
-            description: 'To democratize quality education and make entrance exam preparation accessible to every student, regardless of their background or location.',
+            description:
+                'To democratize quality education and make entrance exam preparation accessible to every student, regardless of their background or location.',
             color: const Color(0xFF667eea),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           _buildMissionVisionItem(
             icon: Icons.visibility_rounded,
             title: 'Vision',
-            description: 'To become the leading educational platform that transforms how students prepare for entrance examinations, fostering academic excellence and career success.',
+            description:
+                'To become the leading educational platform that transforms how students prepare for entrance examinations, fostering academic excellence and career success.',
             color: const Color(0xFF764ba2),
           ),
         ],
@@ -298,18 +300,14 @@ class _AboutPageState extends State<AboutPage> {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(
-            icon,
-            color: color,
-            size: 20,
-          ),
+          child: Icon(icon, color: color, size: 20),
         ),
-        
+
         const SizedBox(width: 16),
-        
+
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -346,7 +344,7 @@ class _AboutPageState extends State<AboutPage> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -363,33 +361,27 @@ class _AboutPageState extends State<AboutPage> {
               color: Colors.black87,
             ),
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           _buildFeatureItem(
             icon: Icons.video_library_rounded,
             title: 'Video Lessons',
             description: 'High-quality video content from expert teachers',
           ),
-          
+
           _buildFeatureItem(
             icon: Icons.quiz_rounded,
             title: 'Practice Tests',
             description: 'Comprehensive practice tests and mock exams',
           ),
-          
+
           _buildFeatureItem(
             icon: Icons.description_rounded,
             title: 'Study Materials',
             description: 'Downloadable notes and study guides',
           ),
-          
-          _buildFeatureItem(
-            icon: Icons.analytics_rounded,
-            title: 'Progress Tracking',
-            description: 'Monitor your learning progress and performance',
-          ),
-          
+
           _buildFeatureItem(
             icon: Icons.offline_bolt_rounded,
             title: 'Offline Access',
@@ -413,7 +405,7 @@ class _AboutPageState extends State<AboutPage> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: const Color(0xFF667eea).withOpacity(0.1),
+              color: const Color(0xFF667eea).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Icon(
@@ -422,9 +414,9 @@ class _AboutPageState extends State<AboutPage> {
               size: 20,
             ),
           ),
-          
+
           const SizedBox(width: 16),
-          
+
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -440,10 +432,7 @@ class _AboutPageState extends State<AboutPage> {
                 const SizedBox(height: 2),
                 Text(
                   description,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey.shade600,
-                  ),
+                  style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
                 ),
               ],
             ),
@@ -461,7 +450,7 @@ class _AboutPageState extends State<AboutPage> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -478,9 +467,9 @@ class _AboutPageState extends State<AboutPage> {
               color: Colors.black87,
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           Text(
             'We are a dedicated team of educators, developers, and designers committed to providing the best learning experience for students.',
             style: TextStyle(
@@ -489,23 +478,23 @@ class _AboutPageState extends State<AboutPage> {
               height: 1.5,
             ),
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           _buildContactItem(
             icon: Icons.email_rounded,
             title: 'Email',
-            value: 'info@entrancetricks.com',
+            value: 'entrancetricks@gmail.com',
             onTap: () => _launchEmail(),
           ),
-          
+
           _buildContactItem(
             icon: Icons.phone_rounded,
             title: 'Phone',
-            value: '+251 911 234 567',
+            value: '0920308061',
             onTap: () => _launchPhone(),
           ),
-          
+
           _buildContactItem(
             icon: Icons.language_rounded,
             title: 'Website',
@@ -534,14 +523,10 @@ class _AboutPageState extends State<AboutPage> {
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Row(
               children: [
-                Icon(
-                  icon,
-                  color: const Color(0xFF667eea),
-                  size: 20,
-                ),
-                
+                Icon(icon, color: const Color(0xFF667eea), size: 20),
+
                 const SizedBox(width: 12),
-                
+
                 Text(
                   '$title: ',
                   style: const TextStyle(
@@ -550,17 +535,14 @@ class _AboutPageState extends State<AboutPage> {
                     color: Colors.black87,
                   ),
                 ),
-                
+
                 Expanded(
                   child: Text(
                     value,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade700,
-                    ),
+                    style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
                   ),
                 ),
-                
+
                 Icon(
                   Icons.arrow_forward_ios_rounded,
                   color: Colors.grey.shade400,
@@ -578,10 +560,10 @@ class _AboutPageState extends State<AboutPage> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
+        color: Colors.white.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: Colors.white.withOpacity(0.2),
+          color: Colors.white.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -592,28 +574,27 @@ class _AboutPageState extends State<AboutPage> {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: Colors.white,
+              color: Colors.black,
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           if (packageInfo != null) ...[
             _buildInfoRow('Version', packageInfo!.version),
             _buildInfoRow('Build', packageInfo!.buildNumber),
-            _buildInfoRow('Package', packageInfo!.packageName),
           ] else
             const CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
             ),
-          
+
           const SizedBox(height: 16),
-          
+
           Text(
             '© 2024 Entrance Tricks. All rights reserved.',
             style: TextStyle(
               fontSize: 12,
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.grey.withValues(alpha: 0.8),
             ),
             textAlign: TextAlign.center,
           ),
@@ -632,7 +613,7 @@ class _AboutPageState extends State<AboutPage> {
             label,
             style: TextStyle(
               fontSize: 14,
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.grey.withValues(alpha: 0.8),
             ),
           ),
           Text(
@@ -640,7 +621,7 @@ class _AboutPageState extends State<AboutPage> {
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: Colors.white,
+              color: Colors.black,
             ),
           ),
         ],
@@ -651,7 +632,7 @@ class _AboutPageState extends State<AboutPage> {
   void _launchEmail() async {
     const emailUrl = 'mailto:info@entrancetricks.com';
     final uri = Uri.parse(emailUrl);
-    
+
     try {
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri);
@@ -676,7 +657,7 @@ class _AboutPageState extends State<AboutPage> {
   void _launchPhone() async {
     const phoneUrl = 'tel:+251911234567';
     final uri = Uri.parse(phoneUrl);
-    
+
     try {
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri);
@@ -701,7 +682,7 @@ class _AboutPageState extends State<AboutPage> {
   void _launchWebsite() async {
     const websiteUrl = 'https://www.entrancetricks.com';
     final uri = Uri.parse(websiteUrl);
-    
+
     try {
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -723,4 +704,3 @@ class _AboutPageState extends State<AboutPage> {
     }
   }
 }
-

@@ -221,14 +221,4 @@ class EditProfilePage extends StatelessWidget {
       ),
     );
   }
-
-  void _saveProfile(ProfileController controller) {
-    Get.snackbar(
-      'Success',
-      'Profile updated successfully',
-      backgroundColor: Colors.green,
-      colorText: Colors.white,
-    );
-    Get.back();
-  }
 }

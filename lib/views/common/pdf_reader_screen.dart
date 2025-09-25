@@ -68,7 +68,6 @@ class PDFReaderScreen extends StatelessWidget {
           }
           return SizedBox.shrink();
         }),
-        IconButton(onPressed: controller.sharePDF, icon: Icon(Icons.share)),
       ],
     );
   }
