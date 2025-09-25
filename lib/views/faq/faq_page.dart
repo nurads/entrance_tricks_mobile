@@ -105,7 +105,8 @@ class FAQPage extends StatelessWidget {
 
           // Search Button
           GestureDetector(
-            onTap: () => _showSearchDialog(),
+            onTap: () =>
+                showSearch(context: context, delegate: FaqSearchDelegate()),
             child: MouseRegion(
               cursor: SystemMouseCursors.click,
               child: Container(
@@ -342,6 +343,121 @@ class FAQPage extends StatelessWidget {
             child: const Text('Search'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class FaqSearchDelegate extends SearchDelegate<FAQ> {
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return [
+      IconButton(
+        onPressed: () {
+          query = '';
+        },
+        icon: Icon(Icons.close),
+      ),
+    ];
+  }
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+      onPressed: () {
+        Get.back();
+      },
+      icon: Icon(Icons.arrow_back),
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    final controller = Get.find<FAQController>();
+    return FutureBuilder<List<FAQ>>(
+      future: controller.searchFaq(query),
+      builder: (context, snapshot) {
+        return snapshot.data?.isEmpty ?? true
+            ? _buildNoResultsState(context)
+            : _buildSearchResults(context, snapshot.data!);
+      },
+    );
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    final controller = Get.find<FAQController>();
+    return ListView.builder(
+      itemBuilder: (context, index) =>
+          _buildFAQItem(context, controller.faqs[index], index),
+      itemCount: controller.faqs.length,
+    );
+  }
+
+  Widget _buildNoResultsState(BuildContext context) {
+    return Center(child: Text('No results found'));
+  }
+
+  Widget _buildSearchResults(BuildContext context, List<FAQ> faqs) {
+    return ListView.builder(
+      itemBuilder: (context, index) =>
+          _buildFAQItem(context, faqs[index], index),
+      itemCount: faqs.length,
+    );
+  }
+
+  Widget _buildFAQItem(BuildContext context, FAQ item, int index) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+          leading: Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: const Color(0xFF667eea).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.help_outline_rounded,
+              color: Color(0xFF667eea),
+              size: 18,
+            ),
+          ),
+          title: Text(
+            item.question,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+          ),
+          children: [
+            Text(
+              item.answer,
+              textAlign: TextAlign.start,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade700,
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

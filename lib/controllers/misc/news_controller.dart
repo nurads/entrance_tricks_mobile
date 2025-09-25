@@ -59,4 +59,10 @@ class NewsController extends GetxController {
   void refreshNews() {
     loadNews();
   }
+
+  Future<List<News>> searchNews(String query) async {
+    return _news
+        .where((n) => n.title.toLowerCase().contains(query.toLowerCase()))
+        .toList();
+  }
 }

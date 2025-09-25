@@ -30,4 +30,12 @@ class FAQController extends GetxController {
     loadFaq();
     super.onInit();
   }
+
+  Future<List<FAQ>> searchFaq(String query) async {
+    return faqs
+        .where(
+          (faq) => faq.question.toLowerCase().contains(query.toLowerCase()),
+        )
+        .toList();
+  }
 }

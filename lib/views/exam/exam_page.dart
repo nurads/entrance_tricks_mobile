@@ -28,7 +28,8 @@ class ExamPage extends StatelessWidget {
           automaticallyImplyLeading: false, // Change this line
           actions: [
             IconButton(
-              onPressed: () {},
+              onPressed: () =>
+                  showSearch(context: context, delegate: ExamSearchDelegate()),
               icon: Icon(Icons.search, color: Colors.black87),
             ),
           ],
@@ -228,388 +229,344 @@ class ExamPage extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildExamList(BuildContext context, ExamController controller) {
-    if (controller.isLoading) {
-      return Center(child: CircularProgressIndicator());
-    }
+Widget _buildExamList(BuildContext context, ExamController controller) {
+  if (controller.isLoading) {
+    return Center(child: CircularProgressIndicator());
+  }
 
-    if (controller.error != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error, size: 48, color: Colors.red),
-            SizedBox(height: 16),
-            Text(
-              'Error loading exams',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 8),
-            Text(
-              controller.error!,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey[600]),
-            ),
-            SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => controller.refreshExams(),
-              child: Text('Retry'),
-            ),
-          ],
-        ),
-      );
-    }
+  if (controller.error != null) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error, size: 48, color: Colors.red),
+          SizedBox(height: 16),
+          Text(
+            'Error loading exams',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 8),
+          Text(
+            controller.error!,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.grey[600]),
+          ),
+          SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () => controller.refreshExams(),
+            child: Text('Retry'),
+          ),
+        ],
+      ),
+    );
+  }
 
-    if (controller.exams.isEmpty) {
-      return RefreshIndicator(
-        onRefresh: controller.refreshExams,
-        child: SingleChildScrollView(
-          physics: AlwaysScrollableScrollPhysics(),
-          child: SizedBox(
-            height: MediaQuery.of(context).size.height * 0.6,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.quiz, size: 48, color: Colors.grey),
-                  SizedBox(height: 16),
-                  Text(
-                    'No exams available',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    'Check back later for new exams',
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                ],
-              ),
+  if (controller.exams.isEmpty) {
+    return RefreshIndicator(
+      onRefresh: controller.refreshExams,
+      child: SingleChildScrollView(
+        physics: AlwaysScrollableScrollPhysics(),
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height * 0.6,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.quiz, size: 48, color: Colors.grey),
+                SizedBox(height: 16),
+                Text(
+                  'No exams available',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Check back later for new exams',
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+              ],
             ),
           ),
         ),
-      );
-    }
+      ),
+    );
+  }
 
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(bottom: 12),
-                  child: Text(
-                    'Available Exams',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
+  return Padding(
+    padding: EdgeInsets.symmetric(horizontal: 10),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.only(bottom: 12),
+                child: Text(
+                  'Available Exams',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
                   ),
                 ),
               ),
-              IconButton(
-                onPressed: () => controller.refreshExams(),
-                icon: Icon(Icons.refresh, color: Colors.black87, size: 20),
-                tooltip: 'Refresh exams',
-              ),
-            ],
-          ),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: controller.refreshExams,
-              child: ListView.builder(
-                physics: AlwaysScrollableScrollPhysics(),
-                itemCount: controller.exams.length,
-                itemBuilder: (context, index) {
-                  final exam = controller.exams[index];
-                  return GetBuilder<DownloadsController>(
-                    builder: (downloadsController) => _buildExamCard(
-                      context,
-                      exam,
-                      controller,
-                      downloadsController,
-                    ),
-                  );
-                },
-              ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildExamCard(
-    BuildContext context,
-    Exam exam,
-    ExamController controller,
-    DownloadsController downloadsController,
-  ) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: exam.isLocked ? Colors.grey[50] : Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: exam.isLocked
-              ? Colors.grey.withValues(alpha: 0.3)
-              : Colors.grey.withValues(alpha: 0.2),
-          width: 1,
+            IconButton(
+              onPressed: () => controller.refreshExams(),
+              icon: Icon(Icons.refresh, color: Colors.black87, size: 20),
+              tooltip: 'Refresh exams',
+            ),
+          ],
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: Offset(0, 1),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(12),
-        child: Row(
-          children: [
-            // Exam Icon with Lock Status
-            Container(
-              width: 45,
-              height: 45,
-              decoration: BoxDecoration(
-                color: exam.isLocked ? Colors.grey[300] : Colors.blue[100],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Stack(
-                children: [
-                  Center(
-                    child: Icon(
-                      Icons.quiz,
-                      color: exam.isLocked
-                          ? Colors.grey[500]
-                          : Colors.blue[600],
-                      size: 24,
-                    ),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: controller.refreshExams,
+            child: ListView.builder(
+              physics: AlwaysScrollableScrollPhysics(),
+              itemCount: controller.exams.length,
+              itemBuilder: (context, index) {
+                final exam = controller.exams[index];
+                return GetBuilder<DownloadsController>(
+                  builder: (downloadsController) => _buildExamCard(
+                    context,
+                    exam,
+                    controller,
+                    downloadsController,
                   ),
-                  if (exam.isLocked)
-                    Positioned(
-                      top: 2,
-                      right: 2,
-                      child: Container(
-                        width: 12,
-                        height: 12,
-                        decoration: BoxDecoration(
-                          color: Colors.red[600],
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(Icons.lock, color: Colors.white, size: 8),
-                      ),
-                    ),
-                ],
-              ),
+                );
+              },
             ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
 
-            SizedBox(width: 12),
-
-            // Exam Details - Enhanced with download status
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    exam.title,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: exam.isLocked
-                          ? Colors.grey[600]
-                          : Colors.blue[700],
+Widget _buildExamCard(
+  BuildContext context,
+  Exam exam,
+  ExamController controller,
+  DownloadsController downloadsController,
+) {
+  return Container(
+    margin: EdgeInsets.only(bottom: 8),
+    decoration: BoxDecoration(
+      color: exam.isLocked ? Colors.grey[50] : Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(
+        color: exam.isLocked
+            ? Colors.grey.withValues(alpha: 0.3)
+            : Colors.grey.withValues(alpha: 0.2),
+        width: 1,
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.grey.withValues(alpha: 0.05),
+          blurRadius: 8,
+          offset: Offset(0, 1),
+        ),
+      ],
+    ),
+    child: Padding(
+      padding: EdgeInsets.all(12),
+      child: Row(
+        children: [
+          // Exam Icon with Lock Status
+          Container(
+            width: 45,
+            height: 45,
+            decoration: BoxDecoration(
+              color: exam.isLocked ? Colors.grey[300] : Colors.blue[100],
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Stack(
+              children: [
+                Center(
+                  child: Icon(
+                    Icons.quiz,
+                    color: exam.isLocked ? Colors.grey[500] : Colors.blue[600],
+                    size: 24,
+                  ),
+                ),
+                if (exam.isLocked)
+                  Positioned(
+                    top: 2,
+                    right: 2,
+                    child: Container(
+                      width: 12,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: Colors.red[600],
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.lock, color: Colors.white, size: 8),
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.quiz_outlined,
-                        size: 12,
-                        color: Colors.grey[500],
-                      ),
-                      SizedBox(width: 4),
-                      Text(
-                        "${exam.totalQuestions} Q",
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                      ),
-                      SizedBox(width: 12),
-                      Icon(
-                        Icons.access_time,
-                        size: 12,
-                        color: Colors.grey[500],
-                      ),
-                      SizedBox(width: 4),
-                      Text(
-                        "${exam.duration}m",
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                      ),
-                    ],
+              ],
+            ),
+          ),
+
+          SizedBox(width: 12),
+
+          // Exam Details - Enhanced with download status
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  exam.title,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: exam.isLocked ? Colors.grey[600] : Colors.blue[700],
                   ),
-                  SizedBox(height: 4),
-                  // Download status indicator
-                  Row(
-                    children: [
-                      Icon(
-                        exam.isDownloaded
-                            ? Icons.download_done
-                            : Icons.cloud_download,
-                        size: 12,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.quiz_outlined,
+                      size: 12,
+                      color: Colors.grey[500],
+                    ),
+                    SizedBox(width: 4),
+                    Text(
+                      "${exam.totalQuestions} Q",
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    ),
+                    SizedBox(width: 12),
+                    Icon(Icons.access_time, size: 12, color: Colors.grey[500]),
+                    SizedBox(width: 4),
+                    Text(
+                      "${exam.duration}m",
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 4),
+                // Download status indicator
+                Row(
+                  children: [
+                    Icon(
+                      exam.isDownloaded
+                          ? Icons.download_done
+                          : Icons.cloud_download,
+                      size: 12,
+                      color: exam.isDownloaded
+                          ? Colors.green[600]
+                          : Colors.orange[600],
+                    ),
+                    SizedBox(width: 4),
+                    Text(
+                      exam.isDownloaded ? "Downloaded" : "Not Downloaded",
+                      style: TextStyle(
+                        fontSize: 11,
                         color: exam.isDownloaded
                             ? Colors.green[600]
                             : Colors.orange[600],
+                        fontWeight: FontWeight.w500,
                       ),
-                      SizedBox(width: 4),
-                      Text(
-                        exam.isDownloaded ? "Downloaded" : "Not Downloaded",
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: exam.isDownloaded
-                              ? Colors.green[600]
-                              : Colors.orange[600],
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                  ],
+                ),
+              ],
             ),
+          ),
 
-            SizedBox(width: 8),
+          SizedBox(width: 8),
 
-            // Action Button - Enhanced with download functionality
-            SizedBox(
-              width: 85,
-              child: _buildExamActionButton(
-                exam,
-                controller,
-                downloadsController,
-              ),
+          // Action Button - Enhanced with download functionality
+          SizedBox(
+            width: 85,
+            child: buildExamActionButton(exam, controller, downloadsController),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+Widget buildExamActionButton(
+  Exam exam,
+  ExamController controller,
+  DownloadsController downloadsController,
+) {
+  if (exam.isLocked) {
+    // Locked exam
+    return ElevatedButton(
+      onPressed: null,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.grey[200],
+        foregroundColor: Colors.grey[500],
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+        padding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+        minimumSize: Size(0, 0),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.lock, size: 10, color: Colors.grey[500]),
+          SizedBox(width: 3),
+          Flexible(
+            child: Text(
+              "Locked",
+              style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
+              overflow: TextOverflow.ellipsis,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildExamActionButton(
-    Exam exam,
-    ExamController controller,
-    DownloadsController downloadsController,
-  ) {
-    if (exam.isLocked) {
-      // Locked exam
-      return ElevatedButton(
-        onPressed: null,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.grey[200],
-          foregroundColor: Colors.grey[500],
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-          padding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-          minimumSize: Size(0, 0),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.lock, size: 10, color: Colors.grey[500]),
-            SizedBox(width: 3),
-            Flexible(
-              child: Text(
-                "Locked",
-                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (exam.isLoadingQuestion) {
-      // Downloading exam
-      return ElevatedButton(
-        onPressed: null,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.orange[100],
-          foregroundColor: Colors.orange[700],
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-          padding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-          minimumSize: Size(0, 0),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: 10,
-              height: 10,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.orange[700]!),
-              ),
-            ),
-            SizedBox(width: 3),
-            Flexible(
-              child: Text(
-                "Loading",
-                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (exam.isDownloaded) {
-      // Downloaded exam - can start
-      return ElevatedButton(
-        onPressed: () => downloadsController.startExam(exam),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.green[600],
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-          padding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-          minimumSize: Size(0, 0),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.play_arrow, size: 10, color: Colors.white),
-            SizedBox(width: 3),
-            Flexible(
-              child: Text(
-                "Start",
-                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    // Not downloaded exam - download and start
+  if (exam.isLoadingQuestion) {
+    // Downloading exam
     return ElevatedButton(
-      onPressed: () async {
-        await downloadsController.downloadExam(exam);
-        if (exam.isDownloaded) {
-          downloadsController.startExam(exam);
-        }
-      },
+      onPressed: null,
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.blue[600],
+        backgroundColor: Colors.orange[100],
+        foregroundColor: Colors.orange[700],
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+        padding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+        minimumSize: Size(0, 0),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 10,
+            height: 10,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.orange[700]!),
+            ),
+          ),
+          SizedBox(width: 3),
+          Flexible(
+            child: Text(
+              "Loading",
+              style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  if (exam.isDownloaded) {
+    // Downloaded exam - can start
+    return ElevatedButton(
+      onPressed: () => downloadsController.startExam(exam),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.green[600],
         foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         padding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
@@ -619,16 +576,118 @@ class ExamPage extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.download, size: 10, color: Colors.white),
+          Icon(Icons.play_arrow, size: 10, color: Colors.white),
           SizedBox(width: 3),
           Flexible(
             child: Text(
-              "Download",
+              "Start",
               style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
               overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // Not downloaded exam - download and start
+  return ElevatedButton(
+    onPressed: () async {
+      await downloadsController.downloadExam(exam);
+      if (exam.isDownloaded) {
+        downloadsController.startExam(exam);
+      }
+    },
+    style: ElevatedButton.styleFrom(
+      backgroundColor: Colors.blue[600],
+      foregroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+      minimumSize: Size(0, 0),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(Icons.download, size: 10, color: Colors.white),
+        SizedBox(width: 3),
+        Flexible(
+          child: Text(
+            "Download",
+            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class ExamSearchDelegate extends SearchDelegate<Exam> {
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return [
+      IconButton(
+        onPressed: () {
+          query = '';
+        },
+        icon: Icon(Icons.close),
+      ),
+    ];
+  }
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+      onPressed: () {
+        Get.back();
+      },
+      icon: Icon(Icons.arrow_back),
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    final controller = Get.find<ExamController>();
+    return FutureBuilder<List<Exam>>(
+      future: controller.searchExams(query),
+      builder: (context, snapshot) {
+        return snapshot.data?.isEmpty ?? true
+            ? _buildNoResultsState(context)
+            : _buildSearchResults(context, snapshot.data!);
+      },
+    );
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    final controller = Get.find<ExamController>();
+    final downloadsController = Get.find<DownloadsController>();
+    return ListView.builder(
+      itemCount: controller.exams.length,
+      itemBuilder: (context, index) => _buildExamCard(
+        context,
+        controller.exams[index],
+        controller,
+        downloadsController,
+      ),
+    );
+  }
+
+  Widget _buildNoResultsState(BuildContext context) {
+    return Center(child: Text('No results found'));
+  }
+
+  Widget _buildSearchResults(BuildContext context, List<Exam> exams) {
+    final controller = Get.find<ExamController>();
+    final downloadsController = Get.find<DownloadsController>();
+    return ListView.builder(
+      itemCount: exams.length,
+      itemBuilder: (context, index) => _buildExamCard(
+        context,
+        exams[index],
+        controller,
+        downloadsController,
       ),
     );
   }

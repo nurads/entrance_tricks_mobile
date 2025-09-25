@@ -21,7 +21,13 @@ class NewsPage extends StatelessWidget {
           backgroundColor: Colors.white,
           elevation: 0,
           automaticallyImplyLeading: false, // Change this line
-          actions: [IconButton(icon: Icon(Icons.search), onPressed: () {})],
+          actions: [
+            IconButton(
+              icon: Icon(Icons.search),
+              onPressed: () =>
+                  showSearch(context: context, delegate: NewsSearchDelegate()),
+            ),
+          ],
         ),
         body: SafeArea(
           child: CustomScrollView(
@@ -487,6 +493,80 @@ class NewsPage extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class NewsSearchDelegate extends SearchDelegate<News> {
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return [
+      IconButton(
+        onPressed: () {
+          query = '';
+        },
+        icon: Icon(Icons.close),
+      ),
+    ];
+  }
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+      onPressed: () {
+        Get.back();
+      },
+      icon: Icon(Icons.arrow_back),
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    final controller = Get.find<NewsController>();
+    return FutureBuilder<List<News>>(
+      future: controller.searchNews(query),
+      builder: (context, snapshot) {
+        return snapshot.data?.isEmpty ?? true
+            ? _buildNoResultsState(context)
+            : _buildSearchResults(context, snapshot.data!, controller);
+      },
+    );
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    final controller = Get.find<NewsController>();
+    return ListView.builder(
+      itemBuilder: (context, index) =>
+          _buildNewsItem(context, controller.news[index], controller),
+      itemCount: controller.news.length,
+    );
+  }
+
+  Widget _buildNoResultsState(BuildContext context) {
+    return Center(child: Text('No results found'));
+  }
+
+  Widget _buildSearchResults(
+    BuildContext context,
+    List<News> news,
+    NewsController controller,
+  ) {
+    return ListView.builder(
+      itemCount: news.length,
+      itemBuilder: (context, index) =>
+          _buildNewsItem(context, news[index], controller),
+    );
+  }
+
+  Widget _buildNewsItem(
+    BuildContext context,
+    News news,
+    NewsController controller,
+  ) {
+    return ListTile(
+      title: Text(news.title),
+      onTap: () => controller.openNewsDetail(news.id),
     );
   }
 }

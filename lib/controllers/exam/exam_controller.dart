@@ -136,4 +136,10 @@ class ExamController extends GetxController {
   Future<void> refreshExamDownloadStatus() async {
     await _updateExamDownloadStatus();
   }
+
+  Future<List<Exam>> searchExams(String query) async {
+    return _exams
+        .where((e) => e.name.toLowerCase().contains(query.toLowerCase()))
+        .toList();
+  }
 }
