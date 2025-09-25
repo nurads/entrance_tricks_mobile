@@ -80,9 +80,9 @@ class ProfileController extends GetxController {
 
     if (_coreService.hasInternet) {
       try {
-        final user = await UserService().getUser();
+        final user_ = await UserService().getUser();
 
-        await AuthService().saveUser(user);
+        await AuthService().saveUser(user_);
       } catch (e) {
         logger.e(e);
       } finally {
@@ -90,13 +90,13 @@ class ProfileController extends GetxController {
         update();
       }
     } else {
-      _selectedGrade = _authService.user.value?.grade;
+      _selectedGrade = user?.grade;
       update();
     }
     phoneEditController.text = user?.phoneNumber ?? '';
     nameEditController.text = fullName;
 
-    _currentGrade = _authService.user.value?.grade;
+    _currentGrade = user?.grade;
 
     _isLoading = false;
     update();
@@ -106,7 +106,7 @@ class ProfileController extends GetxController {
     try {
       final gradeService = Get.find<GradeService>();
       _availableGrades = await gradeService.getGrades();
-      _selectedGrade = _authService.user.value?.grade;
+      _selectedGrade = user?.grade;
       update();
     } catch (e) {
       AppSnackbar.showError('Error', 'Failed to load grades');
@@ -132,7 +132,7 @@ class ProfileController extends GetxController {
       (element) => element.id == grade,
     );
     logger.i('Changed grade to ${_selectedGrade?.name}');
-    if (_selectedGrade != _authService.user.value?.grade) {
+    if (_selectedGrade != user?.grade) {
       hasChangeOnEditProfile = true;
     }
 
@@ -145,12 +145,12 @@ class ProfileController extends GetxController {
     update();
     if (_coreService.hasInternet) {
       try {
-        final user = await UserService().updateUser(
+        final user_ = await UserService().updateUser(
           phoneNumber: phoneEditController.text.trim(),
           name: nameEditController.text.trim(),
           grade: _selectedGrade?.id ?? 0,
         );
-        await AuthService().saveUser(user);
+        await AuthService().saveUser(user_);
         hasChangeOnEditProfile = false;
       } catch (e) {
         logger.e(e);
@@ -165,7 +165,7 @@ class ProfileController extends GetxController {
     phoneEditController.text = user?.phoneNumber ?? '';
     nameEditController.text = fullName;
 
-    logger.i('Updated user to ${_authService.user.value?.grade.name}');
+    logger.i('Updated user to ${user?.grade.name}');
     isUpdating = false;
     update();
     Get.back();

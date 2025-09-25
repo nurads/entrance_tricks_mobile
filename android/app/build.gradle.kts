@@ -16,7 +16,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.example.entrance_tricks"
-    compileSdk = 34
+    compileSdk = flutter.targetSdkVersion
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -33,8 +33,8 @@ android {
         applicationId = "com.entrance_tricks.app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdk
-        targetSdk = flutter.targetSdk
+        minSdk = flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }

@@ -46,16 +46,16 @@ class HiveAuthStorage extends BaseObjectStorage<AuthToken> {
   }
 }
 
-class HiveUserStorage extends BaseObjectStorage<User> {
+class HiveUserStorage extends BaseObjectStorage<User?> {
   final String _boxName = 'userStorage';
-  static late Box<User> _box;
+  static late Box<User?> _box;
   @override
   Future<void> init() async {
     Hive.registerAdapter<User>(UserTypeAdapter());
     if (!Hive.isBoxOpen(_boxName)) {
-      _box = await Hive.openBox<User>(_boxName);
+      _box = await Hive.openBox<User?>(_boxName);
     } else {
-      _box = Hive.box<User>(_boxName);
+      _box = Hive.box<User?>(_boxName);
     }
   }
 
@@ -65,7 +65,7 @@ class HiveUserStorage extends BaseObjectStorage<User> {
   }
 
   @override
-  void listen(void Function(User p1) callback, String key) {
+  void listen(void Function(User? p1) callback, String key) {
     _box.watch(key: key).listen((event) => callback(event.value));
   }
 
@@ -75,7 +75,7 @@ class HiveUserStorage extends BaseObjectStorage<User> {
   }
 
   @override
-  Future<void> write(String key, User value) {
+  Future<void> write(String key, User? value) {
     return _box.put(key, value);
   }
 

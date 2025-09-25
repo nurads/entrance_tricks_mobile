@@ -317,35 +317,6 @@ class FAQPage extends StatelessWidget {
       ),
     );
   }
-
-  void _showSearchDialog() {
-    showDialog(
-      context: Get.context!,
-      builder: (context) => AlertDialog(
-        title: const Text('Search FAQ'),
-        content: TextField(
-          decoration: const InputDecoration(
-            hintText: 'Search for questions...',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(Icons.search),
-          ),
-          onChanged: (value) {
-            // Implement search functionality
-          },
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Search'),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class FaqSearchDelegate extends SearchDelegate<FAQ> {
