@@ -33,11 +33,19 @@ class DownloadsController extends GetxController {
   bool isLoadingExams = false;
   bool isLoadingNotes = false;
 
+  User? _user;
+
   @override
   void onInit() {
     super.onInit();
     loadAllVideos();
-
+    _user = _coreService.authService.user.value;
+    HiveUserStorage().listen((event) {
+      _user = event;
+      loadAllVideos();
+      loadAllExams();
+      loadAllNotes();
+    }, 'user');
     loadAllExams();
     loadAllNotes();
   }
@@ -48,8 +56,8 @@ class DownloadsController extends GetxController {
       isLoadingVideos = true;
       update();
 
-      final device = await UserDevice.getDeviceInfo();
-      final grade = _coreService.authService.user.value?.grade;
+      final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
+      final grade = _user?.grade;
       // This is a simplified approach - you might need to modify based on your API structure
       try {
         // Get videos from multiple chapters or subjects
@@ -82,7 +90,7 @@ class DownloadsController extends GetxController {
       isLoadingExams = true;
       update();
 
-      final device = await UserDevice.getDeviceInfo();
+      final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
 
       final grade = _coreService.authService.user.value?.grade;
 
@@ -110,12 +118,12 @@ class DownloadsController extends GetxController {
 
   // Load all notes with download states
   Future<void> loadAllNotes() async {
-    final device = await UserDevice.getDeviceInfo();
+    final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
 
     try {
       isLoadingNotes = true;
       update();
-      final grade = _coreService.authService.user.value?.grade;
+      final grade = _user?.grade;
 
       List<Note> notes_ = await _noteApiService.getAllNotes(
         device.id,
@@ -155,7 +163,7 @@ class DownloadsController extends GetxController {
       video.downloadProgress = 0.0;
       update();
 
-      final device = await UserDevice.getDeviceInfo();
+      final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
 
       await _videoApiService.downloadVideo(
         video.id,
@@ -214,7 +222,7 @@ class DownloadsController extends GetxController {
       note.downloadProgress = 0.0;
       update();
 
-      final device = await UserDevice.getDeviceInfo();
+      final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
 
       await _noteApiService.downloadNote(
         note.id,
@@ -282,7 +290,7 @@ class DownloadsController extends GetxController {
       exam.isLoadingQuestion = true;
       update();
 
-      final device = await UserDevice.getDeviceInfo();
+      final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
       final questions = await _examApiService.getQuestions(device.id, exam.id);
       logger.d(questions);
 

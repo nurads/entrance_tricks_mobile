@@ -7,6 +7,7 @@ import 'package:entrance_tricks/views/views.dart';
 import 'package:entrance_tricks/controllers/subject/subject_detail_controller.dart';
 import 'package:entrance_tricks/services/services.dart';
 import 'package:entrance_tricks/utils/device/device.dart';
+import 'package:entrance_tricks/services/services.dart';
 import 'dart:io';
 
 class ChapterDetailController extends GetxController {
@@ -48,9 +49,10 @@ class ChapterDetailController extends GetxController {
   final HiveExamStorage _examStorage = HiveExamStorage();
   final VideoApiService _videoApiService = VideoApiService();
   final NoteService _noteApiService = NoteService();
+  User? _user;
 
   @override
-  void onInit() {
+  void onInit() async {
     chapterId = Get.arguments?['chapterId'] ?? 1;
     subjectId = Get.arguments?['subjectId'] ?? 1;
     loadChapterDetail();
@@ -58,11 +60,19 @@ class ChapterDetailController extends GetxController {
     loadNotes();
     loadQuizzes();
     _loadDownloadedNotes(); // Add this line
+    _user = await HiveUserStorage().getUser();
+    HiveUserStorage().listen((event) {
+      _user = event;
+      loadChapterDetail();
+      loadVideos();
+      loadNotes();
+      loadQuizzes();
+    }, 'user');
     super.onInit();
   }
 
   void loadVideos() async {
-    final device = await UserDevice.getDeviceInfo();
+    final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
     _isVideosLoading = true;
     update();
     try {
@@ -82,7 +92,7 @@ class ChapterDetailController extends GetxController {
   }
 
   void loadNotes() async {
-    final device = await UserDevice.getDeviceInfo();
+    final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
     _isNotesLoading = true;
     update();
     try {
@@ -101,7 +111,7 @@ class ChapterDetailController extends GetxController {
   }
 
   void loadQuizzes() async {
-    final device = await UserDevice.getDeviceInfo();
+    final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
     _isQuizzesLoading = true;
     update();
     try {
@@ -317,7 +327,7 @@ class ChapterDetailController extends GetxController {
           duration: const Duration(seconds: 2),
         );
 
-        final device = await UserDevice.getDeviceInfo();
+        final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
         await _noteApiService.downloadNote(
           noteId,
           deviceId: device.id,
@@ -435,7 +445,7 @@ class ChapterDetailController extends GetxController {
         video.downloadProgress = 0.0;
         update();
 
-        final device = await UserDevice.getDeviceInfo();
+        final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
         VideoApiService().downloadVideo(
           videoId,
           deviceId: device.id,

@@ -14,6 +14,7 @@ class ExamController extends GetxController {
   final InternetConnection _internetConnection = InternetConnection();
   bool _isLoading = true;
   bool get isLoading => _isLoading;
+  User? _user;
   final Subject _allPlaceholderSubject = Subject(
     id: 0,
     name: 'All',
@@ -38,6 +39,13 @@ class ExamController extends GetxController {
     super.onInit();
     loadExams();
     loadSubjects();
+
+    _user = _coreService.authService.user.value;
+
+    HiveUserStorage().listen((event) {
+      _user = event;
+      loadExams();
+    }, 'user');
 
     _internetConnection.onStatusChange.listen((event) {
       if (event == InternetStatus.connected) {
@@ -66,11 +74,13 @@ class ExamController extends GetxController {
     _error = null;
     update();
 
-    final device = await UserDevice.getDeviceInfo();
+    final device = await UserDevice.getDeviceInfo(
+      _user?.phoneNumber ?? '',
+    );
 
     if (_coreService.hasInternet) {
       try {
-        final grade = _coreService.authService.user.value?.grade;
+        final grade = _user?.grade;
         final exams_ = await _examService.getAvailableExams(
           device.id,
           gradeId: grade?.id,

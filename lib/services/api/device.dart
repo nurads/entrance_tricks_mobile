@@ -6,8 +6,8 @@ import 'package:entrance_tricks/utils/utils.dart';
 class DeviceService {
   final ApiClient apiClient = ApiClient();
 
-  Future<void> registerDevice() async {
-    final device = await UserDevice.getDeviceInfo();
+  Future<void> registerDevice(String phoneNumber) async {
+    final device = await UserDevice.getDeviceInfo(phoneNumber);
     final response = await apiClient.post(
       '/auth/device/',
       data: {

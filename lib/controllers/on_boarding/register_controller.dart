@@ -105,6 +105,8 @@ class RegisterController extends GetxController {
           response.tokens.refresh,
         );
 
+        await DeviceService().registerDevice(user.phoneNumber);
+
         Get.offAllNamed(VIEWS.home.path);
 
         Get.snackbar(
@@ -114,8 +116,6 @@ class RegisterController extends GetxController {
           backgroundColor: Colors.green,
           colorText: Colors.white,
         );
-
-        await DeviceService().registerDevice();
 
         // Navigate to verify phone page
       } on DioException catch (e) {

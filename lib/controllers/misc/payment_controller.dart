@@ -8,6 +8,7 @@ import 'package:entrance_tricks/models/models.dart';
 import 'package:entrance_tricks/services/services.dart';
 import 'package:entrance_tricks/services/api/exceptions.dart';
 import 'package:entrance_tricks/utils/utils.dart';
+import 'package:entrance_tricks/utils/storages/storages.dart';
 
 class PaymentController extends GetxController {
   final PaymentService _paymentService = PaymentService();
@@ -23,12 +24,18 @@ class PaymentController extends GetxController {
   bool isLoading = false;
   bool isLoadingPayments = false;
   bool isCreatingPayment = false;
+  User? _user;
 
   @override
   void onInit() {
     super.onInit();
 
     loadAll();
+    _user = _coreService.authService.user.value;
+    HiveUserStorage().listen((event) {
+      _user = event;
+      loadAll();
+    }, 'user');
   }
 
   Future<void> loadAll() async {
@@ -72,7 +79,7 @@ class PaymentController extends GetxController {
     try {
       isLoadingPayments = true;
       update();
-      final device = await UserDevice.getDeviceInfo();
+      final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
       final userPayments_ = await _paymentService.getUserPayments(device.id);
       userPayments.value = userPayments_;
     } catch (e) {
@@ -144,7 +151,7 @@ class PaymentController extends GetxController {
     try {
       isLoading = true;
       update();
-      final device = await UserDevice.getDeviceInfo();
+      final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
       final grade = _coreService.authService.user.value?.grade;
       final packages_ = await _paymentService.getPackages(
         device.id,
@@ -193,7 +200,7 @@ class PaymentController extends GetxController {
     try {
       isCreatingPayment = true;
       update();
-      final device = await UserDevice.getDeviceInfo();
+      final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
       await _paymentService.uploadReceipt(
         file: selectedReceiptImage.value!,
         package: packageId,

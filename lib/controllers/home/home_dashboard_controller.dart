@@ -17,11 +17,6 @@ class HomeDashboardController extends GetxController {
 
   final CoreService _coreService = Get.find<CoreService>();
 
-  late DeviceInfo _deviceInfo;
-
-  List<Map<String, dynamic>> _recentNews = [];
-  List<Map<String, dynamic>> get recentNews => _recentNews;
-
   List<Subject> _subjects = [];
   List<Subject> get subjects => _subjects;
   User? _user;
@@ -31,7 +26,7 @@ class HomeDashboardController extends GetxController {
     super.onInit();
 
     loadSubjects();
-    _deviceInfo = await UserDevice.getDeviceInfo();
+
     _user = await HiveUserStorage().getUser();
 
     InternetConnection().onStatusChange.listen((event) {
@@ -55,9 +50,10 @@ class HomeDashboardController extends GetxController {
       try {
         logger.i('Loading subjects from api');
         final gradeId = _user?.grade.id;
+        final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
 
         _subjects = await SubjectsService().getSubjects(
-          _deviceInfo.id,
+          device.id,
           gradeId: gradeId ?? 0,
         );
         _coreService.setSubjects(_subjects);
@@ -84,34 +80,9 @@ class HomeDashboardController extends GetxController {
     update();
 
     try {
-      _recentNews = [
-        {
-          'id': 1,
-          'title': 'New Physics Chapter: Quantum Mechanics',
-          'excerpt':
-              'We have added comprehensive study materials for Quantum Mechanics including videos, notes, and practice questions.',
-          'date': '2 days ago',
-        },
-        {
-          'id': 2,
-          'title': 'Scholarship Program 2024',
-          'excerpt':
-              'Applications are now open for our merit-based scholarship program. Top performers will receive up to 100% fee waiver.',
-          'date': '1 week ago',
-        },
-        {
-          'id': 3,
-          'title': 'App Update: Dark Mode Available',
-          'excerpt':
-              'The latest app update includes dark mode, improved video player, and better offline support.',
-          'date': '2 weeks ago',
-        },
-      ];
+      final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
 
-      _subjects = await SubjectsService().getSubjects(
-        _deviceInfo.id,
-        gradeId: 1,
-      );
+      _subjects = await SubjectsService().getSubjects(device.id, gradeId: 1);
       logger.i(_subjects.map((e) => e.isLocked).toList()[0]);
     } catch (e) {
       Get.snackbar('Error', 'Failed to load dashboard data');

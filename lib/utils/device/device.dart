@@ -29,8 +29,8 @@ class UserDevice {
     return '1.0.0';
   }
 
-  static Future<DeviceInfo> getDeviceInfo() async {
-    final deviceId = await deviceHash();
+  static Future<DeviceInfo> getDeviceInfo(String phoneNumber) async {
+    final deviceId = await deviceHash(phoneNumber);
     final df = DeviceInfoPlugin();
     if (Platform.isAndroid) {
       final androidInfo = await df.androidInfo;
@@ -100,11 +100,11 @@ class UserDevice {
     );
   }
 
-  static Future<String> _deviceId() async {
+  static Future<String> _deviceId(String phoneNumber) async {
     if (Platform.isAndroid) {
       final androidInfo = await deviceInfo.androidInfo;
 
-      return "${androidInfo.brand} ${androidInfo.model} ${androidInfo.manufacturer} ${androidInfo.board} ${androidInfo.device} ${androidInfo.name}";
+      return "${androidInfo.brand} ${androidInfo.model} ${androidInfo.manufacturer} ${androidInfo.board} ${androidInfo.device} ${androidInfo.name} ${androidInfo.id} $phoneNumber";
     } else if (Platform.isIOS) {
       final iosInfo = await deviceInfo.iosInfo;
       return "${iosInfo.model} ${iosInfo.name} ${iosInfo.systemVersion}";
@@ -121,8 +121,8 @@ class UserDevice {
     return '1.0.0';
   }
 
-  static Future<String> deviceHash() async {
-    final raw = await _deviceId();
+  static Future<String> deviceHash(String phoneNumber) async {
+    final raw = await _deviceId(phoneNumber);
     return sha256.convert(raw.codeUnits).toString();
   }
 }

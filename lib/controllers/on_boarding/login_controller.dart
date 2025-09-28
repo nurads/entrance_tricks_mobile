@@ -26,14 +26,17 @@ class LoginController extends GetxController {
 
         final response = await UserService().loginUser(phone, password);
 
-        BaseApiClient.setTokens(response.tokens.access, response.tokens.refresh);
-        
+        BaseApiClient.setTokens(
+          response.tokens.access,
+          response.tokens.refresh,
+        );
+
         final user = await UserService().getUser();
 
         await authService.saveAuthToken(response.tokens);
         await authService.saveUser(user);
 
-        await DeviceService().registerDevice();
+        await DeviceService().registerDevice(user.phoneNumber);
 
         AppSnackbar.showSuccess('Success', 'Login successful!');
         Get.offAllNamed(VIEWS.home.path);
