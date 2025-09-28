@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/controllers/subject/chapter_detail_controller.dart';
-import 'package:entrance_tricks/views/exam/question_page.dart';
 import 'package:entrance_tricks/models/models.dart';
 
 class QuizTab extends StatelessWidget {
@@ -113,7 +112,7 @@ class QuizTab extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => _openQuizDetail(quiz),
+          onTap: quiz.isLocked ? null : () => _handleQuizTap(quiz, controller),
           borderRadius: BorderRadius.circular(20),
           child: Padding(
             padding: EdgeInsets.all(16),
@@ -123,35 +122,78 @@ class QuizTab extends StatelessWidget {
                 // Header Row
                 Row(
                   children: [
-                    // Quiz Icon
-                    Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            theme.colorScheme.primary,
-                            theme.colorScheme.primary.withValues(alpha: 0.8),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: theme.colorScheme.primary.withValues(
-                              alpha: 0.3,
+                    // Quiz Icon with status overlay
+                    Stack(
+                      children: [
+                        Container(
+                          width: 56,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: quiz.isLocked
+                                  ? [
+                                      theme.colorScheme.onSurface.withValues(
+                                        alpha: 0.3,
+                                      ),
+                                      theme.colorScheme.onSurface.withValues(
+                                        alpha: 0.2,
+                                      ),
+                                    ]
+                                  : [
+                                      theme.colorScheme.primary,
+                                      theme.colorScheme.primary.withValues(
+                                        alpha: 0.8,
+                                      ),
+                                    ],
                             ),
-                            blurRadius: 8,
-                            offset: Offset(0, 4),
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: quiz.isLocked
+                                ? []
+                                : [
+                                    BoxShadow(
+                                      color: theme.colorScheme.primary
+                                          .withValues(alpha: 0.3),
+                                      blurRadius: 8,
+                                      offset: Offset(0, 4),
+                                    ),
+                                  ],
                           ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.quiz_outlined,
-                        size: 26,
-                        color: Colors.white,
-                      ),
+                          child: Icon(
+                            quiz.isLocked ? Icons.lock : Icons.quiz_outlined,
+                            size: 26,
+                            color: quiz.isLocked
+                                ? theme.colorScheme.onSurface.withValues(
+                                    alpha: 0.5,
+                                  )
+                                : Colors.white,
+                          ),
+                        ),
+                        // Download status indicator
+                        if (quiz.isDownloaded && !quiz.isLocked)
+                          Positioned(
+                            right: -2,
+                            top: -2,
+                            child: Container(
+                              width: 20,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                color: Colors.green,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: theme.colorScheme.surface,
+                                  width: 2,
+                                ),
+                              ),
+                              child: Icon(
+                                Icons.check,
+                                size: 12,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
 
                     SizedBox(width: 16),
@@ -160,14 +202,71 @@ class QuizTab extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            quiz.name,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              height: 1.3,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  quiz.name,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    height: 1.3,
+                                    color: quiz.isLocked
+                                        ? theme.colorScheme.onSurface
+                                              .withValues(alpha: 0.5)
+                                        : null,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              // Status badges
+                              if (quiz.isLocked)
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.orange.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: Colors.orange.withValues(
+                                        alpha: 0.3,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'LOCKED',
+                                    style: theme.textTheme.labelSmall?.copyWith(
+                                      color: Colors.orange,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              if (!quiz.isLocked && quiz.isDownloaded)
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: Colors.green.withValues(
+                                        alpha: 0.3,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'DOWNLOADED',
+                                    style: theme.textTheme.labelSmall?.copyWith(
+                                      color: Colors.green,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                           SizedBox(height: 10),
                           // Use Wrap instead of Row to prevent overflow
@@ -249,38 +348,43 @@ class QuizTab extends StatelessWidget {
                       ),
                     ),
 
-                    // Arrow Icon
-                    Container(
-                      padding: EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceContainerHighest
-                            .withValues(alpha: 0.5),
-                        borderRadius: BorderRadius.circular(10),
+                    // Arrow Icon or Download Progress
+                    if (quiz.isLoadingQuestion)
+                      Container(
+                        padding: EdgeInsets.all(8),
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              theme.colorScheme.primary,
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      Container(
+                        padding: EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surfaceContainerHighest
+                              .withValues(alpha: 0.5),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(
+                          Icons.arrow_forward_ios,
+                          size: 14,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
                       ),
-                      child: Icon(
-                        Icons.arrow_forward_ios,
-                        size: 14,
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
                   ],
                 ),
 
                 SizedBox(height: 16),
-                // Start Quiz Button
+                // Action Button
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () => _openQuizDetail(quiz),
-                    icon: Icon(Icons.play_arrow, size: 18),
-                    label: Text('Start Quiz'),
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                  ),
+                  child: _buildActionButton(context, quiz, controller),
                 ),
               ],
             ),
@@ -290,13 +394,86 @@ class QuizTab extends StatelessWidget {
     );
   }
 
-  void _openQuizDetail(Exam quiz) {
-    Get.to(
-      () => QuestionPage(
-        title: quiz.name,
-        initialTimeMinutes: quiz.duration,
-        questions: quiz.questions,
+  Widget _buildActionButton(
+    BuildContext context,
+    Exam quiz,
+    ChapterDetailController controller,
+  ) {
+    final theme = Theme.of(context);
+
+    if (quiz.isLocked) {
+      return ElevatedButton.icon(
+        onPressed: null,
+        icon: Icon(Icons.lock, size: 18),
+        label: Text('Locked'),
+        style: ElevatedButton.styleFrom(
+          padding: EdgeInsets.symmetric(vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          backgroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.1),
+          foregroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+        ),
+      );
+    }
+
+    if (quiz.isLoadingQuestion) {
+      return ElevatedButton.icon(
+        onPressed: null,
+        icon: SizedBox(
+          width: 18,
+          height: 18,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+          ),
+        ),
+        label: Text('Downloading...'),
+        style: ElevatedButton.styleFrom(
+          padding: EdgeInsets.symmetric(vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
+      );
+    }
+
+    if (quiz.isDownloaded && quiz.questions.isNotEmpty) {
+      return ElevatedButton.icon(
+        onPressed: () => controller.startQuiz(quiz.id),
+        icon: Icon(Icons.play_arrow, size: 18),
+        label: Text('Start Quiz'),
+        style: ElevatedButton.styleFrom(
+          padding: EdgeInsets.symmetric(vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
+      );
+    }
+
+    return ElevatedButton.icon(
+      onPressed: () => controller.downloadQuiz(quiz.id),
+      icon: Icon(Icons.download, size: 18),
+      label: Text('Download Quiz'),
+      style: ElevatedButton.styleFrom(
+        padding: EdgeInsets.symmetric(vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        backgroundColor: theme.colorScheme.secondary,
+        foregroundColor: theme.colorScheme.onSecondary,
       ),
     );
+  }
+
+  void _handleQuizTap(Exam quiz, ChapterDetailController controller) {
+    if (quiz.isLocked) {
+      return;
+    }
+
+    if (quiz.isDownloaded && quiz.questions.isNotEmpty) {
+      controller.startQuiz(quiz.id);
+    } else {
+      controller.downloadQuiz(quiz.id);
+    }
   }
 }

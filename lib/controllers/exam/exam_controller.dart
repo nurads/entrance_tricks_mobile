@@ -54,7 +54,7 @@ class ExamController extends GetxController {
     });
 
     _hiveExamStorage.listen((event) {
-      _exams = event;
+      _exams = event.where((e) => e.examType != 'quiz').toList();
       update();
     }, 'exams');
 
@@ -74,9 +74,7 @@ class ExamController extends GetxController {
     _error = null;
     update();
 
-    final device = await UserDevice.getDeviceInfo(
-      _user?.phoneNumber ?? '',
-    );
+    final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
 
     if (_coreService.hasInternet) {
       try {
@@ -86,7 +84,9 @@ class ExamController extends GetxController {
           gradeId: grade?.id,
         );
         await _hiveExamStorage.setExams(exams_);
-        _exams = await _hiveExamStorage.getExams();
+        _exams = (await _hiveExamStorage.getExams())
+            .where((e) => e.examType != 'quiz')
+            .toList();
       } catch (e) {
         _exams = await _hiveExamStorage.getExams();
       } finally {
@@ -94,7 +94,9 @@ class ExamController extends GetxController {
         update();
       }
     } else {
-      _exams = await _hiveExamStorage.getExams();
+      _exams = (await _hiveExamStorage.getExams())
+          .where((e) => e.examType != 'quiz')
+          .toList();
       logger.i(_exams);
       _isLoading = false;
       update();
@@ -117,9 +119,11 @@ class ExamController extends GetxController {
     _selectedSubjectIndex = index;
     final exams = await _hiveExamStorage.getExams();
     if (subject.id == 0) {
-      _exams = exams;
+      _exams = exams.where((e) => e.examType != 'quiz').toList();
     } else {
-      _exams = exams.where((e) => e.subject?.id == subject.id).toList();
+      _exams = exams
+          .where((e) => e.subject?.id == subject.id && e.examType != 'quiz')
+          .toList();
     }
     // Update download status for filtered exams
     await _updateExamDownloadStatus();

@@ -7,7 +7,7 @@ import 'package:entrance_tricks/views/views.dart';
 import 'package:entrance_tricks/controllers/subject/subject_detail_controller.dart';
 import 'package:entrance_tricks/services/services.dart';
 import 'package:entrance_tricks/utils/device/device.dart';
-import 'package:entrance_tricks/services/services.dart';
+import 'package:entrance_tricks/views/exam/question_page.dart';
 import 'dart:io';
 
 class ChapterDetailController extends GetxController {
@@ -42,6 +42,7 @@ class ChapterDetailController extends GetxController {
 
   RxMap<int, dynamic> videoDownloadProgress = RxMap<int, dynamic>({});
   RxMap<int, dynamic> noteDownloadProgress = RxMap<int, dynamic>({});
+  RxMap<int, dynamic> quizDownloadProgress = RxMap<int, dynamic>({});
 
   final HiveVideoStorage _hiveVideoStorage = HiveVideoStorage();
   final HiveNoteStorage _hiveNoteStorage = HiveNoteStorage();
@@ -431,7 +432,133 @@ class ChapterDetailController extends GetxController {
   }
 
   void startQuiz(int quizId) {
-    // Get.to
+    final quiz = _quizzes.firstWhereOrNull((q) => q.id == quizId);
+    if (quiz != null) {
+      if (quiz.isLocked) {
+        Get.snackbar(
+          'Access Denied',
+          'This quiz is locked',
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      if (!quiz.isDownloaded || quiz.questions.isEmpty) {
+        Get.snackbar(
+          'Quiz Not Available',
+          'This quiz needs to be downloaded first',
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      // Navigate to quiz
+      Get.to(
+        () => QuestionPage(
+          title: quiz.name,
+          initialTimeMinutes: quiz.duration,
+          questions: quiz.questions,
+        ),
+      );
+    }
+  }
+
+  void downloadQuiz(int quizId) async {
+    try {
+      final quiz = _quizzes.firstWhereOrNull((q) => q.id == quizId);
+      if (quiz != null) {
+        // Check if locked
+        if (quiz.isLocked) {
+          Get.snackbar(
+            'Access Denied',
+            'This quiz is locked and cannot be downloaded',
+            backgroundColor: Colors.orange,
+            colorText: Colors.white,
+          );
+          return;
+        }
+
+        // Check if already downloaded
+        if (quiz.isDownloaded && quiz.questions.isNotEmpty) {
+          Get.snackbar(
+            'Info',
+            'Quiz is already downloaded',
+            backgroundColor: Colors.blue,
+            colorText: Colors.white,
+          );
+          return;
+        }
+
+        // Check if already downloading
+        if (quiz.isLoadingQuestion) {
+          Get.snackbar(
+            'Already Downloading',
+            'This quiz is already being downloaded',
+            backgroundColor: Colors.orange,
+            colorText: Colors.white,
+          );
+          return;
+        }
+
+        // Start download process
+        quiz.isLoadingQuestion = true;
+        quizDownloadProgress[quizId] = {'progress': 0.0, 'isDownloading': true};
+        update();
+
+        Get.snackbar(
+          'Downloading',
+          'Starting download of ${quiz.name}...',
+          backgroundColor: Colors.blue,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 2),
+        );
+
+        final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
+        final questions = await _examService.getQuestions(device.id, quiz.id);
+
+        quiz.questions = questions;
+        quiz.isDownloaded = true;
+        quiz.isLoadingQuestion = false;
+
+        // Update progress map
+        quizDownloadProgress[quizId] = {
+          'progress': 1.0,
+          'isDownloading': false,
+        };
+
+        update();
+
+        await _examStorage.setQuestions(quiz.id, questions);
+
+        Get.snackbar(
+          'Download Complete',
+          'Quiz downloaded successfully',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+        );
+      } else {
+        Get.snackbar('Error', 'Quiz not found');
+      }
+    } catch (e) {
+      final quiz = _quizzes.firstWhereOrNull((q) => q.id == quizId);
+      if (quiz != null) {
+        quiz.isLoadingQuestion = false;
+        quizDownloadProgress.remove(quizId);
+        update();
+      }
+
+      logger.e('Error downloading quiz: $e');
+      Get.snackbar(
+        'Download Failed',
+        'Failed to download quiz: $e',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 4),
+      );
+    }
   }
 
   void downloadVideo(int videoId) async {

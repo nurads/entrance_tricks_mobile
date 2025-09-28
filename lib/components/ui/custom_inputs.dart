@@ -90,7 +90,7 @@ class PhoneTextField extends StatelessWidget {
     this.onChanged,
     this.onFieldSubmitted,
     this.enabled = true,
-    this.prefix = '09',
+    this.prefix = '0',
   });
 
   @override
@@ -103,7 +103,7 @@ class PhoneTextField extends StatelessWidget {
       keyboardType: TextInputType.phone,
       textInputAction: TextInputAction.next,
       prefixText: prefix,
-      maxLength: 8,
+      maxLength: 9,
       enabled: enabled,
       validator:
           validator ??
@@ -111,7 +111,7 @@ class PhoneTextField extends StatelessWidget {
             if (value == null || value.isEmpty) {
               return 'Phone number is required';
             }
-            if (value.length != 8) {
+            if (value.length != 9) {
               return 'Phone number must be 9 digits';
             }
             return null;
@@ -172,7 +172,7 @@ class _PasswordTextFieldState extends State<PasswordTextField> {
             if (value == null || value.isEmpty) {
               return 'Password is required';
             }
-            if (value.length < 6) {
+            if (value.length < 4) {
               return 'Password must be at least 6 characters';
             }
             return null;

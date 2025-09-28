@@ -4,7 +4,7 @@ import 'package:entrance_tricks/controllers/on_boarding/register_controller.dart
 import 'package:entrance_tricks/models/models.dart';
 
 class Register extends StatelessWidget {
-  Register({super.key});
+  const Register({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +43,7 @@ class Register extends StatelessWidget {
                     decoration: InputDecoration(
                       labelText: 'Name',
                       prefixIcon: Icon(Icons.person),
+
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -92,39 +93,6 @@ class Register extends StatelessWidget {
                     },
                   ),
                 ),
-
-                // if (controller.allowStreamSelection)
-                //   Padding(
-                //     padding: const EdgeInsets.symmetric(
-                //       horizontal: 10,
-                //       vertical: 10,
-                //     ),
-                //     child: DropdownButtonFormField<String>(
-                //       initialValue: controller.selectedStream,
-                //       decoration: InputDecoration(
-                //         labelText: 'Stream',
-                //         prefixIcon: Icon(Icons.category),
-                //         border: OutlineInputBorder(
-                //           borderRadius: BorderRadius.circular(10),
-                //         ),
-                //       ),
-                //       items: controller.streamOptions.map((String stream) {
-                //         return DropdownMenuItem<String>(
-                //           value: stream,
-                //           child: Text(stream),
-                //         );
-                //       }).toList(),
-                //       onChanged: (String? newValue) {
-                //         controller.setSelectedStream(newValue);
-                //       },
-                //       validator: (value) {
-                //         if (value == null || value.isEmpty) {
-                //           return 'Stream is required';
-                //         }
-                //         return null;
-                //       },
-                //     ),
-                //   ),
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
@@ -135,22 +103,25 @@ class Register extends StatelessWidget {
                     decoration: InputDecoration(
                       labelText: 'Phone Number',
                       prefixIcon: Icon(Icons.phone),
-
-                      prefix: Text('09'),
+                      prefix: Text('0'),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
                     keyboardType: TextInputType.phone,
-                    maxLength: 8,
+                    maxLength: 9,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Phone Number is required';
                       }
-                      if (value.length != 8) {
+                      if (value.length != 9) {
                         return 'Phone Number must be 9 digits';
                       }
-                      return null;
+                      final pattern = RegExp(r'^(7|9)\d{8}$');
+                      if (pattern.hasMatch(value)) {
+                        return null;
+                      }
+                      return 'Phone Number must start with 7 or 9 and only digits';
                     },
                     textInputAction: TextInputAction.next,
                   ),
@@ -182,9 +153,10 @@ class Register extends StatelessWidget {
                       if (value == null || value.isEmpty) {
                         return 'Password is required';
                       }
-                      if (value.length < 6) {
-                        return 'Password must be at least 6 characters';
+                      if (value.length < 4) {
+                        return 'Password must be at least 4 characters';
                       }
+
                       return null;
                     },
                     textInputAction: TextInputAction.next,

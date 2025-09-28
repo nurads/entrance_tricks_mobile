@@ -89,7 +89,7 @@ class RegisterController extends GetxController {
         // Simulate API call
         final response = await UserService().registerUser(
           nameController.text,
-          '9${phoneController.text}',
+          phoneController.text,
           passwordController.text,
           selectedGrade?.id ?? 0,
         );

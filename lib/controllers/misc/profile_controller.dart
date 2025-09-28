@@ -42,14 +42,14 @@ class ProfileController extends GetxController {
       TextEditingController();
 
   @override
-  void onInit() {
+  void onInit() async {
     super.onInit();
 
     loadUserData();
 
     loadGrades();
 
-    _user = _authService.user.value;
+    _user = await HiveUserStorage().getUser();
 
     _authService.listenUser((event) {
       _user = event;

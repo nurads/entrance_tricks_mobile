@@ -21,7 +21,7 @@ class LoginController extends GetxController {
       _setLoading(true);
 
       try {
-        final phone = '9${phoneController.text}';
+        final phone = phoneController.text;
         final password = passwordController.text;
 
         final response = await UserService().loginUser(phone, password);

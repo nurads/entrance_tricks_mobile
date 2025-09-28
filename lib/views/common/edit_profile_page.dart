@@ -190,7 +190,7 @@ class EditProfilePage extends StatelessWidget {
           ),
           SizedBox(height: 12),
           DropdownButtonFormField<int>(
-            initialValue: controller.selectedGrade?.id,
+            initialValue: controller.user?.grade.id,
 
             decoration: InputDecoration(
               border: InputBorder.none,

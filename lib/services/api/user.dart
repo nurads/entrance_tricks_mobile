@@ -51,8 +51,24 @@ class UserService extends GetxController {
       logger.i(response.data);
       return RegisterResponse.fromJson(response.data);
     }
+    String? error;
+    if (response.data['phone_number'] != null) {
+      error = "Phone Number: ${response.data['phone_number'][0]}";
+    }
+    if (response.data['grade'] != null) {
+      error = "Grade: ${response.data['grade'][0]}";
+    }
+    if (response.data['password'] != null) {
+      error = "Password: ${response.data['password'][0]}";
+    }
+    if (response.data['first_name'] != null) {
+      error = "First Name: ${response.data['first_name'][0]}";
+    }
+    if (response.data['last_name'] != null) {
+      error = "Last Name: ${response.data['last_name'][0]}";
+    }
     logger.e(response.data);
-    throw ApiException("Failed to register user");
+    throw ApiException(error ?? "Failed to register user");
   }
 
   Future<AuthResponse> loginUser(String phone, String password) async {
