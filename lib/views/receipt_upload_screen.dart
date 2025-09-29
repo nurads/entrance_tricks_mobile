@@ -121,7 +121,7 @@ class ReceiptUploadScreen extends StatelessWidget {
             const SizedBox(height: 12),
 
             Obx(() {
-              final selectedImage = controller.selectedReceiptImage.value;
+              final selectedImage = controller.selectedReceiptImage;
 
               return Card(
                 elevation: 2,
@@ -240,7 +240,7 @@ class ReceiptUploadScreen extends StatelessWidget {
               child: Obx(
                 () => ElevatedButton(
                   onPressed:
-                      controller.selectedReceiptImage.value != null &&
+                      controller.selectedReceiptImage != null &&
                           !controller.isCreatingPayment
                       ? () => _submitPayment(
                           context,

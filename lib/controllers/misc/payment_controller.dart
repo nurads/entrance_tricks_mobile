@@ -14,11 +14,11 @@ class PaymentController extends GetxController {
   final PaymentService _paymentService = PaymentService();
   final ImagePicker _picker = ImagePicker();
 
-  final RxList<PaymentMethod> paymentMethods = <PaymentMethod>[].obs;
-  final RxList<Payment> userPayments = <Payment>[].obs;
-  final RxList<Package> packages = <Package>[].obs;
-  final Rx<PaymentMethod?> selectedPaymentMethod = Rx<PaymentMethod?>(null);
-  final Rx<File?> selectedReceiptImage = Rx<File?>(null);
+  List<PaymentMethod> paymentMethods = <PaymentMethod>[];
+  List<Payment> userPayments = <Payment>[];
+  List<Package> packages = <Package>[];
+  PaymentMethod? selectedPaymentMethod;
+  File? selectedReceiptImage;
 
   bool isLoading = false;
   bool isLoadingPayments = false;
@@ -28,28 +28,21 @@ class PaymentController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
-
-    loadAll();
     _user = await HiveUserStorage().getUser();
+    loadUserPayments();
+    loadPackages();
+
     logger.i('User: $_user');
     HiveUserStorage().listen((event) {
       _user = event;
-      loadAll();
+      loadPaymentMethods();
+      loadUserPayments();
+      loadPackages();
     }, 'user');
   }
 
-  Future<void> loadAll() async {
-    await Future.wait([
-      loadPaymentMethods(),
-      loadUserPayments(),
-      loadPackages(),
-    ]);
-
-    update();
-  }
-
   void changeSelectedPaymentMethod(PaymentMethod method) {
-    selectedPaymentMethod.value = method;
+    selectedPaymentMethod = method;
     update();
   }
 
@@ -59,7 +52,7 @@ class PaymentController extends GetxController {
       isLoading = true;
       update();
       final paymentMethods_ = await _paymentService.getPaymentMethods();
-      paymentMethods.value = paymentMethods_;
+      paymentMethods = paymentMethods_;
     } catch (e) {
       logger.e(e);
       Get.snackbar(
@@ -81,7 +74,8 @@ class PaymentController extends GetxController {
       update();
       final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
       final userPayments_ = await _paymentService.getUserPayments(device.id);
-      userPayments.value = userPayments_;
+      userPayments = userPayments_;
+      logger.f(userPayments_);
     } catch (e) {
       Get.snackbar(
         'Error',
@@ -97,7 +91,8 @@ class PaymentController extends GetxController {
 
   // Select payment method
   void selectPaymentMethod(PaymentMethod method) {
-    selectedPaymentMethod.value = method;
+    selectedPaymentMethod = method;
+    update();
   }
 
   // Pick receipt image from gallery
@@ -111,7 +106,8 @@ class PaymentController extends GetxController {
       );
 
       if (image != null) {
-        selectedReceiptImage.value = File(image.path);
+        selectedReceiptImage = File(image.path);
+        update();
       }
     } catch (e) {
       Get.snackbar(
@@ -134,7 +130,8 @@ class PaymentController extends GetxController {
       );
 
       if (image != null) {
-        selectedReceiptImage.value = File(image.path);
+        selectedReceiptImage = File(image.path);
+        update();
       }
     } catch (e) {
       Get.snackbar(
@@ -158,7 +155,8 @@ class PaymentController extends GetxController {
         grade: grade?.id,
       );
       logger.d(packages_);
-      packages.value = packages_;
+      packages = packages_;
+      update();
     } catch (e) {
       Get.snackbar(
         'Error',
@@ -168,7 +166,7 @@ class PaymentController extends GetxController {
       );
     } finally {
       isLoading = false;
-      update();
+      loadPaymentMethods();
     }
   }
 
@@ -177,7 +175,7 @@ class PaymentController extends GetxController {
     isCreatingPayment = true;
     update();
 
-    if (selectedPaymentMethod.value == null) {
+    if (selectedPaymentMethod == null) {
       Get.snackbar(
         'Error',
         'Please select a payment method',
@@ -187,7 +185,7 @@ class PaymentController extends GetxController {
       return false;
     }
 
-    if (selectedReceiptImage.value == null) {
+    if (selectedReceiptImage == null) {
       Get.snackbar(
         'Error',
         'Please upload a receipt image',
@@ -202,9 +200,9 @@ class PaymentController extends GetxController {
       update();
       final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
       await _paymentService.uploadReceipt(
-        file: selectedReceiptImage.value!,
+        file: selectedReceiptImage!,
         package: packageId,
-        paymentMethod: selectedPaymentMethod.value!.id,
+        paymentMethod: selectedPaymentMethod!.id,
         amount: amount,
         device: device.id,
       );
@@ -218,8 +216,8 @@ class PaymentController extends GetxController {
       );
 
       // Reset form
-      selectedPaymentMethod.value = null;
-      selectedReceiptImage.value = null;
+      selectedPaymentMethod = null;
+      selectedReceiptImage = null;
 
       // Refresh user payments
       loadUserPayments();
@@ -243,8 +241,9 @@ class PaymentController extends GetxController {
 
   // Clear selected items
   void clearSelection() {
-    selectedPaymentMethod.value = null;
-    selectedReceiptImage.value = null;
+    selectedPaymentMethod = null;
+    selectedReceiptImage = null;
+    update();
   }
 
   // Get payment status color

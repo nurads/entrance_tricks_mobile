@@ -618,7 +618,7 @@ class _PaymentMethodPageState extends State<_PaymentMethodPage> {
 
               Expanded(
                 child: RadioGroup<PaymentMethod>(
-                  groupValue: controller.selectedPaymentMethod.value,
+                  groupValue: controller.selectedPaymentMethod,
                   onChanged: (value) {
                     if (value != null) {
                       controller.changeSelectedPaymentMethod(value);
@@ -629,8 +629,7 @@ class _PaymentMethodPageState extends State<_PaymentMethodPage> {
                     itemBuilder: (context, index) {
                       final method = controller.paymentMethods[index];
                       final isSelected =
-                          controller.selectedPaymentMethod.value?.id ==
-                          method.id;
+                          controller.selectedPaymentMethod?.id == method.id;
 
                       return Container(
                         margin: const EdgeInsets.only(bottom: 12),
@@ -670,7 +669,7 @@ class _PaymentMethodPageState extends State<_PaymentMethodPage> {
                 width: double.infinity,
                 height: 48,
                 child: ElevatedButton(
-                  onPressed: controller.selectedPaymentMethod.value != null
+                  onPressed: controller.selectedPaymentMethod != null
                       ? () => _navigateToReceiptUpload()
                       : null,
                   style: ElevatedButton.styleFrom(
@@ -803,7 +802,7 @@ class _ReceiptUploadPageState extends State<_ReceiptUploadPage> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'Payment Method: ${controller.selectedPaymentMethod.value?.bankName ?? 'Not selected'}',
+                              'Payment Method: ${controller.selectedPaymentMethod?.bankName ?? 'Not selected'}',
                               style: TextStyle(color: Colors.grey.shade700),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -837,22 +836,22 @@ class _ReceiptUploadPageState extends State<_ReceiptUploadPage> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: controller.selectedReceiptImage.value != null
+                      color: controller.selectedReceiptImage != null
                           ? Colors.green.shade400
                           : Colors.grey.shade300,
                       style: BorderStyle.solid,
                     ),
-                    color: controller.selectedReceiptImage.value != null
+                    color: controller.selectedReceiptImage != null
                         ? Colors.green.shade50
                         : Colors.grey.shade50,
                   ),
-                  child: controller.selectedReceiptImage.value != null
+                  child: controller.selectedReceiptImage != null
                       ? Stack(
                           children: [
                             ClipRRect(
                               borderRadius: BorderRadius.circular(12),
                               child: Image.file(
-                                controller.selectedReceiptImage.value!,
+                                controller.selectedReceiptImage!,
                                 width: double.infinity,
                                 height: double.infinity,
                                 fit: BoxFit.cover,
@@ -915,7 +914,7 @@ class _ReceiptUploadPageState extends State<_ReceiptUploadPage> {
                 height: 48,
                 child: ElevatedButton(
                   onPressed:
-                      controller.selectedReceiptImage.value != null &&
+                      controller.selectedReceiptImage != null &&
                           !controller.isCreatingPayment
                       ? () => _submitPayment()
                       : null,
@@ -973,7 +972,7 @@ class _ReceiptUploadPageState extends State<_ReceiptUploadPage> {
       );
 
       if (image != null) {
-        controller.selectedReceiptImage.value = File(image.path);
+        controller.selectedReceiptImage = File(image.path);
         controller.update();
       }
     } catch (e) {

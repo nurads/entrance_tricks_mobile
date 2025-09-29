@@ -38,10 +38,10 @@ class PaymentMethodsScreen extends StatelessWidget {
               margin: const EdgeInsets.all(16),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor.withOpacity(0.1),
+                color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: Theme.of(context).primaryColor.withOpacity(0.3),
+                  color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
                 ),
               ),
               child: Column(
@@ -96,7 +96,7 @@ class PaymentMethodsScreen extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Obx(
                 () => ElevatedButton(
-                  onPressed: controller.selectedPaymentMethod.value != null
+                  onPressed: controller.selectedPaymentMethod != null
                       ? () => _navigateToReceiptUpload(context, controller)
                       : null,
                   style: ElevatedButton.styleFrom(
@@ -126,8 +126,7 @@ class PaymentMethodsScreen extends StatelessWidget {
     PaymentMethod method,
   ) {
     return Obx(() {
-      final isSelected =
-          controller.selectedPaymentMethod.value?.id == method.id;
+      final isSelected = controller.selectedPaymentMethod?.id == method.id;
 
       return Card(
         margin: const EdgeInsets.only(bottom: 12),
@@ -137,7 +136,7 @@ class PaymentMethodsScreen extends StatelessWidget {
           side: BorderSide(
             color: isSelected
                 ? Theme.of(context).primaryColor
-                : Colors.grey.withOpacity(0.3),
+                : Colors.grey.withValues(alpha: 0.3),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -153,7 +152,9 @@ class PaymentMethodsScreen extends StatelessWidget {
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withOpacity(0.1),
+                    color: Theme.of(
+                      context,
+                    ).primaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: method.image != null
@@ -232,7 +233,7 @@ class PaymentMethodsScreen extends StatelessWidget {
         'subjectId': subjectId,
         'amount': amount,
         'subjectTitle': subjectTitle,
-        'paymentMethod': controller.selectedPaymentMethod.value,
+        'paymentMethod': controller.selectedPaymentMethod,
       },
     );
   }
