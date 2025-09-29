@@ -14,8 +14,7 @@ class HomeDashboardController extends GetxController {
   bool get isLoading => _isLoading;
   int _notificationCount = 3;
   int get notificationCount => _notificationCount;
-
-  final CoreService _coreService = Get.find<CoreService>();
+  bool hasInternet = false;
 
   List<Subject> _subjects = [];
   List<Subject> get subjects => _subjects;
@@ -30,6 +29,7 @@ class HomeDashboardController extends GetxController {
     _user = await HiveUserStorage().getUser();
 
     InternetConnection().onStatusChange.listen((event) {
+      hasInternet = event == InternetStatus.connected;
       logger.i('Internet status changed: $event');
       if (event == InternetStatus.connected) {
         loadSubjects();
@@ -46,7 +46,7 @@ class HomeDashboardController extends GetxController {
   Future<void> loadSubjects() async {
     _isLoading = true;
     update();
-    if (_coreService.hasInternet) {
+    if (hasInternet) {
       try {
         logger.i('Loading subjects from api');
         final gradeId = _user?.grade.id;
@@ -56,19 +56,18 @@ class HomeDashboardController extends GetxController {
           device.id,
           gradeId: gradeId ?? 0,
         );
-        _coreService.setSubjects(_subjects);
+        await HiveSubjectsStorage().write('subjects', _subjects);
       } catch (e) {
         logger.i('Loading subjects from storage');
         logger.e(e);
-        logger.i(_coreService.subjects);
-        _subjects = _coreService.subjects;
+        _subjects = await HiveSubjectsStorage().read('subjects');
       } finally {
         _isLoading = false;
         update();
       }
     } else {
       logger.i('No internet');
-      _subjects = _coreService.subjects;
+      _subjects = await HiveSubjectsStorage().read('subjects');
       logger.i(_subjects);
       _isLoading = false;
       update();

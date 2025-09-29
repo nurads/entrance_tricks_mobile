@@ -10,7 +10,6 @@ import 'package:entrance_tricks/utils/device/device.dart';
 class ExamController extends GetxController {
   final ExamService _examService = ExamService();
   final HiveExamStorage _hiveExamStorage = HiveExamStorage();
-  final CoreService _coreService = Get.find<CoreService>();
   final InternetConnection _internetConnection = InternetConnection();
   bool _isLoading = true;
   bool get isLoading => _isLoading;
@@ -33,14 +32,15 @@ class ExamController extends GetxController {
 
   String? _error;
   String? get error => _error;
+  bool hasInternet = false;
 
   @override
-  void onInit() {
+  void onInit() async {
     super.onInit();
     loadExams();
     loadSubjects();
 
-    _user = _coreService.authService.user.value;
+    _user = await HiveUserStorage().getUser();
 
     HiveUserStorage().listen((event) {
       _user = event;
@@ -48,6 +48,7 @@ class ExamController extends GetxController {
     }, 'user');
 
     _internetConnection.onStatusChange.listen((event) {
+      hasInternet = event == InternetStatus.connected;
       if (event == InternetStatus.connected) {
         loadExams();
       }
@@ -65,7 +66,8 @@ class ExamController extends GetxController {
   }
 
   Future<void> loadSubjects() async {
-    _subjects = [_allPlaceholderSubject, ..._coreService.subjects];
+    final subjects = await HiveSubjectsStorage().read('subjects');
+    _subjects = [_allPlaceholderSubject, ...subjects];
     update();
   }
 
@@ -76,7 +78,7 @@ class ExamController extends GetxController {
 
     final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
 
-    if (_coreService.hasInternet) {
+    if (hasInternet) {
       try {
         final grade = _user?.grade;
         final exams_ = await _examService.getAvailableExams(

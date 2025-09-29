@@ -1,15 +1,15 @@
 import 'package:get/get.dart';
 import 'package:entrance_tricks/views/views.dart';
-import 'package:entrance_tricks/services/services.dart';
 import 'package:entrance_tricks/models/models.dart';
 import 'package:entrance_tricks/utils/utils.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
+import 'dart:async';
+import 'package:entrance_tricks/utils/storages/storages.dart';
 
 class SubjectDetailController extends GetxController {
   bool _isLoading = true;
   bool get isLoading => _isLoading;
   bool isLocked = true;
-
-  final CoreService _coreService = Get.find<CoreService>();
 
   String _subjectName = '';
   String get subjectName => _subjectName;
@@ -19,11 +19,24 @@ class SubjectDetailController extends GetxController {
 
   int subjectId = 0;
 
+  User? _user;
+  bool hasInternet = false;
+  late StreamSubscription<InternetStatus> _internetStatusSubscription;
+
   @override
-  void onInit() {
+  void onInit() async {
     super.onInit();
     subjectId = Get.arguments?['subjectId'] ?? 1;
     loadSubjectDetail();
+    _user = await HiveUserStorage().getUser();
+    _internetStatusSubscription = InternetConnection().onStatusChange.listen((
+      event,
+    ) {
+      hasInternet = event == InternetStatus.connected;
+      if (event == InternetStatus.connected) {
+        loadSubjectDetail();
+      }
+    });
   }
 
   void loadSubjectDetail() async {
@@ -31,13 +44,13 @@ class SubjectDetailController extends GetxController {
     update();
     try {
       // Subject subject = await SubjectsService().getSubject(subjectId);
-      Subject subject = _coreService.subjects.firstWhere(
-        (element) => element.id == subjectId,
-      );
+      Subject subject = (await HiveSubjectsStorage().read(
+        'subjects',
+      )).firstWhere((element) => element.id == subjectId);
       logger.i('subject: $subject ${subject.isLocked}');
-      
-      isLocked=subject.isLocked;
-      
+
+      isLocked = subject.isLocked;
+
       _subjectName = subject.name;
       _chapters = subject.chapters;
       _chapters.sort((e1, e2) => e1.chapterNumber.compareTo(e2.chapterNumber));
@@ -56,5 +69,11 @@ class SubjectDetailController extends GetxController {
       VIEWS.chapterDetail.path,
       arguments: {'chapterId': chapterId, 'subjectId': subjectId},
     );
+  }
+
+  @override
+  void onClose() {
+    _internetStatusSubscription.cancel();
+    super.onClose();
   }
 }

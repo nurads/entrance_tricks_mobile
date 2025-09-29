@@ -6,7 +6,6 @@ import 'package:entrance_tricks/utils/storages/storages.dart';
 import 'package:entrance_tricks/services/services.dart';
 import 'package:entrance_tricks/utils/device/device.dart';
 import 'dart:io';
-
 import 'package:entrance_tricks/views/common/video_player_screen.dart';
 import 'package:entrance_tricks/views/common/pdf_reader_screen.dart';
 import 'package:entrance_tricks/views/exam/exam_detail_page.dart';
@@ -17,7 +16,6 @@ class DownloadsController extends GetxController {
   final VideoApiService _videoApiService = VideoApiService();
   final NoteService _noteApiService = NoteService();
   final ExamService _examApiService = ExamService();
-  final CoreService _coreService = Get.find<CoreService>();
   // Storage services
   final HiveVideoStorage _videoStorage = HiveVideoStorage();
   final HiveNoteStorage _noteStorage = HiveNoteStorage();
@@ -36,10 +34,10 @@ class DownloadsController extends GetxController {
   User? _user;
 
   @override
-  void onInit() {
+  void onInit() async {
     super.onInit();
     loadAllVideos();
-    _user = _coreService.authService.user.value;
+    _user = await HiveUserStorage().getUser();
     HiveUserStorage().listen((event) {
       _user = event;
       loadAllVideos();
@@ -92,7 +90,7 @@ class DownloadsController extends GetxController {
 
       final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
 
-      final grade = _coreService.authService.user.value?.grade;
+      final grade = _user?.grade;
 
       // Get all available exams
       final exams = await _examApiService.getAvailableExams(

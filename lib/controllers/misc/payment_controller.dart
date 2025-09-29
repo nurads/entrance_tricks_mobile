@@ -13,7 +13,6 @@ import 'package:entrance_tricks/utils/storages/storages.dart';
 class PaymentController extends GetxController {
   final PaymentService _paymentService = PaymentService();
   final ImagePicker _picker = ImagePicker();
-  final CoreService _coreService = Get.find<CoreService>();
 
   final RxList<PaymentMethod> paymentMethods = <PaymentMethod>[].obs;
   final RxList<Payment> userPayments = <Payment>[].obs;
@@ -27,11 +26,12 @@ class PaymentController extends GetxController {
   User? _user;
 
   @override
-  void onInit() {
+  void onInit() async {
     super.onInit();
 
     loadAll();
-    _user = _coreService.authService.user.value;
+    _user = await HiveUserStorage().getUser();
+    logger.i('User: $_user');
     HiveUserStorage().listen((event) {
       _user = event;
       loadAll();
@@ -152,7 +152,7 @@ class PaymentController extends GetxController {
       isLoading = true;
       update();
       final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
-      final grade = _coreService.authService.user.value?.grade;
+      final grade = _user?.grade;
       final packages_ = await _paymentService.getPackages(
         device.id,
         grade: grade?.id,

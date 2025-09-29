@@ -4,6 +4,8 @@ import 'package:entrance_tricks/services/services.dart';
 import 'package:entrance_tricks/models/models.dart';
 import 'package:entrance_tricks/utils/storages/storages.dart';
 import 'package:entrance_tricks/utils/device/device.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
+import 'dart:async';
 
 class SubjectController extends GetxController {
   bool _isLoading = true;
@@ -15,20 +17,28 @@ class SubjectController extends GetxController {
   List<Subject> _subjects = [];
   List<Subject> get subjects => _subjects;
 
-  final _coreService = Get.find<CoreService>();
-
   User? _user;
-
+  bool hasInternet = false;
+  late StreamSubscription<InternetStatus> _internetStatusSubscription;
   @override
   void onInit() async {
     super.onInit();
-    _grade = _coreService.authService.user.value?.grade;
+    _grade = _user?.grade;
     _user = await HiveUserStorage().getUser();
     HiveUserStorage().listen((event) {
       _user = event;
       loadSubjects();
+      update();
     }, 'user');
     loadSubjects();
+    _internetStatusSubscription = InternetConnection().onStatusChange.listen((
+      event,
+    ) {
+      hasInternet = event == InternetStatus.connected;
+      if (event == InternetStatus.connected) {
+        loadSubjects();
+      }
+    });
   }
 
   void loadSubjects() async {
@@ -41,9 +51,9 @@ class SubjectController extends GetxController {
         device.id,
         gradeId: _grade?.id ?? 0,
       );
-      _coreService.setSubjects(_subjects);
+      await HiveSubjectsStorage().write('subjects', _subjects);
     } catch (e) {
-      _subjects = _coreService.subjects;
+      _subjects = await HiveSubjectsStorage().read('subjects');
     } finally {
       _isLoading = false;
       update();
@@ -53,5 +63,11 @@ class SubjectController extends GetxController {
   void navigateToSubjectDetail(int subjectId) {
     // Navigate to subject detail page for the selected subject
     Get.to(() => SubjectDetail(), arguments: {'subjectId': subjectId});
+  }
+
+  @override
+  void dispose() {
+    _internetStatusSubscription.cancel();
+    super.dispose();
   }
 }

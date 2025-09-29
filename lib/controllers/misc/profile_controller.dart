@@ -18,8 +18,7 @@ class ProfileController extends GetxController {
 
   final phoneEditController = TextEditingController();
   final nameEditController = TextEditingController();
-
-  final CoreService _coreService = Get.find<CoreService>();
+  bool hasInternet = false;
   User? _user;
   User? get user => _user;
   String get fullName => "${_user?.firstName} ${_user?.lastName ?? ''}";
@@ -59,6 +58,7 @@ class ProfileController extends GetxController {
     _internetStatusSubscription = InternetConnection().onStatusChange.listen((
       event,
     ) {
+      hasInternet = event == InternetStatus.connected;
       if (event == InternetStatus.connected) {
         loadUserData();
       }
@@ -78,7 +78,7 @@ class ProfileController extends GetxController {
     _isLoading = true;
     update();
 
-    if (_coreService.hasInternet) {
+    if (hasInternet) {
       try {
         final user_ = await UserService().getUser();
 
@@ -143,7 +143,7 @@ class ProfileController extends GetxController {
     if (isUpdating) return;
     isUpdating = true;
     update();
-    if (_coreService.hasInternet) {
+    if (hasInternet) {
       try {
         final user_ = await UserService().updateUser(
           phoneNumber: phoneEditController.text.trim(),
@@ -365,7 +365,7 @@ class ProfileController extends GetxController {
     update();
 
     try {
-      if (!_coreService.hasInternet) {
+      if (!hasInternet) {
         throw Exception('No internet connection');
       }
 
