@@ -18,7 +18,6 @@ class SubjectController extends GetxController {
   List<Subject> get subjects => _subjects;
 
   User? _user;
-  bool hasInternet = false;
   late StreamSubscription<InternetStatus> _internetStatusSubscription;
   @override
   void onInit() async {
@@ -34,7 +33,6 @@ class SubjectController extends GetxController {
     _internetStatusSubscription = InternetConnection().onStatusChange.listen((
       event,
     ) {
-      hasInternet = event == InternetStatus.connected;
       if (event == InternetStatus.connected) {
         loadSubjects();
       }

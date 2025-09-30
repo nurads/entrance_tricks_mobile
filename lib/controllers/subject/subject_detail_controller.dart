@@ -20,7 +20,6 @@ class SubjectDetailController extends GetxController {
   int subjectId = 0;
 
   User? _user;
-  bool hasInternet = false;
   late StreamSubscription<InternetStatus> _internetStatusSubscription;
 
   @override
@@ -32,7 +31,6 @@ class SubjectDetailController extends GetxController {
     _internetStatusSubscription = InternetConnection().onStatusChange.listen((
       event,
     ) {
-      hasInternet = event == InternetStatus.connected;
       if (event == InternetStatus.connected) {
         loadSubjectDetail();
       }

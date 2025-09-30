@@ -10,6 +10,7 @@ class Register extends StatelessWidget {
   Widget build(BuildContext context) {
     Get.put(RegisterController());
     return Scaffold(
+      backgroundColor: Color(0xffefefef),
       appBar: AppBar(
         title: Text('Register'),
         backgroundColor: Colors.transparent,

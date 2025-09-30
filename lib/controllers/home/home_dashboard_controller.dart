@@ -14,7 +14,6 @@ class HomeDashboardController extends GetxController {
   bool get isLoading => _isLoading;
   int _notificationCount = 3;
   int get notificationCount => _notificationCount;
-  bool hasInternet = false;
 
   List<Subject> _subjects = [];
   List<Subject> get subjects => _subjects;
@@ -29,7 +28,6 @@ class HomeDashboardController extends GetxController {
     _user = await HiveUserStorage().getUser();
 
     InternetConnection().onStatusChange.listen((event) {
-      hasInternet = event == InternetStatus.connected;
       logger.i('Internet status changed: $event');
       if (event == InternetStatus.connected) {
         loadSubjects();
@@ -46,29 +44,21 @@ class HomeDashboardController extends GetxController {
   Future<void> loadSubjects() async {
     _isLoading = true;
     update();
-    if (hasInternet) {
-      try {
-        logger.i('Loading subjects from api');
-        final gradeId = _user?.grade.id;
-        final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
+    try {
+      logger.i('Loading subjects from api');
+      final gradeId = _user?.grade.id;
+      final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
 
-        _subjects = await SubjectsService().getSubjects(
-          device.id,
-          gradeId: gradeId ?? 0,
-        );
-        await HiveSubjectsStorage().write('subjects', _subjects);
-      } catch (e) {
-        logger.i('Loading subjects from storage');
-        logger.e(e);
-        _subjects = await HiveSubjectsStorage().read('subjects');
-      } finally {
-        _isLoading = false;
-        update();
-      }
-    } else {
-      logger.i('No internet');
+      _subjects = await SubjectsService().getSubjects(
+        device.id,
+        gradeId: gradeId ?? 0,
+      );
+      await HiveSubjectsStorage().write('subjects', _subjects);
+    } catch (e) {
+      logger.i('Loading subjects from storage');
+      logger.e(e);
       _subjects = await HiveSubjectsStorage().read('subjects');
-      logger.i(_subjects);
+    } finally {
       _isLoading = false;
       update();
     }

@@ -1,4 +1,5 @@
 import 'package:entrance_tricks/models/models.dart';
+import 'package:entrance_tricks/utils/utils.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'base.dart';
@@ -56,6 +57,7 @@ class HiveExamStorage extends BaseObjectStorage<List<Exam>> {
   }
 
   Future<void> setQuizzes(int chapterId, List<Exam> quizzes) {
+    logger.i('Setting quizzes for chapter $chapterId');
     return _box.put('quizzes_$chapterId', quizzes);
   }
 

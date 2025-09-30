@@ -70,9 +70,7 @@ class RegisterController extends GetxController {
       gradeOptions.sort((a, b) => a.name.compareTo(b.name));
       update();
     } catch (e) {
-      {
-        Get.snackbar('Error', 'Failed to load grades');
-      }
+      Get.snackbar('Error', 'Failed to load grades');
     }
   }
 

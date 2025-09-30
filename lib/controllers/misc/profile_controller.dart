@@ -18,7 +18,6 @@ class ProfileController extends GetxController {
 
   final phoneEditController = TextEditingController();
   final nameEditController = TextEditingController();
-  bool hasInternet = false;
   User? _user;
   User? get user => _user;
   String get fullName => "${_user?.firstName} ${_user?.lastName ?? ''}";
@@ -58,9 +57,9 @@ class ProfileController extends GetxController {
     _internetStatusSubscription = InternetConnection().onStatusChange.listen((
       event,
     ) {
-      hasInternet = event == InternetStatus.connected;
       if (event == InternetStatus.connected) {
         loadUserData();
+        loadGrades();
       }
     });
   }
@@ -78,19 +77,14 @@ class ProfileController extends GetxController {
     _isLoading = true;
     update();
 
-    if (hasInternet) {
-      try {
-        final user_ = await UserService().getUser();
+    try {
+      final user_ = await UserService().getUser();
 
-        await AuthService().saveUser(user_);
-      } catch (e) {
-        logger.e(e);
-      } finally {
-        _isLoading = false;
-        update();
-      }
-    } else {
-      _selectedGrade = user?.grade;
+      await AuthService().saveUser(user_);
+    } catch (e) {
+      logger.e(e);
+    } finally {
+      _isLoading = false;
       update();
     }
     phoneEditController.text = user?.phoneNumber ?? '';
@@ -109,7 +103,7 @@ class ProfileController extends GetxController {
       _selectedGrade = user?.grade;
       update();
     } catch (e) {
-      AppSnackbar.showError('Error', 'Failed to load grades');
+      logger.e(e);
     }
   }
 
@@ -143,32 +137,26 @@ class ProfileController extends GetxController {
     if (isUpdating) return;
     isUpdating = true;
     update();
-    if (hasInternet) {
-      try {
-        final user_ = await UserService().updateUser(
-          phoneNumber: phoneEditController.text.trim(),
-          name: nameEditController.text.trim(),
-          grade: _selectedGrade?.id ?? 0,
-        );
-        await AuthService().saveUser(user_);
-        hasChangeOnEditProfile = false;
-      } catch (e) {
-        logger.e(e);
-        AppSnackbar.showError('Error', 'Failed to update user');
-      }
-    } else {
-      AppSnackbar.showError('Error', 'No internet connection');
+    try {
+      final user_ = await UserService().updateUser(
+        phoneNumber: phoneEditController.text.trim(),
+        name: nameEditController.text.trim(),
+        grade: _selectedGrade?.id ?? 0,
+      );
+      await AuthService().saveUser(user_);
+      hasChangeOnEditProfile = false;
+    } catch (e) {
+      logger.e(e);
+      AppSnackbar.showError('Error', 'Failed to update user');
+    } finally {
+      _selectedGrade = user?.grade;
+      _isLoading = false;
+
+      phoneEditController.text = user?.phoneNumber ?? '';
+      nameEditController.text = fullName;
+      update();
+      Get.back();
     }
-
-    _selectedGrade = user?.grade;
-
-    phoneEditController.text = user?.phoneNumber ?? '';
-    nameEditController.text = fullName;
-
-    logger.i('Updated user to ${user?.grade.name}');
-    isUpdating = false;
-    update();
-    Get.back();
   }
 
   void navigateToEditProfile() {
@@ -365,10 +353,6 @@ class ProfileController extends GetxController {
     update();
 
     try {
-      if (!hasInternet) {
-        throw Exception('No internet connection');
-      }
-
       // Call the delete user API
       await UserService().deleteUser();
 

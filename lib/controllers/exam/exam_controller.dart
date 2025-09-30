@@ -1,4 +1,3 @@
-import 'package:entrance_tricks/utils/utils.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/views/exam/exam_detail_page.dart';
 import 'package:entrance_tricks/models/models.dart';
@@ -32,7 +31,6 @@ class ExamController extends GetxController {
 
   String? _error;
   String? get error => _error;
-  bool hasInternet = false;
 
   @override
   void onInit() async {
@@ -48,7 +46,6 @@ class ExamController extends GetxController {
     }, 'user');
 
     _internetConnection.onStatusChange.listen((event) {
-      hasInternet = event == InternetStatus.connected;
       if (event == InternetStatus.connected) {
         loadExams();
       }
@@ -78,34 +75,24 @@ class ExamController extends GetxController {
 
     final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
 
-    if (hasInternet) {
-      try {
-        final grade = _user?.grade;
-        final exams_ = await _examService.getAvailableExams(
-          device.id,
-          gradeId: grade?.id,
-        );
-        await _hiveExamStorage.setExams(exams_);
-        _exams = (await _hiveExamStorage.getExams())
-            .where((e) => e.examType != 'quiz')
-            .toList();
-      } catch (e) {
-        _exams = await _hiveExamStorage.getExams();
-      } finally {
-        _isLoading = false;
-        update();
-      }
-    } else {
+    try {
+      final grade = _user?.grade;
+      final exams_ = await _examService.getAvailableExams(
+        device.id,
+        gradeId: grade?.id,
+      );
+      await _hiveExamStorage.setExams(exams_);
       _exams = (await _hiveExamStorage.getExams())
           .where((e) => e.examType != 'quiz')
           .toList();
-      logger.i(_exams);
+    } catch (e) {
+      _exams = await _hiveExamStorage.getExams();
+    } finally {
       _isLoading = false;
       update();
     }
 
     // Update download status for all exams
-    await _updateExamDownloadStatus();
   }
 
   Future<void> _updateExamDownloadStatus() async {

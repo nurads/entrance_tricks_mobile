@@ -70,12 +70,7 @@ class DownloadsController extends GetxController {
 
       allVideos.value = await _videoStorage.getAllVideos();
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to load videos: $e',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      allVideos.value = await _videoStorage.getAllVideos();
     } finally {
       isLoadingVideos = false;
       update();
@@ -102,12 +97,7 @@ class DownloadsController extends GetxController {
 
       allExams.value = await _examStorage.getExams();
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to load exams: $e',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      allExams.value = await _examStorage.getExams();
     } finally {
       isLoadingExams = false;
       update();
@@ -131,13 +121,7 @@ class DownloadsController extends GetxController {
 
       allNotes.value = await _noteStorage.getAllNotes();
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to load notes: $e',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-      allNotes.value = await _noteApiService.getAllNotes(device.id);
+      allNotes.value = await _noteStorage.getAllNotes();
     } finally {
       isLoadingNotes = false;
       update();
@@ -191,7 +175,7 @@ class DownloadsController extends GetxController {
           video.downloadProgress = 0.0;
           update();
 
-          Get.snackbar('Error', 'Failed to download video: $error');
+          Get.snackbar('Error', 'Failed to download video');
         },
       );
     } catch (e) {
@@ -199,7 +183,7 @@ class DownloadsController extends GetxController {
       video.downloadProgress = 0.0;
       update();
 
-      Get.snackbar('Error', 'Failed to download video: $e');
+      Get.snackbar('Error', 'Failed to download video');
     }
   }
 
@@ -250,7 +234,7 @@ class DownloadsController extends GetxController {
           note.downloadProgress = 0.0;
           update();
 
-          Get.snackbar('Error', 'Failed to download note: $error');
+          Get.snackbar('Error', 'Failed to download note');
         },
       );
     } catch (e) {
@@ -258,7 +242,7 @@ class DownloadsController extends GetxController {
       note.downloadProgress = 0.0;
       update();
 
-      Get.snackbar('Error', 'Failed to download note: $e');
+      Get.snackbar('Error', 'Failed to download note');
     }
   }
 
@@ -316,7 +300,7 @@ class DownloadsController extends GetxController {
       update();
 
       logger.e(e);
-      Get.snackbar('Error', 'Failed to download exam: $e');
+      Get.snackbar('Error', 'Failed to download exam');
     }
   }
 
@@ -407,7 +391,7 @@ class DownloadsController extends GetxController {
                 );
               } catch (e) {
                 Get.back();
-                Get.snackbar('Error', 'Failed to delete video: $e');
+                Get.snackbar('Error', 'Failed to delete video');
               }
             },
             child: const Text('Delete'),
@@ -455,7 +439,7 @@ class DownloadsController extends GetxController {
                 );
               } catch (e) {
                 Get.back();
-                Get.snackbar('Error', 'Failed to delete note: $e');
+                Get.snackbar('Error', 'Failed to delete note');
               }
             },
             child: const Text('Delete'),
@@ -494,7 +478,7 @@ class DownloadsController extends GetxController {
                 );
               } catch (e) {
                 Get.back();
-                Get.snackbar('Error', 'Failed to delete exam: $e');
+                Get.snackbar('Error', 'Failed to delete exam');
               }
             },
             child: const Text('Delete'),
@@ -565,7 +549,7 @@ class DownloadsController extends GetxController {
                 );
               } catch (e) {
                 Get.back();
-                Get.snackbar('Error', 'Failed to clear downloads: $e');
+                Get.snackbar('Error', 'Failed to clear downloads');
               }
             },
             child: const Text('Clear All'),

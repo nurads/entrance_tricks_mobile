@@ -56,12 +56,12 @@ class ChapterDetailController extends GetxController {
   void onInit() async {
     chapterId = Get.arguments?['chapterId'] ?? 1;
     subjectId = Get.arguments?['subjectId'] ?? 1;
+    _user = await HiveUserStorage().getUser();
     loadChapterDetail();
     loadVideos();
     loadNotes();
     loadQuizzes();
     _loadDownloadedNotes(); // Add this line
-    _user = await HiveUserStorage().getUser();
     HiveUserStorage().listen((event) {
       _user = event;
       loadChapterDetail();
@@ -121,14 +121,12 @@ class ChapterDetailController extends GetxController {
         chapterId: chapterId,
         examType: "quiz",
       );
+      logger.i('Setting quizzes for chapter $chapterId');
+      logger.d(await _examStorage.getQuizzes(chapterId));
       _examStorage.setQuizzes(chapterId, quizzes_);
       _quizzes = await _examStorage.getQuizzes(chapterId);
     } catch (e) {
-      _quizzes = await _examService.getAvailableExams(
-        device.id,
-        chapterId: chapterId,
-        examType: "quiz",
-      );
+      _quizzes = await _examStorage.getQuizzes(chapterId);
     }
     _isQuizzesLoading = false;
     update();
