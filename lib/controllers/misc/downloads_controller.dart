@@ -36,8 +36,8 @@ class DownloadsController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
-    loadAllVideos();
     _user = await HiveUserStorage().getUser();
+    loadAllVideos();
     HiveUserStorage().listen((event) {
       _user = event;
       loadAllVideos();

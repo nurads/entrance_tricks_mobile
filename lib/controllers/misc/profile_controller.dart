@@ -43,11 +43,11 @@ class ProfileController extends GetxController {
   void onInit() async {
     super.onInit();
 
+    _user = await HiveUserStorage().getUser();
+
     loadUserData();
 
     loadGrades();
-
-    _user = await HiveUserStorage().getUser();
 
     _authService.listenUser((event) {
       _user = event;

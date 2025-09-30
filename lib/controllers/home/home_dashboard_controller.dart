@@ -23,9 +23,8 @@ class HomeDashboardController extends GetxController {
   void onInit() async {
     super.onInit();
 
-    loadSubjects();
-
     _user = await HiveUserStorage().getUser();
+    loadSubjects();
 
     InternetConnection().onStatusChange.listen((event) {
       logger.i('Internet status changed: $event');

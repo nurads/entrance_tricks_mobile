@@ -26,8 +26,8 @@ class SubjectDetailController extends GetxController {
   void onInit() async {
     super.onInit();
     subjectId = Get.arguments?['subjectId'] ?? 1;
-    loadSubjectDetail();
     _user = await HiveUserStorage().getUser();
+    loadSubjectDetail();
     _internetStatusSubscription = InternetConnection().onStatusChange.listen((
       event,
     ) {

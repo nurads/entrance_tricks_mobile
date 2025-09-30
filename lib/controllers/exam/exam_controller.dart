@@ -35,10 +35,9 @@ class ExamController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
+    _user = await HiveUserStorage().getUser();
     loadExams();
     loadSubjects();
-
-    _user = await HiveUserStorage().getUser();
 
     HiveUserStorage().listen((event) {
       _user = event;
