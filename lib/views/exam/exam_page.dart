@@ -588,7 +588,7 @@ Widget buildExamActionButton(
   if (exam.isDownloaded) {
     // Downloaded exam - can start
     return ElevatedButton(
-      onPressed: () => downloadsController.startExam(exam),
+      onPressed: () async => await downloadsController.startExam(exam),
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.green[600],
         foregroundColor: Colors.white,
@@ -619,7 +619,7 @@ Widget buildExamActionButton(
     onPressed: () async {
       await downloadsController.downloadExam(exam);
       if (exam.isDownloaded) {
-        downloadsController.startExam(exam);
+        await downloadsController.startExam(exam);
       }
     },
     style: ElevatedButton.styleFrom(
