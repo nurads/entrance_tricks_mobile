@@ -1,256 +1,248 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/controllers/profile_controller.dart';
+import 'package:entrance_tricks/controllers/controllers.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    Get.put(ProfileController());
     return GetBuilder<ProfileController>(
       builder: (controller) => Scaffold(
-        backgroundColor: Colors.white,
-        body: Column(
-          children: [
-            // Blue Header with Wave
-            _buildHeader(context, controller),
-            
-            // Profile Picture
-            _buildProfilePicture(context, controller),
-            
-            // Profile Content
-            Expanded(
-              child: _buildProfileContent(context, controller),
-            ),
-          ],
+        backgroundColor: Colors.grey[50],
+        body: SafeArea(
+          child: CustomScrollView(
+            slivers: [
+              // App Bar
+              _buildSliverAppBar(context, controller),
+              // Profile Content
+              SliverToBoxAdapter(
+                child: _buildProfileContent(context, controller),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context, ProfileController controller) {
-    return Container(
-      height: 200,
-      decoration: BoxDecoration(
-        color: Colors.blue[600],
-      ),
-      child: Stack(
-        children: [
-          // Header Content
-          Positioned(
-            top: 50,
-            left: 0,
-            right: 0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Back Button (only visible in edit mode)
-                if (controller.isEditMode)
+  Widget _buildSliverAppBar(
+    BuildContext context,
+    ProfileController controller,
+  ) {
+    return SliverAppBar(
+      expandedHeight: 280,
+      floating: false,
+      pinned: true,
+      backgroundColor: Colors.blue[600],
+      elevation: 0,
+      automaticallyImplyLeading: false, // Add this line
+      actions: [
+        IconButton(
+          icon: Icon(Icons.edit, color: Colors.white),
+          onPressed: () => controller.navigateToEditProfile(),
+        ),
+        SizedBox(width: 8),
+      ],
+      flexibleSpace: FlexibleSpaceBar(
+        background: Stack(
+          children: [
+            // Background gradient
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Colors.blue[600]!, Colors.blue[800]!],
+                ),
+              ),
+            ),
+
+            // Profile picture with modern styling
+            Positioned(
+              bottom: 20,
+              left: 0,
+              right: 0,
+              child: Column(
+                children: [
                   Container(
-                    margin: EdgeInsets.only(left: 20),
-                    child: MouseRegion(
-                      cursor: SystemMouseCursors.precise,
-                      child: GestureDetector(
-                        onTap: () => controller.toggleEditMode(),
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 4),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.3),
+                          blurRadius: 20,
+                          offset: Offset(0, 8),
+                        ),
+                        BoxShadow(
+                          color: Colors.blue.withValues(alpha: 0.2),
+                          blurRadius: 30,
+                          offset: Offset(0, 12),
+                        ),
+                      ],
+                    ),
+                    child: ClipOval(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [Colors.blue[100]!, Colors.blue[200]!],
+                          ),
+                        ),
                         child: Icon(
-                          Icons.arrow_back,
-                          color: Colors.white,
-                          size: 24,
+                          Icons.person,
+                          size: 60,
+                          color: Colors.blue[700],
                         ),
                       ),
                     ),
-                  )
-                else
-                  SizedBox(width: 44),
-                
-                // Title
-                Text(
-                  "Profile",
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
                   ),
-                ),
-                
-                // Edit Button
-                Container(
-                  margin: EdgeInsets.only(right: 20),
-                  child: MouseRegion(
-                    cursor: SystemMouseCursors.precise,
-                    child: GestureDetector(
-                      onTap: () => controller.toggleEditMode(),
-                      child: Icon(
-                        controller.isEditMode ? Icons.check : Icons.edit,
-                        color: Colors.white,
-                        size: 24,
-                      ),
+                  SizedBox(height: 12),
+                  Text(
+                    controller.fullName,
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          
-          // Wave Separator
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: CustomPaint(
-              painter: WavePainter(),
-              size: Size(double.infinity, 60),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProfilePicture(BuildContext context, ProfileController controller) {
-    return Transform.translate(
-      offset: Offset(0, -50),
-      child: Center(
-        child: Stack(
-          children: [
-            // Profile Picture
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: Colors.white,
-                  width: 4,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.3),
-                    blurRadius: 10,
-                    offset: Offset(0, 4),
+                  Text(
+                    controller.user?.grade.name ?? '',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white.withValues(alpha: 0.9),
+                    ),
                   ),
                 ],
               ),
-              child: ClipOval(
-                child: Image.network(
-                  controller.profileImageUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: Colors.grey[300],
-                      child: Icon(
-                        Icons.person,
-                        size: 60,
-                        color: Colors.grey[600],
-                      ),
-                    );
-                  },
-                ),
-              ),
             ),
-            
-            // Edit Icon (only visible in edit mode)
-            if (controller.isEditMode)
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.white,
-                      width: 2,
-                    ),
-                  ),
-                  child: Icon(
-                    Icons.add,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ),
-              ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildProfileContent(BuildContext context, ProfileController controller) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20),
+  Widget _buildProfileContent(
+    BuildContext context,
+    ProfileController controller,
+  ) {
+    return Container(
+      padding: EdgeInsets.all(20),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: 60), // Space for profile picture
-          
-          // Profile Fields
+          // Profile Information
+          Text(
+            'Profile Information',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[800],
+            ),
+          ),
+          SizedBox(height: 20),
+
           _buildProfileField(
             context,
-            Icons.person,
-            "Name",
-            controller.userName,
-            controller.isEditMode,
-            (value) => controller.updateUserName(value),
+            Icons.person_outline,
+            "Full Name",
+            controller.fullName,
           ),
-          
-          SizedBox(height: 24),
-          
+
+          SizedBox(height: 20),
+
           _buildProfileField(
             context,
-            Icons.business,
-            "Class",
-            controller.userClass,
-            controller.isEditMode,
-            (value) => controller.updateUserClass(value),
+            Icons.school_outlined,
+            "Class/Grade",
+            controller.user?.grade.name ?? '',
           ),
-          
-          SizedBox(height: 24),
-          
+
+          SizedBox(height: 20),
+
           _buildProfileField(
             context,
-            Icons.phone,
-            "Phone no.",
-            controller.userPhone,
-            controller.isEditMode,
-            (value) => controller.updateUserPhone(value),
+            Icons.phone_outlined,
+            "Phone Number",
+            controller.user?.phoneNumber ?? '',
           ),
-          
+
           SizedBox(height: 40),
-          
-          // Additional Actions
-          if (!controller.isEditMode) ...[
-            _buildActionButton(
-              context,
-              Icons.settings,
-              "Settings",
-              () {
-                // TODO: Navigate to settings
-              },
+
+          // Action Buttons
+          Text(
+            'Account',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[800],
             ),
-            
-            SizedBox(height: 16),
-            
-            _buildActionButton(
-              context,
-              Icons.help,
-              "Help & Support",
-              () {
-                // TODO: Navigate to help
-              },
+          ),
+          SizedBox(height: 20),
+
+          _buildActionButton(
+            context,
+            Icons.help_outline,
+            "Help & Support",
+            "Get help and contact support",
+            () => controller.openSupport(),
+          ),
+
+          SizedBox(height: 12),
+
+          _buildActionButton(
+            context,
+            Icons.info_outline,
+            "App Information",
+            "Learn more about the app",
+            () => controller.openAppInfo(),
+          ),
+
+          SizedBox(height: 32),
+
+          // Delete Account Button
+          _buildActionButton(
+            context,
+            Icons.delete_forever,
+            "Delete Account",
+            "Permanently delete your account and data",
+            () => controller.showDeleteAccountDialog(),
+            isDestructive: true,
+          ),
+
+          SizedBox(height: 20),
+
+          // Logout Button
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () => controller.logout(),
+              icon: Icon(Icons.logout, color: Colors.white),
+              label: Text(
+                'Logout',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red[600],
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 2,
+              ),
             ),
-            
-            SizedBox(height: 16),
-            
-            _buildActionButton(
-              context,
-              Icons.logout,
-              "Logout",
-              () => controller.logout(),
-            ),
-          ],
+          ),
+
+          SizedBox(height: 20),
         ],
       ),
     );
@@ -261,141 +253,134 @@ class ProfilePage extends StatelessWidget {
     IconData icon,
     String label,
     String value,
-    bool isEditMode,
-    Function(String) onChanged,
   ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(
-              icon,
-              color: Colors.black87,
-              size: 20,
-            ),
-            SizedBox(width: 12),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-                fontWeight: FontWeight.w500,
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[200]!, width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: Colors.grey[600], size: 20),
+              SizedBox(width: 12),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-            ),
-          ],
-        ),
-        
-        SizedBox(height: 8),
-        
-        if (isEditMode)
-          TextField(
-            controller: TextEditingController(text: value),
-            onChanged: onChanged,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.grey[300]!),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.grey[300]!),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.blue[600]!),
-              ),
-              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            ),
-          )
-        else
+            ],
+          ),
+          SizedBox(height: 12),
           Text(
             value,
             style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey[800],
             ),
           ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget _buildActionButton(
     BuildContext context,
     IconData icon,
-    String label,
-    VoidCallback onTap,
-  ) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.precise,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          decoration: BoxDecoration(
-            color: Colors.grey[100],
-            borderRadius: BorderRadius.circular(12),
+    String title,
+    String subtitle,
+    VoidCallback onTap, {
+    bool isDestructive = false,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: isDestructive
+            ? Border.all(color: Colors.red[200]!, width: 1)
+            : null,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: Offset(0, 2),
           ),
-          child: Row(
-            children: [
-              Icon(
-                icon,
-                color: Colors.grey[700],
-                size: 20,
-              ),
-              SizedBox(width: 16),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[700],
-                  fontWeight: FontWeight.w500,
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: isDestructive ? Colors.red[50] : Colors.grey[100],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: isDestructive ? Colors.red[600] : Colors.grey[700],
+                    size: 20,
+                  ),
                 ),
-              ),
-              Spacer(),
-              Icon(
-                Icons.arrow_forward_ios,
-                color: Colors.grey[500],
-                size: 16,
-              ),
-            ],
+                SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: isDestructive
+                              ? Colors.red[700]
+                              : Colors.grey[800],
+                        ),
+                      ),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: isDestructive
+                              ? Colors.red[500]
+                              : Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color: isDestructive ? Colors.red[300] : Colors.grey[400],
+                  size: 16,
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
-}
-
-// Custom painter for wave effect
-class WavePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.fill;
-
-    final path = Path();
-    path.moveTo(0, size.height);
-    path.quadraticBezierTo(
-      size.width * 0.25,
-      size.height * 0.8,
-      size.width * 0.5,
-      size.height * 0.8,
-    );
-    path.quadraticBezierTo(
-      size.width * 0.75,
-      size.height * 0.8,
-      size.width,
-      size.height * 0.8,
-    );
-    path.lineTo(size.width, size.height);
-    path.lineTo(0, size.height);
-    path.close();
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }

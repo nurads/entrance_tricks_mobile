@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:entrance_tricks/components/components.dart';
 
 class ComponentShowcase extends StatelessWidget {
-  ComponentShowcase({super.key});
+  const ComponentShowcase({super.key});
 
   @override
   Widget build(BuildContext context) {

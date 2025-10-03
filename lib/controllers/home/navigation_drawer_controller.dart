@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 import 'package:entrance_tricks/views/views.dart';
+import 'package:entrance_tricks/services/services.dart';
+import 'package:entrance_tricks/utils/utils.dart';
 
 class NavigationDrawerController extends GetxController {
   bool _isDrawerOpen = false;
@@ -22,27 +24,28 @@ class NavigationDrawerController extends GetxController {
 
   // Navigation methods for drawer items
   void navigateToFAQ() {
-    Get.snackbar('Info', 'FAQ page will be implemented');
+    AppSnackbar.showInfo('Info', 'FAQ page will be implemented');
     closeDrawer();
   }
 
   void navigateToSupport() {
-    Get.snackbar('Info', 'Support page will be implemented');
+    AppSnackbar.showInfo('Info', 'Support page will be implemented');
     closeDrawer();
   }
 
   void navigateToAbout() {
-    Get.snackbar('Info', 'About page will be implemented');
+    AppSnackbar.showInfo('Info', 'About page will be implemented');
     closeDrawer();
   }
 
   void navigateToContactUs() {
-    Get.snackbar('Info', 'Contact Us page will be implemented');
+    AppSnackbar.showInfo('Info', 'Contact Us page will be implemented');
     closeDrawer();
   }
 
-  void logout() {
+  void logout() async {
     // Navigate to login and clear navigation stack
+    await AuthService().logout();
     Get.offAllNamed(VIEWS.login.path);
   }
 }

@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/controllers/exam_controller.dart';
+import 'package:entrance_tricks/controllers/exam/exam_controller.dart';
 import 'package:entrance_tricks/views/exam/exam_result_page.dart';
+import 'package:entrance_tricks/views/exam/question_page.dart';
+import 'package:entrance_tricks/models/models.dart';
+import 'package:entrance_tricks/controllers/exam/question_page_controller.dart';
 
 class ExamDetailPage extends StatefulWidget {
-  const ExamDetailPage({super.key});
+  final Exam exam;
+
+  const ExamDetailPage({super.key, required this.exam});
 
   @override
   State<ExamDetailPage> createState() => _ExamDetailPageState();
@@ -12,396 +17,278 @@ class ExamDetailPage extends StatefulWidget {
 
 class _ExamDetailPageState extends State<ExamDetailPage> {
   late ExamController controller;
-  int currentQuestionIndex = 0;
-  int? selectedAnswer;
-  List<Map<String, dynamic>> userAnswers = [];
-  bool isExamCompleted = false;
 
   @override
   void initState() {
     super.initState();
     controller = Get.put(ExamController());
-    _initializeExam();
-  }
-
-  void _initializeExam() {
-    final examId = Get.arguments['examId'];
-    // For now, we'll use mock questions
-    // In the future, this will fetch questions from API
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Top Bar
-            _buildTopBar(context),
-            
-            // Question Card
-            Expanded(
-              child: _buildQuestionCard(context),
-            ),
-            
-            // Navigation Buttons
-            _buildNavigationButtons(context),
-          ],
-        ),
-      ),
-    );
-  }
+    // Get exam data from arguments
+    final examTitle = widget.exam.name;
+    final timeLimit = widget.exam.duration; // in minutes
 
-  Widget _buildTopBar(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: Row(
-        children: [
-          // Back Arrow
-          GestureDetector(
-            onTap: () => Get.back(),
-            child: MouseRegion(
-              cursor: SystemMouseCursors.click,
-              child: Container(
-                padding: EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.blue,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  Icons.arrow_back,
-                  color: Colors.white,
-                  size: 20,
-                ),
-              ),
-            ),
-          ),
-          
-          SizedBox(width: 16),
-          
-          // Exam Title and Info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Maths Exam One",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
-                Text(
-                  "30 Question",
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-          // Timer
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.orange[100],
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.timer,
-                  size: 16,
-                  color: Colors.orange[700],
-                ),
-                SizedBox(width: 4),
-                Text(
-                  "16:35",
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.orange[700],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+    // Create mock math question
 
-  Widget _buildQuestionCard(BuildContext context) {
-    // Mock question data - in future this will come from API
-    final Map<String, dynamic> mockQuestion = {
-      'question': 'Who is making the Web standards?',
-      'options': [
-        'The World Wide Web Consortium',
-        'Microsoft',
-        'Mozilla',
-        'Google',
-      ],
-      'correctAnswer': 0,
-    };
-
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      padding: EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.grey.withOpacity(0.2),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.05),
-            blurRadius: 10,
-            offset: Offset(0, 2),
+    return _ExamModeGate(
+      examTitle: examTitle,
+      timeLimit: timeLimit,
+      questions: widget.exam.questions,
+      examId: widget.exam.id,
+      onComplete: (answers, timeSpent) {
+        final correctAnswers = _calculateCorrectAnswers(
+          answers,
+          widget.exam.questions,
+        );
+        final score = (correctAnswers / widget.exam.questions.length * 100)
+            .round();
+        Get.to(
+          () => ExamResultPage(
+            score: score,
+            correctAnswers: correctAnswers,
+            totalQuestions: widget.exam.questions.length,
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Progress and Quit Button
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Question: ${currentQuestionIndex + 1}/30",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-              TextButton(
-                onPressed: () => _showQuitDialog(context),
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.red,
-                ),
-                child: Text("Quit"),
-              ),
-            ],
-          ),
-          
-          SizedBox(height: 24),
-          
-          // Question Text
-          Text(
-            mockQuestion['question'],
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-              color: Colors.black87,
-            ),
-          ),
-          
-          SizedBox(height: 32),
-          
-          // Options
-          ...List.generate(
-            mockQuestion['options'].length,
-            (index) => _buildOptionButton(
-              context,
-              mockQuestion['options'][index],
-              index,
-              mockQuestion['correctAnswer'] == index,
-            ),
-          ),
-          
-          Spacer(),
-          
-          // See Result Section
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              children: [
-                Text(
-                  "See Result",
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[700],
-                  ),
-                ),
-                Spacer(),
-                Icon(
-                  Icons.keyboard_arrow_down,
-                  color: Colors.grey[600],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildOptionButton(BuildContext context, String option, int index, bool isCorrect) {
-    final isSelected = selectedAnswer == index;
-    
-    return Container(
-      margin: EdgeInsets.only(bottom: 16),
-      child: ElevatedButton(
-        onPressed: () {
-          setState(() {
-            selectedAnswer = index;
-            userAnswers.add({
-              'questionIndex': currentQuestionIndex,
-              'selectedAnswer': index,
-              'isCorrect': isCorrect,
-            });
-          });
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: isSelected ? Colors.blue : Colors.white,
-          foregroundColor: isSelected ? Colors.white : Colors.black87,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(
-              color: isSelected ? Colors.blue : Colors.grey.withOpacity(0.3),
-              width: 1,
-            ),
-          ),
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          elevation: 0,
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                option,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
-            ),
-            if (isSelected)
-              Icon(
-                Icons.check_circle,
-                color: Colors.white,
-                size: 20,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavigationButtons(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(20),
-      child: Row(
-        children: [
-          // Previous Button
-          Expanded(
-            child: ElevatedButton(
-              onPressed: currentQuestionIndex > 0 ? () {
-                setState(() {
-                  currentQuestionIndex--;
-                  selectedAnswer = userAnswers
-                      .where((answer) => answer['questionIndex'] == currentQuestionIndex)
-                      .firstOrNull?['selectedAnswer'];
-                });
-              } : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue[600],
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: EdgeInsets.symmetric(vertical: 16),
-              ),
-              child: Text(
-                "Previous",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
-          
-          SizedBox(width: 16),
-          
-          // Next Button
-          Expanded(
-            child: ElevatedButton(
-              onPressed: selectedAnswer != null ? () {
-                if (currentQuestionIndex < 29) {
-                  setState(() {
-                    currentQuestionIndex++;
-                    selectedAnswer = userAnswers
-                        .where((answer) => answer['questionIndex'] == currentQuestionIndex)
-                        .firstOrNull?['selectedAnswer'];
-                  });
-                } else {
-                  // Exam completed, show results
-                  _showResults();
-                }
-              } : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue[600],
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: EdgeInsets.symmetric(vertical: 16),
-              ),
-              child: Text(
-                currentQuestionIndex < 29 ? "Next" : "Finish",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showQuitDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Quit Exam"),
-          content: Text("Are you sure you want to quit this exam? Your progress will be lost."),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Get.back();
-              },
-              child: Text("Quit", style: TextStyle(color: Colors.red)),
-            ),
-          ],
         );
       },
     );
   }
 
-  void _showResults() {
-    final correctAnswers = userAnswers.where((answer) => answer['isCorrect'] == true).length;
-    final totalQuestions = 30;
-    final score = (correctAnswers / totalQuestions * 100).round();
-    
-    Get.to(() => ExamResultPage(
-      score: score,
-      correctAnswers: correctAnswers,
-      totalQuestions: totalQuestions,
-    ));
+  int _calculateCorrectAnswers(
+    List<int> userAnswers,
+    List<Question> questions,
+  ) {
+    // Remove hardcoded answers and use actual question data
+    int correct = 0;
+    for (int i = 0; i < userAnswers.length && i < questions.length; i++) {
+      final question = questions[i];
+      final userAnswerId = userAnswers[i];
+      
+      // Find the correct choice for this question
+      final correctChoice = question.choices.firstWhere(
+        (choice) => choice.isCorrect,
+        orElse: () => question.choices.first, // fallback if no correct choice found
+      );
+      
+      if (userAnswerId == correctChoice.id) {
+        correct++;
+      }
+    }
+    return correct;
+  }
+}
+
+class _ExamModeGate extends StatefulWidget {
+  final String examTitle;
+  final int timeLimit;
+  final List<Question> questions;
+  final Function(List<int> answers, int timeSpent)? onComplete;
+  final int examId;
+
+  const _ExamModeGate({
+    required this.examTitle,
+    required this.timeLimit,
+    required this.questions,
+    required this.examId,
+    this.onComplete,
+  });
+
+  @override
+  State<_ExamModeGate> createState() => _ExamModeGateState();
+}
+
+class _ExamModeGateState extends State<_ExamModeGate> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showModePicker();
+    });
+  }
+
+  void _showModePicker() async {
+    final mode = await showDialog<_ExamMode>(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        final theme = Theme.of(context);
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          titlePadding: EdgeInsets.only(top: 20, left: 24, right: 24),
+          contentPadding: EdgeInsets.only(left: 16, right: 16, bottom: 20),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Choose Mode',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              SizedBox(height: 6),
+              Text(
+                'How would you like to take this exam?',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                ),
+              ),
+              SizedBox(height: 12),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _ModeCard(
+                accent: theme.colorScheme.primary,
+                icon: Icons.school,
+                title: 'Practice Mode',
+                subtitle: 'See correctness instantly and review as you go',
+                badgeText: 'Recommended for learning',
+                onTap: () => Navigator.of(context).pop(_ExamMode.practice),
+              ),
+              SizedBox(height: 12),
+              _ModeCard(
+                accent: theme.colorScheme.secondary,
+                icon: Icons.fact_check,
+                title: 'Exam Mode',
+                subtitle: 'No feedback until you submit at the end',
+                badgeText: 'Simulates real exam',
+                onTap: () => Navigator.of(context).pop(_ExamMode.exam),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).maybePop(),
+              child: Text('Close'),
+            )
+          ],
+        );
+      },
+    );
+
+    if (!mounted) return;
+    if (mode == null) {
+      Get.back();
+      return;
+    }
+
+    final isPractice = mode == _ExamMode.practice;
+    Get.off(() => QuestionPage(
+          title: widget.examTitle,
+          initialTimeMinutes: widget.timeLimit,
+          questions: widget.questions,
+          onComplete: widget.onComplete,
+          allowReview: true,
+          showTimer: true,
+          mode: isPractice ? QuestionMode.practice : QuestionMode.exam,
+          examId: widget.examId,
+        ));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SizedBox.shrink(),
+    );
+  }
+}
+
+enum _ExamMode { practice, exam }
+
+class _ModeCard extends StatelessWidget {
+  final Color accent;
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final String? badgeText;
+  final VoidCallback onTap;
+
+  const _ModeCard({
+    required this.accent,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    this.badgeText,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
+          boxShadow: [
+            BoxShadow(
+              color: theme.colorScheme.shadow.withValues(alpha: 0.05),
+              blurRadius: 8,
+              offset: Offset(0, 2),
+            )
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: accent.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: accent),
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: theme.colorScheme.onSurface,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  if (badgeText != null) ...[
+                    SizedBox(height: 6),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: accent.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        badgeText!,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: accent,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                  SizedBox(height: 6),
+                  Text(
+                    subtitle,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

@@ -21,7 +21,7 @@ class CustomTextField extends StatelessWidget {
   final List<TextInputFormatter>? inputFormatters;
   final EdgeInsetsGeometry? contentPadding;
   final FocusNode? focusNode;
-
+  final String? prefixText;
   const CustomTextField({
     super.key,
     this.label,
@@ -43,6 +43,7 @@ class CustomTextField extends StatelessWidget {
     this.inputFormatters,
     this.contentPadding,
     this.focusNode,
+    this.prefixText,
   });
 
   @override
@@ -65,6 +66,7 @@ class CustomTextField extends StatelessWidget {
         labelText: label,
         hintText: hint,
         helperText: helperText,
+        prefixText: prefixText,
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,
         contentPadding: contentPadding,
@@ -88,7 +90,7 @@ class PhoneTextField extends StatelessWidget {
     this.onChanged,
     this.onFieldSubmitted,
     this.enabled = true,
-    this.prefix = '09',
+    this.prefix = '0',
   });
 
   @override
@@ -100,6 +102,7 @@ class PhoneTextField extends StatelessWidget {
       prefixIcon: Icon(Icons.phone),
       keyboardType: TextInputType.phone,
       textInputAction: TextInputAction.next,
+      prefixText: prefix,
       maxLength: 9,
       enabled: enabled,
       validator:
@@ -169,7 +172,7 @@ class _PasswordTextFieldState extends State<PasswordTextField> {
             if (value == null || value.isEmpty) {
               return 'Password is required';
             }
-            if (value.length < 6) {
+            if (value.length < 4) {
               return 'Password must be at least 6 characters';
             }
             return null;
