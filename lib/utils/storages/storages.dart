@@ -5,3 +5,5 @@ export 'base.dart';
 export 'misc.dart';
 export 'note.dart';
 export 'video.dart';
+export 'exam_progress.dart';
+export 'exam_completion.dart';

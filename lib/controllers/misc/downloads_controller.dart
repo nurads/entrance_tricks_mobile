@@ -348,9 +348,45 @@ class DownloadsController extends GetxController {
       return;
     }
 
-    // Navigate to exam screen
-
-    Get.to(() => ExamDetailPage(exam: exam));
+    // Check for completion and confirm retake
+    final completionStorage = HiveExamCompletionStorage();
+    completionStorage.init().then((_) async {
+      final isCompleted = await completionStorage.isCompleted(exam.id);
+      if (isCompleted) {
+        Get.dialog(
+          AlertDialog(
+            title: Text('Retake Exam?'),
+            content: Text('Do you want to retake this exam?'),
+            actions: [
+              TextButton(onPressed: () => Get.back(), child: Text('Cancel')),
+              TextButton(
+                onPressed: () async {
+                  // Clear saved progress for both modes and proceed
+                  final progress = HiveExamProgressStorage();
+                  await progress.init();
+                  await progress.clearProgress(exam.id, 'exam');
+                  await progress.clearProgress(exam.id, 'practice');
+                  // Clear completion flag so it no longer shows as completed
+                  final completion = HiveExamCompletionStorage();
+                  await completion.init();
+                  await completion.clearCompleted(exam.id);
+                  // Refresh badges in exam list if controller exists
+                  if (Get.isRegistered<ExamController>()) {
+                    await Get.find<ExamController>().refreshCompletionBadges();
+                  }
+                  Get.back();
+                  Get.to(() => ExamDetailPage(exam: exam));
+                },
+                child: Text('Retake'),
+              ),
+            ],
+          ),
+        );
+      } else {
+        // Navigate to exam screen
+        Get.to(() => ExamDetailPage(exam: exam));
+      }
+    });
   }
 
   // Delete video
