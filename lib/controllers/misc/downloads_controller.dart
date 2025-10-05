@@ -22,9 +22,9 @@ class DownloadsController extends GetxController {
   final HiveExamStorage _examStorage = HiveExamStorage();
 
   // Observable lists for all content (both downloaded and available)
-  final RxList<Video> allVideos = <Video>[].obs;
-  final RxList<Exam> allExams = <Exam>[].obs;
-  final RxList<Note> allNotes = <Note>[].obs;
+  List<Video> allVideos = <Video>[];
+  List<Exam> allExams = <Exam>[];
+  List<Note> allNotes = <Note>[];
 
   // Loading states
   bool isLoadingVideos = false;
@@ -68,9 +68,9 @@ class DownloadsController extends GetxController {
         logger.e('Error loading videos from chapter: $e');
       }
 
-      allVideos.value = await _videoStorage.getAllVideos();
+      allVideos = await _videoStorage.getAllVideos();
     } catch (e) {
-      allVideos.value = await _videoStorage.getAllVideos();
+      allVideos = await _videoStorage.getAllVideos();
     } finally {
       isLoadingVideos = false;
       update();
@@ -95,9 +95,9 @@ class DownloadsController extends GetxController {
 
       await _examStorage.setExams(exams);
 
-      allExams.value = await _examStorage.getExams();
+      allExams = await _examStorage.getExams();
     } catch (e) {
-      allExams.value = await _examStorage.getExams();
+      allExams = await _examStorage.getExams();
     } finally {
       isLoadingExams = false;
       update();
@@ -119,9 +119,9 @@ class DownloadsController extends GetxController {
       );
       await _noteStorage.setAllNotes(notes_);
 
-      allNotes.value = await _noteStorage.getAllNotes();
+      allNotes = await _noteStorage.getAllNotes();
     } catch (e) {
-      allNotes.value = await _noteStorage.getAllNotes();
+      allNotes = await _noteStorage.getAllNotes();
     } finally {
       isLoadingNotes = false;
       update();
@@ -274,7 +274,6 @@ class DownloadsController extends GetxController {
 
       final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
       final questions = await _examApiService.getQuestions(device.id, exam.id);
-      logger.d(questions);
 
       exam.questions = questions;
       exam.isDownloaded = true;

@@ -151,7 +151,7 @@ class ProfileController extends GetxController {
     } finally {
       _selectedGrade = user?.grade;
       _isLoading = false;
-
+      isUpdating = false;
       phoneEditController.text = user?.phoneNumber ?? '';
       nameEditController.text = fullName;
       update();

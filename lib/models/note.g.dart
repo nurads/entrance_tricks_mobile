@@ -14,7 +14,7 @@ Note _$NoteFromJson(Map<String, dynamic> json) => Note(
   size: (json['size'] as num?)?.toInt() ?? 0,
   filePath: json['file_path'] as String?,
   isDownloaded: json['is_downloaded'] as bool? ?? false,
-  isLocked: json['isLocked'] as bool? ?? true,
+  isLocked: json['is_locked'] as bool? ?? true,
 );
 
 Map<String, dynamic> _$NoteToJson(Note instance) => <String, dynamic>{
@@ -25,5 +25,5 @@ Map<String, dynamic> _$NoteToJson(Note instance) => <String, dynamic>{
   'is_downloaded': instance.isDownloaded,
   'file_path': instance.filePath,
   'size': instance.size,
-  'isLocked': instance.isLocked,
+  'is_locked': instance.isLocked,
 };

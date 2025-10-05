@@ -154,7 +154,6 @@ class PaymentController extends GetxController {
         device.id,
         grade: grade?.id,
       );
-      logger.d(packages_);
       packages = packages_;
       update();
     } catch (e) {
