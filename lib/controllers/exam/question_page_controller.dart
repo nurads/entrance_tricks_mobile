@@ -27,9 +27,7 @@ class QuestionPageController extends GetxController {
   late bool showTimer;
   late QuestionMode mode;
   late int examId;
-  final HiveExamProgressStorage _progressStorage = HiveExamProgressStorage();
-  final HiveExamCompletionStorage _completionStorage =
-      HiveExamCompletionStorage();
+  final HiveExamStorage _examStorage = HiveExamStorage();
 
   void initializeQuiz({
     required String title,
@@ -104,8 +102,6 @@ class QuestionPageController extends GetxController {
 
   void selectAnswer(int choiceId) {
     userAnswers[currentQuestionIndex.value] = choiceId;
-    // In practice mode, stay on the question but reveal feedback via UI.
-    // In exam mode, no immediate feedback; keep behavior the same.
     update();
     _persistProgress();
   }
@@ -139,11 +135,11 @@ class QuestionPageController extends GetxController {
   void submitQuiz() {
     _timer?.cancel();
     isCompleted.value = true;
-    _progressStorage.clearProgress(
+    _examStorage.clearProgress(
       examId,
       mode == QuestionMode.practice ? 'practice' : 'exam',
     );
-    _completionStorage.markCompleted(examId);
+    _examStorage.markCompleted(examId);
     Get.to(
       () => ExamResultPage(
         score: calculateCorrectAnswers(),
@@ -156,6 +152,7 @@ class QuestionPageController extends GetxController {
   void reviewAnswers() {
     showAnswers.value = true;
     currentQuestionIndex.value = 0;
+    update();
   }
 
   void finishQuiz() {
@@ -250,9 +247,8 @@ class QuestionPageController extends GetxController {
   }
 
   Future<void> _restoreProgressIfAny() async {
-    await _progressStorage.init();
     if (examId == 0) return;
-    final saved = await _progressStorage.getProgress(
+    final saved = await _examStorage.getProgress(
       examId,
       mode == QuestionMode.practice ? 'practice' : 'exam',
     );
@@ -279,7 +275,7 @@ class QuestionPageController extends GetxController {
 
   void _persistProgress() {
     if (examId == 0) return;
-    _progressStorage.saveProgress(
+    _examStorage.saveProgress(
       examId,
       currentIndex: currentQuestionIndex.value,
       answers: userAnswers.toList(),

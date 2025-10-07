@@ -252,48 +252,52 @@ class QuestionPage extends StatelessWidget {
               final choice = entry.value;
               final choiceLabel = String.fromCharCode(65 + index); // A, B, C, D
 
-              final isSelected = controller
-                      .userAnswers[controller.currentQuestionIndex.value] ==
-                  choice.id;
-              final bool hasAnsweredCurrent =
-                  controller.userAnswers[controller.currentQuestionIndex.value] !=
-                      null;
-              final currentQuestion =
-                  controller.questions[controller.currentQuestionIndex.value];
-              final correctChoiceId = currentQuestion.choices
-                  .firstWhere((c) => c.isCorrect)
-                  .id;
-              // Determine visual state
-              bool highlightAsCorrect = false;
-              bool highlightAsIncorrect = false;
-              if (controller.mode == QuestionMode.practice && hasAnsweredCurrent) {
-                if (choice.id == correctChoiceId) {
-                  highlightAsCorrect = true;
+              return Obx(() {
+                final isSelected = controller
+                        .userAnswers[controller.currentQuestionIndex.value] ==
+                    choice.id;
+                final bool hasAnsweredCurrent =
+                    controller.userAnswers[controller.currentQuestionIndex.value] !=
+                        null;
+                final currentQuestion =
+                    controller.questions[controller.currentQuestionIndex.value];
+                final correctChoiceId = currentQuestion.choices
+                    .firstWhere((c) => c.isCorrect)
+                    .id;
+                // Determine visual state
+                bool highlightAsCorrect = false;
+                bool highlightAsIncorrect = false;
+                if (controller.mode == QuestionMode.practice && hasAnsweredCurrent) {
+                  if (choice.id == correctChoiceId) {
+                    highlightAsCorrect = true;
+                  }
+                  if (isSelected && choice.id != correctChoiceId) {
+                    highlightAsIncorrect = true;
+                  }
                 }
-                if (isSelected && choice.id != correctChoiceId) {
-                  highlightAsIncorrect = true;
+                if (controller.showAnswers.value) {
+                  // Review mode after submission behaves like revealing answers
+                  highlightAsCorrect = choice.id == correctChoiceId;
+                  highlightAsIncorrect = isSelected && choice.id != correctChoiceId;
                 }
-              }
-              if (controller.showAnswers.value) {
-                // Review mode after submission behaves like revealing answers
-                highlightAsCorrect = choice.id == correctChoiceId;
-                highlightAsIncorrect = isSelected && choice.id != correctChoiceId;
-              }
 
-              return _buildChoiceItem(
-                context,
-                choice,
-                choiceLabel,
-                isSelected,
-                () => controller.selectAnswer(choice.id),
-                highlightAsCorrect: highlightAsCorrect,
-                highlightAsIncorrect: highlightAsIncorrect,
-              );
+                return _buildChoiceItem(
+                  context,
+                  choice,
+                  choiceLabel,
+                  isSelected,
+                  () => controller.selectAnswer(choice.id),
+                  highlightAsCorrect: highlightAsCorrect,
+                  highlightAsIncorrect: highlightAsIncorrect,
+                );
+              });
             }),
 
-            // Immediate feedback text for Practice Mode
-            () {
-              if (controller.mode != QuestionMode.practice) return SizedBox();
+            // Immediate feedback text for Practice Mode and Review Mode
+            Obx(() {
+              if (controller.mode != QuestionMode.practice && !controller.showAnswers.value) {
+                return SizedBox();
+              }
               final answered = controller
                       .userAnswers[controller.currentQuestionIndex.value] !=
                   null;
@@ -330,7 +334,7 @@ class QuestionPage extends StatelessWidget {
                   ],
                 ),
               );
-            }(),
+            }),
           ],
         ),
       ),

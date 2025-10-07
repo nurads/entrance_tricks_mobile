@@ -348,10 +348,8 @@ class DownloadsController extends GetxController {
       return;
     }
 
-    // Check for completion and confirm retake
-    final completionStorage = HiveExamCompletionStorage();
-    await completionStorage.init();
-    final isCompleted = await completionStorage.isCompleted(exam.id);
+    // Check for completion and confirm retake using unified storage
+    final isCompleted = await _examStorage.isCompleted(exam.id);
     
     if (isCompleted) {
       Get.dialog(
@@ -363,14 +361,9 @@ class DownloadsController extends GetxController {
             TextButton(
               onPressed: () async {
                 // Clear saved progress for both modes and proceed
-                final progress = HiveExamProgressStorage();
-                await progress.init();
-                await progress.clearProgress(exam.id, 'exam');
-                await progress.clearProgress(exam.id, 'practice');
-                // Clear completion flag so it no longer shows as completed
-                final completion = HiveExamCompletionStorage();
-                await completion.init();
-                await completion.clearCompleted(exam.id);
+                await _examStorage.clearProgress(exam.id, 'exam');
+                await _examStorage.clearProgress(exam.id, 'practice');
+                await _examStorage.clearCompleted(exam.id);
                 // Refresh badges in exam list if controller exists
                 if (Get.isRegistered<ExamController>()) {
                   await Get.find<ExamController>().refreshCompletionBadges();
