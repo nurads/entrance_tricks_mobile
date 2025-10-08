@@ -9,6 +9,7 @@ import 'package:entrance_tricks/utils/device/device.dart';
 class ExamController extends GetxController {
   final ExamService _examService = ExamService();
   final HiveExamStorage _hiveExamStorage = HiveExamStorage();
+  // Completion now handled within HiveExamStorage
   final InternetConnection _internetConnection = InternetConnection();
   bool _isLoading = true;
   bool get isLoading => _isLoading;
@@ -22,6 +23,8 @@ class ExamController extends GetxController {
 
   List<Exam> _exams = [];
   List<Exam> get exams => _exams;
+  Set<int> _completedExamIds = {};
+  Set<int> get completedExamIds => _completedExamIds;
 
   List<Subject> _subjects = [];
   List<Subject> get subjects => _subjects;
@@ -38,6 +41,7 @@ class ExamController extends GetxController {
     _user = await HiveUserStorage().getUser();
     loadExams();
     loadSubjects();
+    _completedExamIds = await _hiveExamStorage.completedExamIds();
 
     HiveUserStorage().listen((event) {
       _user = event;
@@ -52,6 +56,7 @@ class ExamController extends GetxController {
 
     _hiveExamStorage.listen((event) {
       _exams = event.where((e) => e.examType != 'quiz').toList();
+      _refreshCompletionBadges();
       update();
     }, 'exams');
 
@@ -88,10 +93,10 @@ class ExamController extends GetxController {
       _exams = await _hiveExamStorage.getExams();
     } finally {
       _isLoading = false;
+      await _refreshCompletionBadges();
       update();
     }
 
-    // Update download status for all exams
   }
 
   Future<void> _updateExamDownloadStatus() async {
@@ -100,6 +105,15 @@ class ExamController extends GetxController {
       exam.isDownloaded = questions.isNotEmpty;
     }
     update();
+  }
+
+  Future<void> _refreshCompletionBadges() async {
+    _completedExamIds = await _hiveExamStorage.completedExamIds();
+    update();
+  }
+
+  Future<void> refreshCompletionBadges() async {
+    await _refreshCompletionBadges();
   }
 
   Future<void> selectSubject(int index) async {

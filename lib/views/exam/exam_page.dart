@@ -426,6 +426,30 @@ Widget _buildExamCard(
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
+                const SizedBox(height: 4),
+                if (controller.completedExamIds.contains(exam.id))
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.check_circle, size: 12, color: Colors.green),
+                        SizedBox(width: 4),
+                        Text(
+                          'Completed',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.green[800],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 SizedBox(height: 4),
                 Row(
                   children: [
@@ -564,7 +588,7 @@ Widget buildExamActionButton(
   if (exam.isDownloaded) {
     // Downloaded exam - can start
     return ElevatedButton(
-      onPressed: () => downloadsController.startExam(exam),
+      onPressed: () async => await downloadsController.startExam(exam),
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.green[600],
         foregroundColor: Colors.white,
@@ -595,7 +619,7 @@ Widget buildExamActionButton(
     onPressed: () async {
       await downloadsController.downloadExam(exam);
       if (exam.isDownloaded) {
-        downloadsController.startExam(exam);
+        await downloadsController.startExam(exam);
       }
     },
     style: ElevatedButton.styleFrom(

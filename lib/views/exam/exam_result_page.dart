@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:entrance_tricks/controllers/exam/question_page_controller.dart';
 import 'package:entrance_tricks/controllers/home/main_navigation_controller.dart';
 
 class ExamResultPage extends StatelessWidget {
@@ -34,8 +35,8 @@ class ExamResultPage extends StatelessWidget {
 
               SizedBox(height: 60),
 
-              // Back Button
-              _buildBackButton(context),
+              // Action Buttons
+              _buildActions(context),
             ],
           ),
         ),
@@ -142,31 +143,55 @@ class ExamResultPage extends StatelessWidget {
     );
   }
 
-  Widget _buildBackButton(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: ElevatedButton(
-          onPressed: () {
-            // Navigate back to exam page
-            Get.until((route) => route.settings.name == '/home');
-            Get.find<MainNavigationController>().changeIndex(1);
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue[600],
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+  Widget _buildActions(BuildContext context) {
+    return Column(
+      children: [
+        // Review Answers
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () {
+              if (Get.isRegistered<QuestionPageController>()) {
+                Get.find<QuestionPageController>().reviewAnswers();
+              }
+              Get.back();
+            },
+            icon: Icon(Icons.quiz_outlined),
+            label: Text('Review Answers'),
+            style: OutlinedButton.styleFrom(
+              padding: EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-            padding: EdgeInsets.symmetric(vertical: 16),
-          ),
-          child: Text(
-            "Back to Page",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ),
-      ),
+
+        SizedBox(height: 12),
+
+        // Back to Exams
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: () {
+              Get.until((route) => route.settings.name == '/home');
+              Get.find<MainNavigationController>().changeIndex(1);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue[600],
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: EdgeInsets.symmetric(vertical: 16),
+            ),
+            child: Text(
+              "Back to Page",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

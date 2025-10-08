@@ -26,6 +26,13 @@ class Exam {
   @JsonKey(name: 'is_downloaded')
   bool isDownloaded;
 
+  // New persisted state fields
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool isCompleted = false;
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  ExamProgress? progress;
+
   List<Question> questions;
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -54,12 +61,47 @@ class Exam {
   String get title => name;
 }
 
+class ExamProgress {
+  final int currentQuestionIndex;
+  final List<int?> userAnswers;
+  final int timeRemaining;
+  final String mode;
+
+  ExamProgress({
+    required this.currentQuestionIndex,
+    required this.userAnswers,
+    required this.timeRemaining,
+    required this.mode,
+  });
+
+  factory ExamProgress.fromMap(Map<dynamic, dynamic> map) {
+    final m = Map<String, dynamic>.from(map);
+    final answersDynamic = (m['selected_answers'] as List?) ?? const [];
+    final answers = answersDynamic.map((e) => e is int ? e : (e == null ? null : int.tryParse(e.toString()))).toList();
+    return ExamProgress(
+      currentQuestionIndex: m['current_question_index'] ?? 0,
+      userAnswers: answers.cast<int?>(),
+      timeRemaining: m['remaining_time'] ?? 0,
+      mode: m['mode'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'current_question_index': currentQuestionIndex,
+      'selected_answers': userAnswers,
+      'remaining_time': timeRemaining,
+      'mode': mode,
+    };
+  }
+}
+
 class ExamTypeAdapter implements TypeAdapter<Exam> {
   @override
   read(BinaryReader reader) {
     final json = reader.read() as Map<dynamic, dynamic>;
     final json_ = Map<String, dynamic>.from(json);
-    return Exam(
+    final exam = Exam(
       id: json_['id'],
       name: json_['name'],
       examType: json_['exam_type'],
@@ -73,12 +115,25 @@ class ExamTypeAdapter implements TypeAdapter<Exam> {
       totalQuestions: json_['total_questions'],
       year: json_['year'],
     );
+    // hydrate extra fields if present
+    exam.isCompleted = json_['is_completed'] ?? false;
+    final progressMap = json_['progress'];
+    if (progressMap is Map) {
+      exam.progress = ExamProgress.fromMap(progressMap);
+    }
+    return exam;
   }
 
   @override
   int get typeId => 2;
   @override
   void write(BinaryWriter writer, Exam obj) {
-    writer.write(obj.toJson());
+    final json = obj.toJson();
+    // persist extra fields
+    json['is_completed'] = obj.isCompleted;
+    if (obj.progress != null) {
+      json['progress'] = obj.progress!.toMap();
+    }
+    writer.write(json);
   }
 }
