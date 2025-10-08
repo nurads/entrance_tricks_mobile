@@ -9,8 +9,7 @@ import 'package:entrance_tricks/utils/device/device.dart';
 class ExamController extends GetxController {
   final ExamService _examService = ExamService();
   final HiveExamStorage _hiveExamStorage = HiveExamStorage();
-  final HiveExamCompletionStorage _completionStorage =
-      HiveExamCompletionStorage();
+  // Completion now handled within HiveExamStorage
   final InternetConnection _internetConnection = InternetConnection();
   bool _isLoading = true;
   bool get isLoading => _isLoading;
@@ -42,8 +41,7 @@ class ExamController extends GetxController {
     _user = await HiveUserStorage().getUser();
     loadExams();
     loadSubjects();
-    await _completionStorage.init();
-    _completedExamIds = await _completionStorage.completedExamIds();
+    _completedExamIds = await _hiveExamStorage.completedExamIds();
 
     HiveUserStorage().listen((event) {
       _user = event;
@@ -99,7 +97,6 @@ class ExamController extends GetxController {
       update();
     }
 
-    // Update download status for all exams
   }
 
   Future<void> _updateExamDownloadStatus() async {
@@ -111,7 +108,7 @@ class ExamController extends GetxController {
   }
 
   Future<void> _refreshCompletionBadges() async {
-    _completedExamIds = await _completionStorage.completedExamIds();
+    _completedExamIds = await _hiveExamStorage.completedExamIds();
     update();
   }
 
