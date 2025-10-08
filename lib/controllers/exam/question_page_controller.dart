@@ -101,6 +101,17 @@ class QuestionPageController extends GetxController {
   }
 
   void selectAnswer(int choiceId) {
+    // Block changing answers once finished or in review for both modes
+    if (isCompleted.value || showAnswers.value) {
+      return;
+    }
+    // Additionally, in practice mode during the attempt, once an answer
+    // is chosen for the current question, prevent changing it.
+    if (mode == QuestionMode.practice &&
+        userAnswers.isNotEmpty &&
+        userAnswers[currentQuestionIndex.value] != null) {
+      return;
+    }
     userAnswers[currentQuestionIndex.value] = choiceId;
     update();
     _persistProgress();
