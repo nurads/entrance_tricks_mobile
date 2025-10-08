@@ -1,9 +1,12 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/controllers/exam/exam_controller.dart';
 import 'package:entrance_tricks/views/exam/exam_result_page.dart';
 import 'package:entrance_tricks/views/exam/question_page.dart';
 import 'package:entrance_tricks/models/models.dart';
+import 'package:entrance_tricks/utils/utils.dart';
 import 'package:entrance_tricks/controllers/exam/question_page_controller.dart';
 
 class ExamDetailPage extends StatefulWidget {
@@ -29,6 +32,9 @@ class _ExamDetailPageState extends State<ExamDetailPage> {
     // Get exam data from arguments
     final examTitle = widget.exam.name;
     final timeLimit = widget.exam.duration; // in minutes
+
+    logger.f("Exam Questions: ${widget.exam.questions.length}");
+    logger.f((widget.exam.questions).map((e) => e.toJson()).toList());
 
     // Create mock math question
 
@@ -64,13 +70,14 @@ class _ExamDetailPageState extends State<ExamDetailPage> {
     for (int i = 0; i < userAnswers.length && i < questions.length; i++) {
       final question = questions[i];
       final userAnswerId = userAnswers[i];
-      
+
       // Find the correct choice for this question
       final correctChoice = question.choices.firstWhere(
         (choice) => choice.isCorrect,
-        orElse: () => question.choices.first, // fallback if no correct choice found
+        orElse: () =>
+            question.choices.first, // fallback if no correct choice found
       );
-      
+
       if (userAnswerId == correctChoice.id) {
         correct++;
       }
@@ -114,7 +121,9 @@ class _ExamModeGateState extends State<_ExamModeGate> {
       builder: (context) {
         final theme = Theme.of(context);
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           titlePadding: EdgeInsets.only(top: 20, left: 24, right: 24),
           contentPadding: EdgeInsets.only(left: 16, right: 16, bottom: 20),
           title: Column(
@@ -162,7 +171,7 @@ class _ExamModeGateState extends State<_ExamModeGate> {
             TextButton(
               onPressed: () => Navigator.of(context).maybePop(),
               child: Text('Close'),
-            )
+            ),
           ],
         );
       },
@@ -175,23 +184,23 @@ class _ExamModeGateState extends State<_ExamModeGate> {
     }
 
     final isPractice = mode == _ExamMode.practice;
-    Get.off(() => QuestionPage(
-          title: widget.examTitle,
-          initialTimeMinutes: widget.timeLimit,
-          questions: widget.questions,
-          onComplete: widget.onComplete,
-          allowReview: true,
-          showTimer: true,
-          mode: isPractice ? QuestionMode.practice : QuestionMode.exam,
-          examId: widget.examId,
-        ));
+    Get.off(
+      () => QuestionPage(
+        title: widget.examTitle,
+        initialTimeMinutes: widget.timeLimit,
+        questions: widget.questions,
+        onComplete: widget.onComplete,
+        allowReview: true,
+        showTimer: true,
+        mode: isPractice ? QuestionMode.practice : QuestionMode.exam,
+        examId: widget.examId,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SizedBox.shrink(),
-    );
+    return Scaffold(body: SizedBox.shrink());
   }
 }
 
@@ -226,13 +235,15 @@ class _ModeCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
+          border: Border.all(
+            color: theme.colorScheme.outline.withValues(alpha: 0.2),
+          ),
           boxShadow: [
             BoxShadow(
               color: theme.colorScheme.shadow.withValues(alpha: 0.05),
               blurRadius: 8,
               offset: Offset(0, 2),
-            )
+            ),
           ],
         ),
         child: Row(
@@ -280,7 +291,9 @@ class _ModeCard extends StatelessWidget {
                   Text(
                     subtitle,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                      color: theme.colorScheme.onSurface.withValues(
+                        alpha: 0.75,
+                      ),
                     ),
                   ),
                 ],

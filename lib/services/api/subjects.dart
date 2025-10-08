@@ -17,7 +17,6 @@ class SubjectsService extends GetxController {
         authenticated: true,
       );
       logger.i('Subjects response');
-      logger.d(response.data);
       if (response.statusCode == 200) {
         return (response.data as List).map((e) => Subject.fromJson(e)).toList();
       } else {

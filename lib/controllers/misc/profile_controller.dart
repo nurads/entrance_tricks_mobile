@@ -151,7 +151,7 @@ class ProfileController extends GetxController {
     } finally {
       _selectedGrade = user?.grade;
       _isLoading = false;
-
+      isUpdating = false;
       phoneEditController.text = user?.phoneNumber ?? '';
       nameEditController.text = fullName;
       update();
@@ -168,7 +168,7 @@ class ProfileController extends GetxController {
   }
 
   void openAppInfo() {
-    AppSnackbar.showInfo('Info', 'App information page will be implemented');
+    Get.toNamed(VIEWS.about.path);
   }
 
   void logout() {

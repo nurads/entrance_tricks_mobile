@@ -41,7 +41,6 @@ class SubjectDetailController extends GetxController {
     _isLoading = true;
     update();
     try {
-      // Subject subject = await SubjectsService().getSubject(subjectId);
       Subject subject = (await HiveSubjectsStorage().read(
         'subjects',
       )).firstWhere((element) => element.id == subjectId);

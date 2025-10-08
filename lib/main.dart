@@ -21,7 +21,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    logger.d(service.user.value);
     return GetMaterialApp(
       title: 'Entrance Tricks',
       theme: lightTheme(context),

@@ -126,6 +126,7 @@ class QuestionPageController extends GetxController {
   }
 
   void nextQuestion() {
+    logger.d("Questions length: ${questions.length}");
     if (questions.isNotEmpty &&
         currentQuestionIndex.value < questions.length - 1) {
       currentQuestionIndex.value++;
@@ -266,7 +267,8 @@ class QuestionPageController extends GetxController {
     if (saved == null) return;
 
     final savedIndex = (saved['current_question_index'] as num?)?.toInt() ?? 0;
-    final savedAnswers = (saved['selected_answers'] as List<dynamic>?)
+    final savedAnswers =
+        (saved['selected_answers'] as List<dynamic>?)
             ?.map((e) => e == null ? null : (e as num).toInt())
             .toList() ??
         [];
@@ -275,8 +277,10 @@ class QuestionPageController extends GetxController {
     if (savedAnswers.isNotEmpty && savedAnswers.length == questions.length) {
       userAnswers.value = List<int?>.from(savedAnswers);
     }
-    currentQuestionIndex.value =
-        savedIndex.clamp(0, (questions.length - 1).clamp(0, questions.length));
+    currentQuestionIndex.value = savedIndex.clamp(
+      0,
+      (questions.length - 1).clamp(0, questions.length),
+    );
     if (savedRemaining != null && savedRemaining > 0) {
       timeRemaining.value = savedRemaining;
     }
