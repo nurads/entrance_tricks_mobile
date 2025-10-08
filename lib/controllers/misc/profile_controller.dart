@@ -168,7 +168,7 @@ class ProfileController extends GetxController {
   }
 
   void openAppInfo() {
-    AppSnackbar.showInfo('Info', 'App information page will be implemented');
+    Get.toNamed(VIEWS.about.path);
   }
 
   void logout() {
