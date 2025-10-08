@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/models/models.dart';
 import 'package:entrance_tricks/views/exam/exam_result_page.dart';
+import 'package:entrance_tricks/utils/utils.dart';
 
 class QuestionPageController extends GetxController {
   // Observable variables
@@ -102,6 +103,7 @@ class QuestionPageController extends GetxController {
   }
 
   void nextQuestion() {
+    logger.d("Questions length: ${questions.length}");
     if (questions.isNotEmpty &&
         currentQuestionIndex.value < questions.length - 1) {
       currentQuestionIndex.value++;

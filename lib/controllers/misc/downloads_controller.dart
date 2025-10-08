@@ -275,6 +275,8 @@ class DownloadsController extends GetxController {
       final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
       final questions = await _examApiService.getQuestions(device.id, exam.id);
 
+      logger.i('Downloaded ${questions.length} questions for exam ${exam.id}');
+
       exam.questions = questions;
       exam.isDownloaded = true;
       exam.isLoadingQuestion = false;

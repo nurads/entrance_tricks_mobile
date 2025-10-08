@@ -1,9 +1,12 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/controllers/exam/exam_controller.dart';
 import 'package:entrance_tricks/views/exam/exam_result_page.dart';
 import 'package:entrance_tricks/views/exam/question_page.dart';
 import 'package:entrance_tricks/models/models.dart';
+import 'package:entrance_tricks/utils/utils.dart';
 
 class ExamDetailPage extends StatefulWidget {
   final Exam exam;
@@ -28,6 +31,9 @@ class _ExamDetailPageState extends State<ExamDetailPage> {
     // Get exam data from arguments
     final examTitle = widget.exam.name;
     final timeLimit = widget.exam.duration; // in minutes
+
+    logger.f("Exam Questions: ${widget.exam.questions.length}");
+    logger.f((widget.exam.questions).map((e) => e.toJson()).toList());
 
     // Create mock math question
 
@@ -67,13 +73,14 @@ class _ExamDetailPageState extends State<ExamDetailPage> {
     for (int i = 0; i < userAnswers.length && i < questions.length; i++) {
       final question = questions[i];
       final userAnswerId = userAnswers[i];
-      
+
       // Find the correct choice for this question
       final correctChoice = question.choices.firstWhere(
         (choice) => choice.isCorrect,
-        orElse: () => question.choices.first, // fallback if no correct choice found
+        orElse: () =>
+            question.choices.first, // fallback if no correct choice found
       );
-      
+
       if (userAnswerId == correctChoice.id) {
         correct++;
       }
