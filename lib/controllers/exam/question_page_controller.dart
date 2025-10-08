@@ -103,7 +103,6 @@ class QuestionPageController extends GetxController {
   }
 
   void nextQuestion() {
-    logger.d("Questions length: ${questions.length}");
     if (questions.isNotEmpty &&
         currentQuestionIndex.value < questions.length - 1) {
       currentQuestionIndex.value++;
