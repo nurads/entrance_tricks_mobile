@@ -16,6 +16,7 @@ class Note {
   String? filePath;
   final int? size;
 
+  @JsonKey(name: 'is_locked')
   bool isLocked;
 
   // Add these new properties for download progress
