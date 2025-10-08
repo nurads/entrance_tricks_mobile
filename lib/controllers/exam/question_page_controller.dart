@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/models/models.dart';
 import 'package:entrance_tricks/views/exam/exam_result_page.dart';
+import 'package:entrance_tricks/utils/storages/storages.dart';
+
+enum QuestionMode { practice, exam }
 
 class QuestionPageController extends GetxController {
   // Observable variables
@@ -22,6 +25,9 @@ class QuestionPageController extends GetxController {
   late Function(List<int> answers, int timeSpent)? onComplete;
   late bool allowReview;
   late bool showTimer;
+  late QuestionMode mode;
+  late int examId;
+  final HiveExamStorage _examStorage = HiveExamStorage();
 
   void initializeQuiz({
     required String title,
@@ -30,6 +36,8 @@ class QuestionPageController extends GetxController {
     Function(List<int> answers, int timeSpent)? onComplete,
     bool allowReview = true,
     bool showTimer = true,
+    QuestionMode mode = QuestionMode.exam,
+    int examId = 0,
   }) {
     this.title = title;
     this.initialTimeMinutes = initialTimeMinutes;
@@ -37,6 +45,8 @@ class QuestionPageController extends GetxController {
     this.onComplete = onComplete;
     this.allowReview = allowReview;
     this.showTimer = showTimer;
+    this.mode = mode;
+    this.examId = examId;
 
     // Handle empty questions
     if (questions.isEmpty) {
@@ -47,6 +57,7 @@ class QuestionPageController extends GetxController {
 
     userAnswers.value = List.filled(questions.length, null);
     timeRemaining.value = initialTimeMinutes * 60;
+    _restoreProgressIfAny();
     if (showTimer) {
       _startTimer();
     }
@@ -90,22 +101,37 @@ class QuestionPageController extends GetxController {
   }
 
   void selectAnswer(int choiceId) {
+    // Block changing answers once finished or in review for both modes
+    if (isCompleted.value || showAnswers.value) {
+      return;
+    }
+    // Additionally, in practice mode during the attempt, once an answer
+    // is chosen for the current question, prevent changing it.
+    if (mode == QuestionMode.practice &&
+        userAnswers.isNotEmpty &&
+        userAnswers[currentQuestionIndex.value] != null) {
+      return;
+    }
     userAnswers[currentQuestionIndex.value] = choiceId;
     update();
+    _persistProgress();
   }
 
   void previousQuestion() {
     if (questions.isNotEmpty && currentQuestionIndex.value > 0) {
       currentQuestionIndex.value--;
       update();
+      _persistProgress();
     }
   }
 
   void nextQuestion() {
+    logger.d("Questions length: ${questions.length}");
     if (questions.isNotEmpty &&
         currentQuestionIndex.value < questions.length - 1) {
       currentQuestionIndex.value++;
       update();
+      _persistProgress();
     }
   }
 
@@ -121,6 +147,11 @@ class QuestionPageController extends GetxController {
   void submitQuiz() {
     _timer?.cancel();
     isCompleted.value = true;
+    _examStorage.clearProgress(
+      examId,
+      mode == QuestionMode.practice ? 'practice' : 'exam',
+    );
+    _examStorage.markCompleted(examId);
     Get.to(
       () => ExamResultPage(
         score: calculateCorrectAnswers(),
@@ -133,6 +164,7 @@ class QuestionPageController extends GetxController {
   void reviewAnswers() {
     showAnswers.value = true;
     currentQuestionIndex.value = 0;
+    update();
   }
 
   void finishQuiz() {
@@ -222,6 +254,48 @@ class QuestionPageController extends GetxController {
   @override
   void onClose() {
     _timer?.cancel();
+    _persistProgress();
     super.onClose();
+  }
+
+  Future<void> _restoreProgressIfAny() async {
+    if (examId == 0) return;
+    final saved = await _examStorage.getProgress(
+      examId,
+      mode == QuestionMode.practice ? 'practice' : 'exam',
+    );
+    if (saved == null) return;
+
+    final savedIndex = (saved['current_question_index'] as num?)?.toInt() ?? 0;
+    final savedAnswers =
+        (saved['selected_answers'] as List<dynamic>?)
+            ?.map((e) => e == null ? null : (e as num).toInt())
+            .toList() ??
+        [];
+    final savedRemaining = (saved['remaining_time'] as num?)?.toInt();
+
+    if (savedAnswers.isNotEmpty && savedAnswers.length == questions.length) {
+      userAnswers.value = List<int?>.from(savedAnswers);
+    }
+    currentQuestionIndex.value = savedIndex.clamp(
+      0,
+      (questions.length - 1).clamp(0, questions.length),
+    );
+    if (savedRemaining != null && savedRemaining > 0) {
+      timeRemaining.value = savedRemaining;
+    }
+    // Do not override current mode; we load only the progress for the active mode
+    update();
+  }
+
+  void _persistProgress() {
+    if (examId == 0) return;
+    _examStorage.saveProgress(
+      examId,
+      currentIndex: currentQuestionIndex.value,
+      answers: userAnswers.toList(),
+      timeRemaining: timeRemaining.value,
+      mode: mode == QuestionMode.practice ? 'practice' : 'exam',
+    );
   }
 }

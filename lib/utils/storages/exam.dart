@@ -6,16 +6,16 @@ import 'base.dart';
 
 class HiveExamStorage extends BaseObjectStorage<List<Exam>> {
   final String _boxName = 'examStorage';
-  static late Box<List<dynamic>> _box;
+  static late Box<dynamic> _box;
   @override
   Future<void> init() async {
     Hive.registerAdapter<Exam>(ExamTypeAdapter());
     Hive.registerAdapter<Question>(QuestionTypeAdapter());
     Hive.registerAdapter<Choice>(ChoiceTypeAdapter());
     if (!Hive.isBoxOpen(_boxName)) {
-      _box = await Hive.openBox<List<dynamic>>(_boxName);
+      _box = await Hive.openBox<dynamic>(_boxName);
     } else {
-      _box = Hive.box<List<dynamic>>(_boxName);
+      _box = Hive.box<dynamic>(_boxName);
     }
   }
 
@@ -47,6 +47,7 @@ class HiveExamStorage extends BaseObjectStorage<List<Exam>> {
       if (exam.questions.isNotEmpty) {
         exam.isDownloaded = true;
       }
+      _hydrateExamState(exam);
     }
 
     return value.cast<Exam>();
@@ -68,6 +69,7 @@ class HiveExamStorage extends BaseObjectStorage<List<Exam>> {
       if (quiz.questions.isNotEmpty) {
         quiz.isDownloaded = true;
       }
+      _hydrateExamState(quiz);
     }
     return value.cast<Exam>();
   }
@@ -86,7 +88,8 @@ class HiveExamStorage extends BaseObjectStorage<List<Exam>> {
 
   Future<String?> getQuestionImages(int questionId) async {
     final value = _box.get('question_images_$questionId') ?? [];
-    return value.cast<String>().firstOrNull;
+
+    return value.cast<String?>().firstWhere((e) => true, orElse: () => null);
   }
 
   Future<void> setQuestionImages(int questionId, String image) {
@@ -101,5 +104,75 @@ class HiveExamStorage extends BaseObjectStorage<List<Exam>> {
 
   Future<void> removeAllDownloadedExams() async {
     _box.put('downloaded_exams', []);
+  }
+
+  // --- Added helpers to persist per-exam state on the same box ---
+
+  Future<void> markCompleted(int examId) async {
+    await _box.put(_keyCompleted(examId), true);
+  }
+
+  Future<void> clearCompleted(int examId) async {
+    await _box.delete(_keyCompleted(examId));
+  }
+
+  Future<bool> isCompleted(int examId) async {
+    final v = _box.get(_keyCompleted(examId));
+    return (v is bool ? v : false);
+  }
+
+  Future<Set<int>> completedExamIds() async {
+    return _box.keys
+        .whereType<String>()
+        .where((k) => k.startsWith('completed_'))
+        .map((k) => int.tryParse(k.split('_').last) ?? 0)
+        .where((id) => id != 0)
+        .toSet();
+  }
+
+  Future<Map<String, dynamic>?> getProgress(int examId, String mode) async {
+    final v = _box.get(_keyProgress(examId, mode));
+    if (v is Map) return Map<String, dynamic>.from(v);
+    return null;
+  }
+
+  Future<void> saveProgress(
+    int examId, {
+    required int currentIndex,
+    required List<int?> answers,
+    required int timeRemaining,
+    required String mode,
+  }) async {
+    await _box.put(_keyProgress(examId, mode), {
+      'current_question_index': currentIndex,
+      'selected_answers': answers,
+      'remaining_time': timeRemaining,
+      'mode': mode,
+    });
+  }
+
+  Future<void> clearProgress(int examId, String mode) async {
+    await _box.delete(_keyProgress(examId, mode));
+  }
+
+  String _keyCompleted(int examId) => 'completed_$examId';
+  String _keyProgress(int examId, String mode) => 'progress_${examId}_$mode';
+
+  void _hydrateExamState(Exam exam) {
+    // Move persisted flags/progress into the in-memory object fields for convenience
+    final completed = _box.get(_keyCompleted(exam.id));
+    exam.isCompleted = completed is bool ? completed : false;
+
+    // If any progress for any mode exists, pick the latest by inspecting keys. This avoids needing to know mode here.
+    final keys = _box.keys.whereType<String>().where(
+      (k) => k.startsWith('progress_${exam.id}_'),
+    );
+    final lastKey = keys.isNotEmpty ? keys.last : null;
+    if (lastKey != null) {
+      final map = _box.get(lastKey);
+      if (map is Map) {
+        exam.progress = ExamProgress.fromMap(map);
+      }
+    }
   }
 }

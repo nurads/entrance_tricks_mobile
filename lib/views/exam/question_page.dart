@@ -12,6 +12,8 @@ class QuestionPage extends StatelessWidget {
   final Function(List<int> answers, int timeSpent)? onComplete;
   final bool allowReview;
   final bool showTimer;
+  final QuestionMode mode;
+  final int examId;
 
   const QuestionPage({
     super.key,
@@ -21,6 +23,8 @@ class QuestionPage extends StatelessWidget {
     this.onComplete,
     this.allowReview = true,
     this.showTimer = true,
+    this.mode = QuestionMode.exam,
+    this.examId = 0,
   });
 
   @override
@@ -36,6 +40,8 @@ class QuestionPage extends StatelessWidget {
       onComplete: onComplete,
       allowReview: allowReview,
       showTimer: showTimer,
+      mode: mode,
+      examId: examId,
     );
 
     return GetBuilder<QuestionPageController>(
@@ -247,11 +253,33 @@ class QuestionPage extends StatelessWidget {
               final choiceLabel = String.fromCharCode(65 + index); // A, B, C, D
 
               return Obx(() {
-                final isSelected =
-                    controller.userAnswers[controller
-                        .currentQuestionIndex
-                        .value] ==
+                final isSelected = controller
+                        .userAnswers[controller.currentQuestionIndex.value] ==
                     choice.id;
+                final bool hasAnsweredCurrent =
+                    controller.userAnswers[controller.currentQuestionIndex.value] !=
+                        null;
+                final currentQuestion =
+                    controller.questions[controller.currentQuestionIndex.value];
+                final correctChoiceId = currentQuestion.choices
+                    .firstWhere((c) => c.isCorrect)
+                    .id;
+                // Determine visual state
+                bool highlightAsCorrect = false;
+                bool highlightAsIncorrect = false;
+                if (controller.mode == QuestionMode.practice && hasAnsweredCurrent) {
+                  if (choice.id == correctChoiceId) {
+                    highlightAsCorrect = true;
+                  }
+                  if (isSelected && choice.id != correctChoiceId) {
+                    highlightAsIncorrect = true;
+                  }
+                }
+                if (controller.showAnswers.value) {
+                  // Review mode after submission behaves like revealing answers
+                  highlightAsCorrect = choice.id == correctChoiceId;
+                  highlightAsIncorrect = isSelected && choice.id != correctChoiceId;
+                }
 
                 return _buildChoiceItem(
                   context,
@@ -259,8 +287,53 @@ class QuestionPage extends StatelessWidget {
                   choiceLabel,
                   isSelected,
                   () => controller.selectAnswer(choice.id),
+                  highlightAsCorrect: highlightAsCorrect,
+                  highlightAsIncorrect: highlightAsIncorrect,
                 );
               });
+            }),
+
+            // Immediate feedback text for Practice Mode and Review Mode
+            Obx(() {
+              if (controller.mode != QuestionMode.practice && !controller.showAnswers.value) {
+                return SizedBox();
+              }
+              final answered = controller
+                      .userAnswers[controller.currentQuestionIndex.value] !=
+                  null;
+              if (!answered) return SizedBox();
+              final currentQuestion =
+                  controller.questions[controller.currentQuestionIndex.value];
+              final correctChoiceId = currentQuestion.choices
+                  .firstWhere((c) => c.isCorrect)
+                  .id;
+              final selectedId =
+                  controller.userAnswers[controller.currentQuestionIndex.value]!;
+              final isCorrect = selectedId == correctChoiceId;
+              return Padding(
+                padding: EdgeInsets.only(top: 8),
+                child: Row(
+                  children: [
+                    Icon(
+                      isCorrect ? Icons.check_circle : Icons.cancel,
+                      color: isCorrect
+                          ? Theme.of(context).colorScheme.tertiary
+                          : Theme.of(context).colorScheme.error,
+                      size: 18,
+                    ),
+                    SizedBox(width: 8),
+                    Text(
+                      isCorrect ? 'Correct' : 'Incorrect',
+                      style: TextStyle(
+                        color: isCorrect
+                            ? Theme.of(context).colorScheme.tertiary
+                            : Theme.of(context).colorScheme.error,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              );
             }),
           ],
         ),
@@ -274,6 +347,7 @@ class QuestionPage extends StatelessWidget {
     String label,
     bool isSelected,
     VoidCallback onTap,
+    {bool highlightAsCorrect = false, bool highlightAsIncorrect = false}
   ) {
     final theme = Theme.of(context);
 
@@ -283,14 +357,26 @@ class QuestionPage extends StatelessWidget {
         margin: EdgeInsets.only(bottom: 12),
         padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected
-              ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
-              : theme.colorScheme.surface,
+          color: highlightAsCorrect
+              ? theme.colorScheme.tertiaryContainer
+              : highlightAsIncorrect
+                  ? theme.colorScheme.errorContainer
+                  : (isSelected
+                      ? theme.colorScheme.primaryContainer
+                          .withValues(alpha: 0.3)
+                      : theme.colorScheme.surface),
           border: Border.all(
-            color: isSelected
-                ? theme.colorScheme.primary
-                : theme.colorScheme.outline.withValues(alpha: 0.3),
-            width: isSelected ? 2 : 1,
+            color: highlightAsCorrect
+                ? theme.colorScheme.tertiary
+                : highlightAsIncorrect
+                    ? theme.colorScheme.error
+                    : (isSelected
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.outline
+                            .withValues(alpha: 0.3)),
+            width: (highlightAsCorrect || highlightAsIncorrect || isSelected)
+                ? 2
+                : 1,
           ),
           borderRadius: BorderRadius.circular(12),
         ),
@@ -301,16 +387,21 @@ class QuestionPage extends StatelessWidget {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: isSelected
-                    ? theme.colorScheme.primary
-                    : theme.colorScheme.outline.withValues(alpha: 0.5),
+                color: highlightAsCorrect
+                    ? theme.colorScheme.tertiary
+                    : highlightAsIncorrect
+                        ? theme.colorScheme.error
+                        : (isSelected
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.outline
+                                .withValues(alpha: 0.5)),
                 shape: BoxShape.circle,
               ),
               child: Center(
                 child: Text(
                   label,
                   style: theme.textTheme.labelMedium?.copyWith(
-                    color: isSelected
+                    color: (isSelected || highlightAsCorrect || highlightAsIncorrect)
                         ? theme.colorScheme.onPrimary
                         : theme.colorScheme.onSurface,
                     fontWeight: FontWeight.bold,
@@ -331,11 +422,13 @@ class QuestionPage extends StatelessWidget {
                 width: 24,
                 height: 24,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primary,
+                  color: highlightAsIncorrect
+                      ? theme.colorScheme.error
+                      : theme.colorScheme.primary,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  Icons.check,
+                  highlightAsIncorrect ? Icons.close : Icons.check,
                   color: theme.colorScheme.onPrimary,
                   size: 16,
                 ),
@@ -384,57 +477,58 @@ class QuestionPage extends StatelessWidget {
         SizedBox(height: 16),
 
         // Navigation buttons
-        Obx(() {
-          final canGoPrevious = controller.currentQuestionIndex.value > 0;
-          final canGoNext =
-              controller.userAnswers[controller.currentQuestionIndex.value] !=
-              null;
-          final isLastQuestion =
-              controller.currentQuestionIndex.value ==
-              controller.questions.length - 1;
-
-          return Row(
-            children: [
-              // Previous button
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: canGoPrevious ? controller.previousQuestion : null,
-                  icon: Icon(Icons.arrow_back),
-                  label: Text('Previous'),
-                  style: OutlinedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+        Row(
+          children: [
+            // Previous button
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: controller.currentQuestionIndex.value > 0
+                    ? controller.previousQuestion
+                    : null,
+                icon: Icon(Icons.arrow_back),
+                label: Text('Previous'),
+                style: OutlinedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
               ),
+            ),
 
-              SizedBox(width: 16),
+            SizedBox(width: 16),
 
-              // Next/Submit button
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: canGoNext
-                      ? (isLastQuestion
-                            ? controller.submitQuiz
-                            : controller.nextQuestion)
-                      : null,
-                  icon: Icon(
-                    isLastQuestion ? Icons.check : Icons.arrow_forward,
-                  ),
-                  label: Text(isLastQuestion ? 'Submit' : 'Next'),
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+            // Next/Submit button
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: (controller
+                            .userAnswers[controller.currentQuestionIndex.value] !=
+                        null)
+                    ? (controller.currentQuestionIndex.value ==
+                            controller.questions.length - 1
+                        ? controller.submitQuiz
+                        : controller.nextQuestion)
+                    : null,
+                icon: Icon(
+                  controller.currentQuestionIndex.value ==
+                          controller.questions.length - 1
+                      ? Icons.check
+                      : Icons.arrow_forward,
+                ),
+                label: Text(controller.currentQuestionIndex.value ==
+                        controller.questions.length - 1
+                    ? 'Submit'
+                    : 'Next'),
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
               ),
-            ],
-          );
-        }),
+            ),
+          ],
+        ),
       ],
     );
   }

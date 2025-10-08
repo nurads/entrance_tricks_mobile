@@ -704,7 +704,7 @@ class _ExamsTab extends StatelessWidget {
                 color: Colors.transparent,
                 child: InkWell(
                   onTap: exam.isDownloaded && !exam.isLocked
-                      ? () => controller.startExam(exam)
+                      ? () async => await controller.startExam(exam)
                       : null,
                   borderRadius: BorderRadius.circular(20),
                   child: Padding(
@@ -892,7 +892,7 @@ class _ExamsTab extends StatelessWidget {
                               ),
                             ] else if (exam.isDownloaded) ...[
                               IconButton(
-                                onPressed: () => controller.startExam(exam),
+                                onPressed: () async => await controller.startExam(exam),
                                 icon: const Icon(
                                   Icons.play_circle_outline_rounded,
                                   color: Color(0xFF667eea),
