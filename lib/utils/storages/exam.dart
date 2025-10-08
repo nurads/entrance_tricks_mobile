@@ -88,7 +88,8 @@ class HiveExamStorage extends BaseObjectStorage<List<Exam>> {
 
   Future<String?> getQuestionImages(int questionId) async {
     final value = _box.get('question_images_$questionId') ?? [];
-    return value.cast<String>().firstOrNull;
+
+    return value.cast<String?>().firstWhere((e) => true, orElse: () => null);
   }
 
   Future<void> setQuestionImages(int questionId, String image) {
@@ -163,7 +164,9 @@ class HiveExamStorage extends BaseObjectStorage<List<Exam>> {
     exam.isCompleted = completed is bool ? completed : false;
 
     // If any progress for any mode exists, pick the latest by inspecting keys. This avoids needing to know mode here.
-    final keys = _box.keys.whereType<String>().where((k) => k.startsWith('progress_${exam.id}_'));
+    final keys = _box.keys.whereType<String>().where(
+      (k) => k.startsWith('progress_${exam.id}_'),
+    );
     final lastKey = keys.isNotEmpty ? keys.last : null;
     if (lastKey != null) {
       final map = _box.get(lastKey);

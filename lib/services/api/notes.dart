@@ -22,6 +22,7 @@ class NoteService {
     final response = await apiClient.get(
       '/app/notes?device=$deviceId',
       authenticated: true,
+      queryParameters: queryParams,
     );
     if (response.statusCode != 200) {
       throw ApiException('Failed to get all notes');
