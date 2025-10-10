@@ -77,7 +77,7 @@ class _SubjectPageState extends State<SubjectPage>
     BuildContext context,
     SubjectController controller,
   ) {
-    final gradeName = controller.grade?.name ?? 'Grade Unknown';
+    final gradeName = controller.user?.grade.name ?? 'Grade Unknown';
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),

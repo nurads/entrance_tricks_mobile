@@ -11,18 +11,15 @@ class SubjectController extends GetxController {
   bool _isLoading = true;
   bool get isLoading => _isLoading;
 
-  Grade? _grade;
-  Grade? get grade => _grade;
-
   List<Subject> _subjects = [];
   List<Subject> get subjects => _subjects;
 
   User? _user;
+  User? get user => _user;
   late StreamSubscription<InternetStatus> _internetStatusSubscription;
   @override
   void onInit() async {
     super.onInit();
-    _grade = _user?.grade;
     _user = await HiveUserStorage().getUser();
     HiveUserStorage().listen((event) {
       _user = event;
@@ -47,7 +44,7 @@ class SubjectController extends GetxController {
       final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
       _subjects = await SubjectsService().getSubjects(
         device.id,
-        gradeId: _grade?.id ?? 0,
+        gradeId: _user?.grade.id ?? 0,
       );
       await HiveSubjectsStorage().write('subjects', _subjects);
     } catch (e) {
