@@ -440,7 +440,7 @@ class QuizTab extends StatelessWidget {
 
     if (quiz.isDownloaded && quiz.questions.isNotEmpty) {
       return ElevatedButton.icon(
-        onPressed: () => controller.startQuiz(quiz.id),
+        onPressed: () => controller.startQuiz(quiz),
         icon: Icon(Icons.play_arrow, size: 18),
         label: Text('Start Quiz'),
         style: ElevatedButton.styleFrom(
@@ -471,7 +471,7 @@ class QuizTab extends StatelessWidget {
     }
 
     if (quiz.isDownloaded && quiz.questions.isNotEmpty) {
-      controller.startQuiz(quiz.id);
+      controller.startQuiz(quiz);
     } else {
       controller.downloadQuiz(quiz.id);
     }

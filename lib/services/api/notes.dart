@@ -2,7 +2,6 @@ import 'package:entrance_tricks/services/api/api.dart';
 import 'package:entrance_tricks/models/models.dart';
 import 'package:entrance_tricks/services/api/exceptions.dart';
 import 'package:flutter_file_downloader/flutter_file_downloader.dart';
-import 'package:entrance_tricks/utils/utils.dart';
 
 class NoteService {
   final ApiClient apiClient = ApiClient();
@@ -25,7 +24,6 @@ class NoteService {
       authenticated: true,
       queryParameters: queryParams,
     );
-    logger.f(response.data);
     if (response.statusCode != 200) {
       throw ApiException('Failed to get all notes');
     }

@@ -18,7 +18,7 @@ class SubjectDetailController extends GetxController {
   List<Chapter> get chapters => _chapters;
 
   int subjectId = 0;
-
+  // ignore: unused_field
   User? _user;
   late StreamSubscription<InternetStatus> _internetStatusSubscription;
 

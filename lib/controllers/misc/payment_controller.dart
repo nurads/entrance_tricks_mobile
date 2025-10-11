@@ -75,7 +75,6 @@ class PaymentController extends GetxController {
       final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
       final userPayments_ = await _paymentService.getUserPayments(device.id);
       userPayments = userPayments_;
-      logger.f(userPayments_);
     } catch (e) {
       Get.snackbar(
         'Error',

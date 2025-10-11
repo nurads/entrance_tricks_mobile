@@ -7,7 +7,7 @@ import 'package:entrance_tricks/views/views.dart';
 import 'package:entrance_tricks/controllers/subject/subject_detail_controller.dart';
 import 'package:entrance_tricks/services/services.dart';
 import 'package:entrance_tricks/utils/device/device.dart';
-import 'package:entrance_tricks/views/exam/question_page.dart';
+import 'package:entrance_tricks/controllers/misc/downloads_controller.dart';
 import 'dart:io';
 
 class ChapterDetailController extends GetxController {
@@ -36,6 +36,8 @@ class ChapterDetailController extends GetxController {
 
   List<Exam> _quizzes = [];
   List<Exam> get quizzes => _quizzes;
+
+  final _downloadsController = Get.find<DownloadsController>();
 
   int chapterId = 0;
   int subjectId = 0;
@@ -429,38 +431,8 @@ class ChapterDetailController extends GetxController {
     }
   }
 
-  void startQuiz(int quizId) {
-    final quiz = _quizzes.firstWhereOrNull((q) => q.id == quizId);
-    if (quiz != null) {
-      if (quiz.isLocked) {
-        Get.snackbar(
-          'Access Denied',
-          'This quiz is locked',
-          backgroundColor: Colors.orange,
-          colorText: Colors.white,
-        );
-        return;
-      }
-
-      if (!quiz.isDownloaded || quiz.questions.isEmpty) {
-        Get.snackbar(
-          'Quiz Not Available',
-          'This quiz needs to be downloaded first',
-          backgroundColor: Colors.orange,
-          colorText: Colors.white,
-        );
-        return;
-      }
-
-      // Navigate to quiz
-      Get.to(
-        () => QuestionPage(
-          title: quiz.name,
-          initialTimeMinutes: quiz.duration,
-          questions: quiz.questions,
-        ),
-      );
-    }
+  void startQuiz(Exam quiz) {
+    _downloadsController.startExam(quiz);
   }
 
   void downloadQuiz(int quizId) async {
