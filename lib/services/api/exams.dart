@@ -14,6 +14,7 @@ class ExamService extends GetxService {
     int? subjectId,
     int? chapterId,
     int? gradeId,
+    bool onlyUnlocked = false,
   }) async {
     final queryParams = <String, dynamic>{};
 
@@ -33,6 +34,9 @@ class ExamService extends GetxService {
     }
     if (gradeId != null) {
       queryParams['grade'] = gradeId;
+    }
+    if (onlyUnlocked) {
+      queryParams['only_unlocked'] = true;
     }
 
     final response = await apiClient.get(

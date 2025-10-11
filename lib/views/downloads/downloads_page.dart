@@ -650,7 +650,10 @@ class _ExamsTab extends StatelessWidget {
           return _buildLoadingState('Loading exams...');
         }
 
-        if (controller.allExams.isEmpty) {
+        var unlockedExams = controller.allExams
+            .where((e) => !e.isLocked)
+            .toList();
+        if (unlockedExams.isEmpty) {
           return _buildEmptyState(
             icon: Icons.quiz_outlined,
             title: 'No Exams Available',
@@ -662,9 +665,9 @@ class _ExamsTab extends StatelessWidget {
           margin: const EdgeInsets.all(24),
           child: ListView.builder(
             physics: const BouncingScrollPhysics(),
-            itemCount: controller.allExams.length,
+            itemCount: unlockedExams.length,
             itemBuilder: (context, index) {
-              final exam = controller.allExams[index];
+              final exam = unlockedExams[index];
               return _buildExamItem(context, exam, controller, index);
             },
           ),
@@ -892,7 +895,8 @@ class _ExamsTab extends StatelessWidget {
                               ),
                             ] else if (exam.isDownloaded) ...[
                               IconButton(
-                                onPressed: () async => await controller.startExam(exam),
+                                onPressed: () async =>
+                                    await controller.startExam(exam),
                                 icon: const Icon(
                                   Icons.play_circle_outline_rounded,
                                   color: Color(0xFF667eea),
