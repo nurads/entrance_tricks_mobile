@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
 import 'package:get/get.dart';
+import 'package:entrance_tricks/services/services.dart';
+import 'package:entrance_tricks/services/api/exceptions.dart';
 import 'package:entrance_tricks/views/views.dart';
+import 'package:entrance_tricks/services/api/device.dart';
+import 'package:entrance_tricks/utils/utils.dart';
 
 class LoginController extends GetxController {
+  final authService = Get.find<AuthService>();
   final formKey = GlobalKey<FormState>();
   final phoneController = TextEditingController();
+  final passwordController = TextEditingController();
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -14,20 +21,31 @@ class LoginController extends GetxController {
       _setLoading(true);
 
       try {
-        // Simulate API call
-        await Future.delayed(Duration(seconds: 2));
+        final phone = phoneController.text;
+        final password = passwordController.text;
 
-        // Navigate to verify phone page
-        Get.toNamed(
-          VIEWS.verifyPhone.path,
-          arguments: {'phone': '09${phoneController.text}'},
+        final response = await UserService().loginUser(phone, password);
+
+        BaseApiClient.setTokens(
+          response.tokens.access,
+          response.tokens.refresh,
         );
+
+        final user = await UserService().getUser();
+
+        await authService.saveAuthToken(response.tokens);
+        await authService.saveUser(user);
+
+        await DeviceService().registerDevice(user.phoneNumber);
+
+        AppSnackbar.showSuccess('Success', 'Login successful!');
+        Get.offAllNamed(VIEWS.home.path);
+      } on DioException catch (e) {
+        AppSnackbar.showError('Login Failed', e.message ?? 'Failed to login');
+      } on ApiException catch (e) {
+        AppSnackbar.showError('Login Failed', e.message);
       } catch (e) {
-        Get.snackbar(
-          'Error',
-          'Failed to send OTP. Please try again.',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        AppSnackbar.showError('Login Failed', e.toString());
       } finally {
         _setLoading(false);
       }
@@ -42,6 +60,7 @@ class LoginController extends GetxController {
   @override
   void onClose() {
     phoneController.dispose();
+    passwordController.dispose();
     super.onClose();
   }
 }

@@ -5,13 +5,15 @@ import 'package:entrance_tricks/controllers/on_boarding/login_controller.dart';
 import 'package:entrance_tricks/components/components.dart';
 
 class Login extends StatelessWidget {
-  Login({super.key});
+  const Login({super.key});
 
   @override
   Widget build(BuildContext context) {
-    Get.put(LoginController());
     return Scaffold(
+      backgroundColor: Color(0xffefefef),
       body: SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
+        padding: EdgeInsets.all(20),
         child: GetBuilder<LoginController>(
           builder: (controller) => Form(
             key: controller.formKey,
@@ -36,23 +38,34 @@ class Login extends StatelessWidget {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
+                SizedBox(height: 30),
                 Padding(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
+                    horizontal: 10,
                     vertical: 10,
                   ),
                   child: PhoneTextField(controller: controller.phoneController),
                 ),
-                SizedBox(height: 20),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: PrimaryButton(
-                    text: 'Send OTP',
-                    onPressed: () => controller.login(),
-                    isLoading: controller.isLoading,
-                    icon: Icon(Icons.send_outlined),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 10,
+                  ),
+                  child: PasswordTextField(
+                    controller: controller.passwordController,
                   ),
                 ),
+                SizedBox(height: 30),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: PrimaryButton(
+                    text: 'Login',
+                    onPressed: () => controller.login(),
+                    isLoading: controller.isLoading,
+                    icon: Icon(Icons.login),
+                  ),
+                ),
+                SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -74,6 +87,7 @@ class Login extends StatelessWidget {
                     ),
                   ],
                 ),
+                SizedBox(height: 20),
               ],
             ),
           ),

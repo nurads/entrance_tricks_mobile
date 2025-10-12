@@ -1,29 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/controllers/on_boarding/register_controller.dart';
+import 'package:entrance_tricks/models/models.dart';
 
 class Register extends StatelessWidget {
-  Register({super.key});
+  const Register({super.key});
 
   @override
   Widget build(BuildContext context) {
     Get.put(RegisterController());
     return Scaffold(
+      backgroundColor: Color(0xffefefef),
       appBar: AppBar(
         title: Text('Register'),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
       body: SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
+        padding: EdgeInsets.all(20),
         child: GetBuilder<RegisterController>(
           builder: (controller) => Form(
             key: controller.formKey,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
+            autovalidateMode: AutovalidateMode.onUnfocus,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(height: 50),
+                SizedBox(height: 10),
                 Image.asset('assets/images/logo.png'),
                 Text('Welcome', style: Theme.of(context).textTheme.titleLarge),
                 Text(
@@ -40,6 +44,7 @@ class Register extends StatelessWidget {
                     decoration: InputDecoration(
                       labelText: 'Name',
                       prefixIcon: Icon(Icons.person),
+
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -59,12 +64,47 @@ class Register extends StatelessWidget {
                     horizontal: 10,
                     vertical: 10,
                   ),
+                  child: DropdownButtonFormField<String>(
+                    initialValue: controller.selectedGrade?.name,
+                    decoration: InputDecoration(
+                      labelText: 'Grade',
+                      prefixIcon: Icon(Icons.school),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    items: controller.gradeOptions.map((Grade grade) {
+                      return DropdownMenuItem<String>(
+                        value: grade.name,
+                        child: Text(grade.name),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      controller.setSelectedGrade(
+                        controller.gradeOptions.firstWhere(
+                          (grade) => grade.name == newValue,
+                        ),
+                      );
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Grade is required';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 10,
+                  ),
                   child: TextFormField(
                     controller: controller.phoneController,
                     decoration: InputDecoration(
                       labelText: 'Phone Number',
                       prefixIcon: Icon(Icons.phone),
-                      prefix: Text('09'),
+                      prefix: Text('0'),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -78,7 +118,11 @@ class Register extends StatelessWidget {
                       if (value.length != 9) {
                         return 'Phone Number must be 9 digits';
                       }
-                      return null;
+                      final pattern = RegExp(r'^(7|9)\d{8}$');
+                      if (pattern.hasMatch(value)) {
+                        return null;
+                      }
+                      return 'Phone Number must start with 7 or 9 and only digits';
                     },
                     textInputAction: TextInputAction.next,
                   ),
@@ -110,9 +154,10 @@ class Register extends StatelessWidget {
                       if (value == null || value.isEmpty) {
                         return 'Password is required';
                       }
-                      if (value.length < 6) {
-                        return 'Password must be at least 6 characters';
+                      if (value.length < 4) {
+                        return 'Password must be at least 4 characters';
                       }
+
                       return null;
                     },
                     textInputAction: TextInputAction.next,

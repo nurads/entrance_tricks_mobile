@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:entrance_tricks/views/views.dart';
+import 'package:entrance_tricks/services/services.dart';
+import 'package:entrance_tricks/utils/utils.dart';
 
 class VerifyPhoneController extends GetxController {
   final formKey = GlobalKey<FormState>();
@@ -45,19 +47,23 @@ class VerifyPhoneController extends GetxController {
   }
 
   void verifyOTP() async {
+    logger.i('Verifying OTP...');
     if (formKey.currentState!.validate()) {
       _setLoading(true);
 
       try {
-        // Simulate API call
-        await Future.delayed(Duration(seconds: 2));
+        final response = await UserService().verifyPhone(
+          phoneNumber,
+          otpController.text,
+        );
+        logger.i(response);
 
         // For demo purposes, accept any 6-digit OTP
         if (otpController.text.length == 6) {
           Get.snackbar(
             'Success',
             'Phone verified successfully!',
-            snackPosition: SnackPosition.BOTTOM,
+            snackPosition: SnackPosition.TOP,
             backgroundColor: Colors.green,
             colorText: Colors.white,
           );
@@ -65,22 +71,25 @@ class VerifyPhoneController extends GetxController {
           // Navigate to home
           Get.offAllNamed(VIEWS.home.path);
         } else {
+          logger.e('Invalid OTP. Please try again.');
           Get.snackbar(
             'Error',
             'Invalid OTP. Please try again.',
-            snackPosition: SnackPosition.BOTTOM,
+            snackPosition: SnackPosition.TOP,
             backgroundColor: Colors.red,
             colorText: Colors.white,
           );
         }
       } catch (e) {
+        logger.e(e.toString());
         Get.snackbar(
           'Error',
           'Failed to verify OTP. Please try again.',
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
+        rethrow; // Throw the error to be handled by the caller
       } finally {
         _setLoading(false);
       }

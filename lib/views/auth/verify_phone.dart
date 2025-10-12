@@ -48,7 +48,7 @@ class VerifyPhone extends StatelessWidget {
                   SizedBox(height: 20),
                   PrimaryButton(
                     text: 'Verify OTP',
-                    onPressed: () => controller.verifyOTP(),
+                    onPressed: controller.verifyOTP,
                     isLoading: controller.isLoading,
                     icon: Icon(Icons.verified_user_outlined),
                   ),
