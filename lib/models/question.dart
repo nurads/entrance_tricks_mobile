@@ -13,12 +13,15 @@ class Question {
   @JsonKey(name: 'image_path')
   String? imagePath;
 
+  String? explanation;
+
   Question({
     required this.id,
     required this.content,
     this.image,
     required this.choices,
     this.imagePath,
+    this.explanation,
   });
 
   factory Question.fromJson(Map<String, dynamic> json) =>
@@ -66,6 +69,7 @@ class QuestionTypeAdapter implements TypeAdapter<Question> {
     return Question(
       id: json_['id'],
       content: json_['content'],
+      explanation: json_['explanation'],
       choices: choices,
       image: json_['image'],
     );

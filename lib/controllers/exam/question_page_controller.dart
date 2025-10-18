@@ -14,6 +14,7 @@ class QuestionPageController extends GetxController {
   final RxInt timeRemaining = 0.obs;
   final RxBool isCompleted = false.obs;
   final RxBool showAnswers = false.obs;
+  final RxBool showSolution = false.obs;
 
   // Timer
   Timer? _timer;
@@ -120,6 +121,7 @@ class QuestionPageController extends GetxController {
   void previousQuestion() {
     if (questions.isNotEmpty && currentQuestionIndex.value > 0) {
       currentQuestionIndex.value--;
+      showSolution.value = false; // Reset solution state when navigating
       update();
       _persistProgress();
     }
@@ -129,6 +131,7 @@ class QuestionPageController extends GetxController {
     if (questions.isNotEmpty &&
         currentQuestionIndex.value < questions.length - 1) {
       currentQuestionIndex.value++;
+      showSolution.value = false; // Reset solution state when navigating
       update();
       _persistProgress();
     }
@@ -140,6 +143,7 @@ class QuestionPageController extends GetxController {
         index >= 0 &&
         index < questions.length) {
       currentQuestionIndex.value = index;
+      showSolution.value = false; // Reset solution state when navigating
     }
   }
 
@@ -170,6 +174,11 @@ class QuestionPageController extends GetxController {
     final timeSpent = (initialTimeMinutes * 60) - timeRemaining.value;
     onComplete?.call(userAnswers.cast<int>().toList(), timeSpent);
     Get.back();
+  }
+
+  void toggleSolution() {
+    showSolution.value = !showSolution.value;
+    update();
   }
 
   int calculateCorrectAnswers() {

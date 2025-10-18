@@ -20,6 +20,9 @@ class _DownloadsPageState extends State<DownloadsPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(() {
+      setState(() {}); // Rebuild to update the clear button
+    });
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
@@ -138,9 +141,9 @@ class _DownloadsPageState extends State<DownloadsPage>
             ),
           ),
 
-          // Clear All Button
+          // Clear Button - Updated to show options dialog
           GestureDetector(
-            onTap: () => controller.clearAllDownloads(),
+            onTap: () => controller.showClearOptionsDialog(),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
@@ -157,7 +160,7 @@ class _DownloadsPageState extends State<DownloadsPage>
                   Icon(Icons.clear_all_rounded, color: Colors.white, size: 16),
                   SizedBox(width: 6),
                   Text(
-                    'Clear All',
+                    'Clear',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 12,

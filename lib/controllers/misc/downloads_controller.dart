@@ -351,7 +351,7 @@ class DownloadsController extends GetxController {
 
     // Check for completion and confirm retake using unified storage
     final isCompleted = await _examStorage.isCompleted(exam.id);
-    
+
     if (isCompleted) {
       Get.dialog(
         AlertDialog(
@@ -518,13 +518,13 @@ class DownloadsController extends GetxController {
     );
   }
 
-  // Clear all downloads
+  // Clear all downloads - Updated to ensure all exam progress is cleared
   void clearAllDownloads() {
     Get.dialog(
       AlertDialog(
         title: const Text('Clear All Downloads'),
         content: const Text(
-          'Are you sure you want to delete all downloaded content? This action cannot be undone.',
+          'Are you sure you want to delete all downloaded content and progress? This action cannot be undone.',
         ),
         actions: [
           TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
@@ -557,10 +557,22 @@ class DownloadsController extends GetxController {
                   note.downloadProgress = 0.0;
                 }
 
-                // Clear exam downloads
+                // Clear exam downloads and ALL progress
                 for (var exam in allExams.where((e) => e.isDownloaded)) {
                   exam.isDownloaded = false;
                   exam.questions.clear();
+                  exam.isCompleted = false;
+                  exam.progress = null;
+
+                  // Clear all progress for this exam (both exam and practice modes)
+                  await _examStorage.clearProgress(exam.id, 'exam');
+                  await _examStorage.clearProgress(exam.id, 'practice');
+
+                  // Clear completion status
+                  await _examStorage.clearCompleted(exam.id);
+
+                  // Remove questions for this exam
+                  await _examStorage.setQuestions(exam.id, []);
                 }
 
                 // Clear all storage
@@ -568,21 +580,194 @@ class DownloadsController extends GetxController {
                 await _noteStorage.removeAllDownloadedNotes();
                 await _examStorage.removeAllDownloadedExams();
 
+                // Refresh exam controller if it exists to update UI badges
+                if (Get.isRegistered<ExamController>()) {
+                  await Get.find<ExamController>().refreshCompletionBadges();
+                }
+
                 update();
 
                 Get.back();
                 Get.snackbar(
                   'Success',
-                  'All downloads cleared successfully',
+                  'All downloads and progress cleared successfully',
                   backgroundColor: Colors.green,
                   colorText: Colors.white,
                 );
               } catch (e) {
                 Get.back();
+                logger.e('Error clearing all downloads: $e');
                 Get.snackbar('Error', 'Failed to clear downloads');
               }
             },
             child: const Text('Clear All'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Clear only videos
+  void clearVideosOnly() {
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Clear Videos'),
+        content: const Text(
+          'Are you sure you want to delete all downloaded videos? This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () async {
+              try {
+                // Delete all video files
+                for (var video in allVideos.where((v) => v.isDownloaded)) {
+                  if (video.filePath != null) {
+                    final file = File(video.filePath!);
+                    if (file.existsSync()) {
+                      await file.delete();
+                    }
+                  }
+                  video.isDownloaded = false;
+                  video.filePath = null;
+                  video.downloadProgress = 0.0;
+                }
+
+                // Clear video storage
+                await _videoStorage.removeAllDownloadedVideos();
+                update();
+
+                Get.back();
+                Get.snackbar(
+                  'Success',
+                  'All videos cleared successfully',
+                  backgroundColor: Colors.green,
+                  colorText: Colors.white,
+                );
+              } catch (e) {
+                Get.back();
+                Get.snackbar('Error', 'Failed to clear videos');
+              }
+            },
+            child: const Text('Clear Videos'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Clear only exams - Updated to remove all progress
+  void clearExamsOnly() {
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Clear Exams'),
+        content: const Text(
+          'Are you sure you want to delete all downloaded exams and their progress? This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () async {
+              try {
+                // Clear exam downloads and reset state
+                for (var exam in allExams.where((e) => e.isDownloaded)) {
+                  exam.isDownloaded = false;
+                  exam.questions.clear();
+                  exam.isCompleted = false;
+                  exam.progress = null;
+
+                  // Clear all progress for this exam (both exam and practice modes)
+                  await _examStorage.clearProgress(exam.id, 'exam');
+                  await _examStorage.clearProgress(exam.id, 'practice');
+
+                  // Clear completion status
+                  await _examStorage.clearCompleted(exam.id);
+
+                  // Clear questions and question images
+                  final questions = await _examStorage.getQuestions(exam.id);
+                  for (var question in questions) {
+                    // Remove question images if they exist
+                    // Note: You might need to delete the actual image files from storage
+                    // depending on how they're stored
+                  }
+
+                  // Remove questions for this exam
+                  await _examStorage.setQuestions(exam.id, []);
+                }
+
+                // Clear all exam storage
+                await _examStorage.removeAllDownloadedExams();
+
+                // Refresh exam controller if it exists to update UI badges
+                if (Get.isRegistered<ExamController>()) {
+                  await Get.find<ExamController>().refreshCompletionBadges();
+                }
+
+                update();
+
+                Get.back();
+                Get.snackbar(
+                  'Success',
+                  'All exams and progress cleared successfully',
+                  backgroundColor: Colors.green,
+                  colorText: Colors.white,
+                );
+              } catch (e) {
+                Get.back();
+                logger.e('Error clearing exams: $e');
+                Get.snackbar('Error', 'Failed to clear exams and progress');
+              }
+            },
+            child: const Text('Clear Exams'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Clear only notes
+  void clearNotesOnly() {
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Clear Notes'),
+        content: const Text(
+          'Are you sure you want to delete all downloaded notes? This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () async {
+              try {
+                // Delete all note files
+                for (var note in allNotes.where((n) => n.isDownloaded)) {
+                  if (note.filePath != null) {
+                    final file = File(note.filePath!);
+                    if (file.existsSync()) {
+                      await file.delete();
+                    }
+                  }
+                  note.isDownloaded = false;
+                  note.filePath = null;
+                  note.downloadProgress = 0.0;
+                }
+
+                // Clear note storage
+                await _noteStorage.removeAllDownloadedNotes();
+                update();
+
+                Get.back();
+                Get.snackbar(
+                  'Success',
+                  'All notes cleared successfully',
+                  backgroundColor: Colors.green,
+                  colorText: Colors.white,
+                );
+              } catch (e) {
+                Get.back();
+                Get.snackbar('Error', 'Failed to clear notes');
+              }
+            },
+            child: const Text('Clear Notes'),
           ),
         ],
       ),
@@ -606,5 +791,185 @@ class DownloadsController extends GetxController {
     await loadAllVideos();
     await loadAllExams();
     await loadAllNotes();
+  }
+
+  // Enhanced clear options dialog with better UI
+  void showClearOptionsDialog() {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.clear_all_rounded,
+                color: Colors.white,
+                size: 48,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Clear Downloads',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Choose what you want to clear:',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.white.withValues(alpha: 0.8),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Clear options
+              _buildClearOption(
+                icon: Icons.video_library_rounded,
+                title: 'Videos Only',
+                subtitle: '${downloadedVideos.length} downloaded',
+                onTap: () {
+                  Get.back();
+                  clearVideosOnly();
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildClearOption(
+                icon: Icons.quiz_rounded,
+                title: 'Exams Only',
+                subtitle: '${downloadedExams.length} downloaded',
+                onTap: () {
+                  Get.back();
+                  clearExamsOnly();
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildClearOption(
+                icon: Icons.description_rounded,
+                title: 'Notes Only',
+                subtitle: '${downloadedNotes.length} downloaded',
+                onTap: () {
+                  Get.back();
+                  clearNotesOnly();
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildClearOption(
+                icon: Icons.delete_forever_rounded,
+                title: 'Clear All',
+                subtitle: 'Delete everything',
+                onTap: () {
+                  Get.back();
+                  clearAllDownloads();
+                },
+                isDestructive: true,
+              ),
+
+              const SizedBox(height: 24),
+              // Cancel button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Get.back(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white.withValues(alpha: 0.2),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text('Cancel'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildClearOption({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+    bool isDestructive = false,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isDestructive
+                  ? Colors.red.withValues(alpha: 0.3)
+                  : Colors.white.withValues(alpha: 0.2),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: isDestructive
+                      ? Colors.red.withValues(alpha: 0.2)
+                      : Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: Colors.white, size: 20),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white.withValues(alpha: 0.7),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: Colors.white.withValues(alpha: 0.7),
+                size: 16,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

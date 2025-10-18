@@ -87,6 +87,15 @@ class QuestionPage extends StatelessWidget {
                     controller,
                   ),
 
+                  SizedBox(height: 16),
+
+                  // Solution Section
+                  _buildSolutionSection(
+                    context,
+                    controller.questions[controller.currentQuestionIndex.value],
+                    controller,
+                  ),
+
                   SizedBox(height: 24),
 
                   // Navigation
@@ -253,12 +262,16 @@ class QuestionPage extends StatelessWidget {
               final choiceLabel = String.fromCharCode(65 + index); // A, B, C, D
 
               return Obx(() {
-                final isSelected = controller
-                        .userAnswers[controller.currentQuestionIndex.value] ==
+                final isSelected =
+                    controller.userAnswers[controller
+                        .currentQuestionIndex
+                        .value] ==
                     choice.id;
                 final bool hasAnsweredCurrent =
-                    controller.userAnswers[controller.currentQuestionIndex.value] !=
-                        null;
+                    controller.userAnswers[controller
+                        .currentQuestionIndex
+                        .value] !=
+                    null;
                 final currentQuestion =
                     controller.questions[controller.currentQuestionIndex.value];
                 final correctChoiceId = currentQuestion.choices
@@ -267,7 +280,8 @@ class QuestionPage extends StatelessWidget {
                 // Determine visual state
                 bool highlightAsCorrect = false;
                 bool highlightAsIncorrect = false;
-                if (controller.mode == QuestionMode.practice && hasAnsweredCurrent) {
+                if (controller.mode == QuestionMode.practice &&
+                    hasAnsweredCurrent) {
                   if (choice.id == correctChoiceId) {
                     highlightAsCorrect = true;
                   }
@@ -278,7 +292,8 @@ class QuestionPage extends StatelessWidget {
                 if (controller.showAnswers.value) {
                   // Review mode after submission behaves like revealing answers
                   highlightAsCorrect = choice.id == correctChoiceId;
-                  highlightAsIncorrect = isSelected && choice.id != correctChoiceId;
+                  highlightAsIncorrect =
+                      isSelected && choice.id != correctChoiceId;
                 }
 
                 return _buildChoiceItem(
@@ -295,11 +310,14 @@ class QuestionPage extends StatelessWidget {
 
             // Immediate feedback text for Practice Mode and Review Mode
             Obx(() {
-              if (controller.mode != QuestionMode.practice && !controller.showAnswers.value) {
+              if (controller.mode != QuestionMode.practice &&
+                  !controller.showAnswers.value) {
                 return SizedBox();
               }
-              final answered = controller
-                      .userAnswers[controller.currentQuestionIndex.value] !=
+              final answered =
+                  controller.userAnswers[controller
+                      .currentQuestionIndex
+                      .value] !=
                   null;
               if (!answered) return SizedBox();
               final currentQuestion =
@@ -307,8 +325,8 @@ class QuestionPage extends StatelessWidget {
               final correctChoiceId = currentQuestion.choices
                   .firstWhere((c) => c.isCorrect)
                   .id;
-              final selectedId =
-                  controller.userAnswers[controller.currentQuestionIndex.value]!;
+              final selectedId = controller
+                  .userAnswers[controller.currentQuestionIndex.value]!;
               final isCorrect = selectedId == correctChoiceId;
               return Padding(
                 padding: EdgeInsets.only(top: 8),
@@ -346,9 +364,10 @@ class QuestionPage extends StatelessWidget {
     Choice choice,
     String label,
     bool isSelected,
-    VoidCallback onTap,
-    {bool highlightAsCorrect = false, bool highlightAsIncorrect = false}
-  ) {
+    VoidCallback onTap, {
+    bool highlightAsCorrect = false,
+    bool highlightAsIncorrect = false,
+  }) {
     final theme = Theme.of(context);
 
     return GestureDetector(
@@ -360,20 +379,18 @@ class QuestionPage extends StatelessWidget {
           color: highlightAsCorrect
               ? theme.colorScheme.tertiaryContainer
               : highlightAsIncorrect
-                  ? theme.colorScheme.errorContainer
-                  : (isSelected
-                      ? theme.colorScheme.primaryContainer
-                          .withValues(alpha: 0.3)
-                      : theme.colorScheme.surface),
+              ? theme.colorScheme.errorContainer
+              : (isSelected
+                    ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
+                    : theme.colorScheme.surface),
           border: Border.all(
             color: highlightAsCorrect
                 ? theme.colorScheme.tertiary
                 : highlightAsIncorrect
-                    ? theme.colorScheme.error
-                    : (isSelected
-                        ? theme.colorScheme.primary
-                        : theme.colorScheme.outline
-                            .withValues(alpha: 0.3)),
+                ? theme.colorScheme.error
+                : (isSelected
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.outline.withValues(alpha: 0.3)),
             width: (highlightAsCorrect || highlightAsIncorrect || isSelected)
                 ? 2
                 : 1,
@@ -390,18 +407,20 @@ class QuestionPage extends StatelessWidget {
                 color: highlightAsCorrect
                     ? theme.colorScheme.tertiary
                     : highlightAsIncorrect
-                        ? theme.colorScheme.error
-                        : (isSelected
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.outline
-                                .withValues(alpha: 0.5)),
+                    ? theme.colorScheme.error
+                    : (isSelected
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.outline.withValues(alpha: 0.5)),
                 shape: BoxShape.circle,
               ),
               child: Center(
                 child: Text(
                   label,
                   style: theme.textTheme.labelMedium?.copyWith(
-                    color: (isSelected || highlightAsCorrect || highlightAsIncorrect)
+                    color:
+                        (isSelected ||
+                            highlightAsCorrect ||
+                            highlightAsIncorrect)
                         ? theme.colorScheme.onPrimary
                         : theme.colorScheme.onSurface,
                     fontWeight: FontWeight.bold,
@@ -445,6 +464,247 @@ class QuestionPage extends StatelessWidget {
       return TeXWidget(math: content);
     } else {
       return Text(content, style: TextStyle(fontSize: 12));
+    }
+  }
+
+  Widget _buildSolutionSection(
+    BuildContext context,
+    Question question,
+    QuestionPageController controller,
+  ) {
+    final theme = Theme.of(context);
+
+    // Only show solution in practice mode after user has attempted the question
+    final hasAnswered =
+        controller.userAnswers[controller.currentQuestionIndex.value] != null;
+    final isPracticeMode = controller.mode == QuestionMode.practice;
+
+    if (!isPracticeMode || !hasAnswered) {
+      return SizedBox.shrink();
+    }
+
+    // Don't show solution if there's no explanation
+    if (question.explanation == null || question.explanation!.trim().isEmpty) {
+      // For testing purposes, show a placeholder solution
+      return Card(
+        elevation: 1,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Solution Button
+            InkWell(
+              onTap: controller.toggleSolution,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+              child: Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.tertiaryContainer,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.lightbulb_outline,
+                      color: theme.colorScheme.onTertiaryContainer,
+                      size: 20,
+                    ),
+                    SizedBox(width: 12),
+                    Text(
+                      'Solution',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: theme.colorScheme.onTertiaryContainer,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Spacer(),
+                    Obx(
+                      () => AnimatedRotation(
+                        turns: controller.showSolution.value ? 0.5 : 0.0,
+                        duration: Duration(milliseconds: 200),
+                        child: Icon(
+                          Icons.keyboard_arrow_down,
+                          color: theme.colorScheme.onTertiaryContainer,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            // Solution Content (Expandable)
+            Obx(
+              () => AnimatedCrossFade(
+                duration: Duration(milliseconds: 300),
+                crossFadeState: controller.showSolution.value
+                    ? CrossFadeState.showSecond
+                    : CrossFadeState.showFirst,
+                firstChild: SizedBox.shrink(),
+                secondChild: Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surface,
+                    borderRadius: BorderRadius.vertical(
+                      bottom: Radius.circular(12),
+                    ),
+                    border: Border(
+                      top: BorderSide(
+                        color: theme.colorScheme.outline.withValues(alpha: 0.2),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            color: theme.colorScheme.tertiary,
+                            size: 18,
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            'No Solution Available',
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              color: theme.colorScheme.tertiary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 12),
+                      Text(
+                        'No explanation is available for this question yet.',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          height: 1.5,
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.7,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Solution Button
+          InkWell(
+            onTap: controller.toggleSolution,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+            child: Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.tertiaryContainer,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.lightbulb_outline,
+                    color: theme.colorScheme.onTertiaryContainer,
+                    size: 20,
+                  ),
+                  SizedBox(width: 12),
+                  Text(
+                    'Solution',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: theme.colorScheme.onTertiaryContainer,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Spacer(),
+                  Obx(
+                    () => AnimatedRotation(
+                      turns: controller.showSolution.value ? 0.5 : 0.0,
+                      duration: Duration(milliseconds: 200),
+                      child: Icon(
+                        Icons.keyboard_arrow_down,
+                        color: theme.colorScheme.onTertiaryContainer,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Solution Content (Expandable)
+          Obx(
+            () => AnimatedCrossFade(
+              duration: Duration(milliseconds: 300),
+              crossFadeState: controller.showSolution.value
+                  ? CrossFadeState.showSecond
+                  : CrossFadeState.showFirst,
+              firstChild: SizedBox.shrink(),
+              secondChild: Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  borderRadius: BorderRadius.vertical(
+                    bottom: Radius.circular(12),
+                  ),
+                  border: Border(
+                    top: BorderSide(
+                      color: theme.colorScheme.outline.withValues(alpha: 0.2),
+                      width: 1,
+                    ),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.check_circle,
+                          color: theme.colorScheme.tertiary,
+                          size: 18,
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          'Explanation',
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            color: theme.colorScheme.tertiary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 12),
+                    _buildSolutionContent(context, question.explanation!),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSolutionContent(BuildContext context, String explanation) {
+    if (LaTeXUtils.containsLaTeX(explanation)) {
+      return TeXWidget(math: explanation);
+    } else {
+      return Text(
+        explanation,
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.5),
+      );
     }
   }
 
@@ -501,13 +761,15 @@ class QuestionPage extends StatelessWidget {
             // Next/Submit button
             Expanded(
               child: ElevatedButton.icon(
-                onPressed: (controller
-                            .userAnswers[controller.currentQuestionIndex.value] !=
+                onPressed:
+                    (controller.userAnswers[controller
+                            .currentQuestionIndex
+                            .value] !=
                         null)
                     ? (controller.currentQuestionIndex.value ==
-                            controller.questions.length - 1
-                        ? controller.submitQuiz
-                        : controller.nextQuestion)
+                              controller.questions.length - 1
+                          ? controller.submitQuiz
+                          : controller.nextQuestion)
                     : null,
                 icon: Icon(
                   controller.currentQuestionIndex.value ==
@@ -515,10 +777,12 @@ class QuestionPage extends StatelessWidget {
                       ? Icons.check
                       : Icons.arrow_forward,
                 ),
-                label: Text(controller.currentQuestionIndex.value ==
-                        controller.questions.length - 1
-                    ? 'Submit'
-                    : 'Next'),
+                label: Text(
+                  controller.currentQuestionIndex.value ==
+                          controller.questions.length - 1
+                      ? 'Submit'
+                      : 'Next',
+                ),
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
