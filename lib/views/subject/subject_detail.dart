@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/controllers/subject/subject_detail_controller.dart';
-import 'package:entrance_tricks/models/models.dart';
+import 'package:vector_academy/controllers/subject/subject_detail_controller.dart';
+import 'package:vector_academy/models/models.dart';
 
 class SubjectDetail extends StatelessWidget {
   const SubjectDetail({super.key});

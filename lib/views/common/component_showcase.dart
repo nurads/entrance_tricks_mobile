@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:entrance_tricks/components/components.dart';
+import 'package:vector_academy/components/components.dart';
 
 class ComponentShowcase extends StatelessWidget {
   const ComponentShowcase({super.key});

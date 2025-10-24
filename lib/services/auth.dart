@@ -1,6 +1,6 @@
-import 'package:entrance_tricks/models/models.dart';
-import 'package:entrance_tricks/services/api/api.dart';
-import 'package:entrance_tricks/utils/storages/storages.dart';
+import 'package:vector_academy/models/models.dart';
+import 'package:vector_academy/services/api/api.dart';
+import 'package:vector_academy/utils/storages/storages.dart';
 import 'package:get/get.dart';
 
 class AuthService extends GetxService {

@@ -2,7 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 import 'dart:io'; // Added for File
-import 'package:entrance_tricks/utils/utils.dart';
+import 'package:vector_academy/utils/utils.dart';
 
 class CustomVideoPlayerController extends GetxController {
   late VideoPlayerController _controller;
@@ -124,7 +124,7 @@ class CustomVideoPlayerController extends GetxController {
 
   void toggleFullscreen() {
     isFullscreen.value = !isFullscreen.value;
-    
+
     if (isFullscreen.value) {
       // Enter fullscreen - landscape orientation
       SystemChrome.setPreferredOrientations([
@@ -135,9 +135,7 @@ class CustomVideoPlayerController extends GetxController {
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     } else {
       // Exit fullscreen - portrait orientation
-      SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-      ]);
+      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
       // Show system UI
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     }

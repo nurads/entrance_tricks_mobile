@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
-import 'package:entrance_tricks/views/views.dart';
-import 'package:entrance_tricks/services/services.dart';
-import 'package:entrance_tricks/utils/utils.dart';
+import 'package:vector_academy/views/views.dart';
+import 'package:vector_academy/services/services.dart';
+import 'package:vector_academy/utils/utils.dart';
 
 class NavigationDrawerController extends GetxController {
   bool _isDrawerOpen = false;

@@ -1,9 +1,9 @@
-import 'package:entrance_tricks/utils/latex_utils.dart';
+import 'package:vector_academy/utils/latex_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tex/flutter_tex.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/models/models.dart';
-import 'package:entrance_tricks/controllers/exam/question_page_controller.dart';
+import 'package:vector_academy/models/models.dart';
+import 'package:vector_academy/controllers/exam/question_page_controller.dart';
 
 class QuestionPage extends StatelessWidget {
   final String title;
@@ -474,12 +474,16 @@ class QuestionPage extends StatelessWidget {
   ) {
     final theme = Theme.of(context);
 
-    // Only show solution in practice mode after user has attempted the question
+    // Show solution in practice mode after user has attempted the question OR in review mode
     final hasAnswered =
         controller.userAnswers[controller.currentQuestionIndex.value] != null;
     final isPracticeMode = controller.mode == QuestionMode.practice;
+    final isReviewMode = controller.showAnswers.value;
 
-    if (!isPracticeMode || !hasAnswered) {
+    // Show solution if:
+    // 1. Practice mode and user has answered, OR
+    // 2. Review mode (after exam completion)
+    if ((!isPracticeMode && !isReviewMode) || (!hasAnswered && !isReviewMode)) {
       return SizedBox.shrink();
     }
 
@@ -511,7 +515,7 @@ class QuestionPage extends StatelessWidget {
                     ),
                     SizedBox(width: 12),
                     Text(
-                      'Solution',
+                      isReviewMode ? 'View Explanation' : 'Solution',
                       style: theme.textTheme.titleMedium?.copyWith(
                         color: theme.colorScheme.onTertiaryContainer,
                         fontWeight: FontWeight.bold,
@@ -620,7 +624,7 @@ class QuestionPage extends StatelessWidget {
                   ),
                   SizedBox(width: 12),
                   Text(
-                    'Solution',
+                    isReviewMode ? 'View Explanation' : 'Solution',
                     style: theme.textTheme.titleMedium?.copyWith(
                       color: theme.colorScheme.onTertiaryContainer,
                       fontWeight: FontWeight.bold,

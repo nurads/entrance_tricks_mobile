@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/models/models.dart';
-import 'package:entrance_tricks/utils/utils.dart';
+import 'package:vector_academy/models/models.dart';
+import 'package:vector_academy/utils/utils.dart';
 
 class NewsDetailPage extends StatelessWidget {
   final News news;

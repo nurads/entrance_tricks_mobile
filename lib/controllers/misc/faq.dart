@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
-import 'package:entrance_tricks/services/services.dart';
-import 'package:entrance_tricks/models/models.dart';
-import 'package:entrance_tricks/utils/utils.dart';
+import 'package:vector_academy/services/services.dart';
+import 'package:vector_academy/models/models.dart';
+import 'package:vector_academy/utils/utils.dart';
 
 class FAQController extends GetxController {
   final FAQApiService _faqApiService = FAQApiService();

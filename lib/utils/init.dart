@@ -1,11 +1,11 @@
-import 'package:entrance_tricks/services/api/api.dart';
-import 'package:entrance_tricks/utils/storages/storages.dart';
-import 'package:entrance_tricks/utils/utils.dart';
+import 'package:vector_academy/services/api/api.dart';
+import 'package:vector_academy/utils/storages/storages.dart';
+import 'package:vector_academy/utils/utils.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/services/auth.dart';
-import 'package:entrance_tricks/services/core.dart';
-import 'package:entrance_tricks/services/api/grades.dart';
+import 'package:vector_academy/services/auth.dart';
+import 'package:vector_academy/services/core.dart';
+import 'package:vector_academy/services/api/grades.dart';
 import 'package:flutter_tex/flutter_tex.dart';
 
 Future<void> initialize() async {

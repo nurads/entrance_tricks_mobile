@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/controllers/exam/question_page_controller.dart';
-import 'package:entrance_tricks/controllers/home/main_navigation_controller.dart';
+import 'package:vector_academy/controllers/exam/question_page_controller.dart';
+import 'package:vector_academy/controllers/home/main_navigation_controller.dart';
 
 class ExamResultPage extends StatelessWidget {
   final int score;

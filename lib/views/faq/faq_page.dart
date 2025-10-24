@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/models/models.dart';
-import 'package:entrance_tricks/controllers/misc/faq.dart';
+import 'package:vector_academy/models/models.dart';
+import 'package:vector_academy/controllers/misc/faq.dart';
 
 class FAQPage extends StatelessWidget {
   const FAQPage({super.key});

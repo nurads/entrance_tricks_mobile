@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:entrance_tricks/models/models.dart';
+import 'package:vector_academy/models/models.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 part 'exam.g.dart';
@@ -77,7 +77,11 @@ class ExamProgress {
   factory ExamProgress.fromMap(Map<dynamic, dynamic> map) {
     final m = Map<String, dynamic>.from(map);
     final answersDynamic = (m['selected_answers'] as List?) ?? const [];
-    final answers = answersDynamic.map((e) => e is int ? e : (e == null ? null : int.tryParse(e.toString()))).toList();
+    final answers = answersDynamic
+        .map(
+          (e) => e is int ? e : (e == null ? null : int.tryParse(e.toString())),
+        )
+        .toList();
     return ExamProgress(
       currentQuestionIndex: m['current_question_index'] ?? 0,
       userAnswers: answers.cast<int?>(),

@@ -1,14 +1,14 @@
 import 'dart:io';
-import 'package:entrance_tricks/utils/device/device.dart';
-import 'package:entrance_tricks/views/views.dart';
+import 'package:vector_academy/utils/device/device.dart';
+import 'package:vector_academy/views/views.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:entrance_tricks/models/models.dart';
-import 'package:entrance_tricks/services/services.dart';
-import 'package:entrance_tricks/services/api/exceptions.dart';
-import 'package:entrance_tricks/utils/utils.dart';
-import 'package:entrance_tricks/utils/storages/storages.dart';
+import 'package:vector_academy/models/models.dart';
+import 'package:vector_academy/services/services.dart';
+import 'package:vector_academy/services/api/exceptions.dart';
+import 'package:vector_academy/utils/utils.dart';
+import 'package:vector_academy/utils/storages/storages.dart';
 
 class PaymentController extends GetxController {
   final PaymentService _paymentService = PaymentService();

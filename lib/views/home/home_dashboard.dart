@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/controllers/controllers.dart';
-import "package:entrance_tricks/models/models.dart";
-import "package:entrance_tricks/utils/utils.dart";
-import "package:entrance_tricks/services/services.dart";
-import 'package:entrance_tricks/views/views.dart';
+import 'package:vector_academy/controllers/controllers.dart';
+import "package:vector_academy/models/models.dart";
+import "package:vector_academy/utils/utils.dart";
+import "package:vector_academy/services/services.dart";
+import 'package:vector_academy/views/views.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class HomeDashboard extends StatelessWidget {
@@ -123,7 +123,7 @@ class HomeDashboard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Entrance Tricks!',
+                  'Vector Academy!',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 24,

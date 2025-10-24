@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:entrance_tricks/models/models.dart';
+import 'package:vector_academy/models/models.dart';
 
 part 'user.g.dart';
 

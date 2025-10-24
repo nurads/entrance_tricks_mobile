@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'auth.dart';
-import 'package:entrance_tricks/models/models.dart';
-import 'package:entrance_tricks/utils/storages/misc.dart';
+import 'package:vector_academy/models/models.dart';
+import 'package:vector_academy/utils/storages/misc.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'dart:async';
 

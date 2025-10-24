@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/views/views.dart';
-import 'package:entrance_tricks/controllers/on_boarding/login_controller.dart';
-import 'package:entrance_tricks/components/components.dart';
+import 'package:vector_academy/views/views.dart';
+import 'package:vector_academy/controllers/on_boarding/login_controller.dart';
+import 'package:vector_academy/components/components.dart';
 
 class Login extends StatelessWidget {
   const Login({super.key});

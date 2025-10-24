@@ -1,13 +1,13 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import 'package:entrance_tricks/models/models.dart';
-import 'package:entrance_tricks/utils/storages/storages.dart';
-import 'package:entrance_tricks/utils/utils.dart';
-import 'package:entrance_tricks/views/views.dart';
-import 'package:entrance_tricks/controllers/subject/subject_detail_controller.dart';
-import 'package:entrance_tricks/services/services.dart';
-import 'package:entrance_tricks/utils/device/device.dart';
-import 'package:entrance_tricks/controllers/misc/downloads_controller.dart';
+import 'package:vector_academy/models/models.dart';
+import 'package:vector_academy/utils/storages/storages.dart';
+import 'package:vector_academy/utils/utils.dart';
+import 'package:vector_academy/views/views.dart';
+import 'package:vector_academy/controllers/subject/subject_detail_controller.dart';
+import 'package:vector_academy/services/services.dart';
+import 'package:vector_academy/utils/device/device.dart';
+import 'package:vector_academy/controllers/misc/downloads_controller.dart';
 import 'dart:io';
 
 class ChapterDetailController extends GetxController {

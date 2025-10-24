@@ -1,9 +1,9 @@
 import 'package:get/get.dart';
-import 'package:entrance_tricks/views/subject/subject_detail.dart';
-import 'package:entrance_tricks/services/services.dart';
-import 'package:entrance_tricks/models/models.dart';
-import 'package:entrance_tricks/utils/storages/storages.dart';
-import 'package:entrance_tricks/utils/device/device.dart';
+import 'package:vector_academy/views/subject/subject_detail.dart';
+import 'package:vector_academy/services/services.dart';
+import 'package:vector_academy/models/models.dart';
+import 'package:vector_academy/utils/storages/storages.dart';
+import 'package:vector_academy/utils/device/device.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'dart:async';
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/controllers/controllers.dart';
-import 'package:entrance_tricks/models/models.dart';
+import 'package:vector_academy/controllers/controllers.dart';
+import 'package:vector_academy/models/models.dart';
 
 class EditProfilePage extends StatelessWidget {
   const EditProfilePage({super.key});

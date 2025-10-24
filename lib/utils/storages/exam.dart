@@ -1,5 +1,5 @@
-import 'package:entrance_tricks/models/models.dart';
-import 'package:entrance_tricks/utils/utils.dart';
+import 'package:vector_academy/models/models.dart';
+import 'package:vector_academy/utils/utils.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'base.dart';

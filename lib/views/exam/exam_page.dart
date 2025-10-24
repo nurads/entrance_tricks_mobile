@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/controllers/exam/exam_controller.dart';
-import 'package:entrance_tricks/controllers/misc/downloads_controller.dart';
-import 'package:entrance_tricks/models/exam.dart';
-import 'package:entrance_tricks/models/models.dart';
-import 'package:entrance_tricks/utils/utils.dart';
+import 'package:vector_academy/controllers/exam/exam_controller.dart';
+import 'package:vector_academy/controllers/misc/downloads_controller.dart';
+import 'package:vector_academy/models/exam.dart';
+import 'package:vector_academy/models/models.dart';
+import 'package:vector_academy/utils/utils.dart';
 
 class ExamPage extends StatelessWidget {
   const ExamPage({super.key});

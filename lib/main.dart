@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:entrance_tricks/views/home/home.dart';
-import 'package:entrance_tricks/views/views.dart';
-import 'package:entrance_tricks/controllers/controllers.dart';
+import 'package:vector_academy/views/home/home.dart';
+import 'package:vector_academy/views/views.dart';
+import 'package:vector_academy/controllers/controllers.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/services/services.dart';
-import 'package:entrance_tricks/components/components.dart';
-import 'package:entrance_tricks/utils/utils.dart';
+import 'package:vector_academy/services/services.dart';
+import 'package:vector_academy/components/components.dart';
+import 'package:vector_academy/utils/utils.dart';
 
 void main() async {
   // Remove debug banner
@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'Entrance Tricks',
+      title: 'Vector Academy',
       theme: lightTheme(context),
       debugShowCheckedModeBanner: true, // Remove debug banner
       getPages: [

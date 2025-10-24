@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/models/models.dart';
-import 'package:entrance_tricks/views/exam/exam_result_page.dart';
-import 'package:entrance_tricks/utils/storages/storages.dart';
+import 'package:vector_academy/models/models.dart';
+import 'package:vector_academy/views/exam/exam_result_page.dart';
+import 'package:vector_academy/utils/storages/storages.dart';
 
 enum QuestionMode { practice, exam }
 

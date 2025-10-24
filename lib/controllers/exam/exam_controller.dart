@@ -1,10 +1,10 @@
 import 'package:get/get.dart';
-import 'package:entrance_tricks/views/exam/exam_detail_page.dart';
-import 'package:entrance_tricks/models/models.dart';
-import 'package:entrance_tricks/services/services.dart';
-import 'package:entrance_tricks/utils/storages/storages.dart';
+import 'package:vector_academy/views/exam/exam_detail_page.dart';
+import 'package:vector_academy/models/models.dart';
+import 'package:vector_academy/services/services.dart';
+import 'package:vector_academy/utils/storages/storages.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
-import 'package:entrance_tricks/utils/device/device.dart';
+import 'package:vector_academy/utils/device/device.dart';
 
 class ExamController extends GetxController {
   final ExamService _examService = ExamService();
@@ -96,7 +96,6 @@ class ExamController extends GetxController {
       await _refreshCompletionBadges();
       update();
     }
-
   }
 
   Future<void> _updateExamDownloadStatus() async {

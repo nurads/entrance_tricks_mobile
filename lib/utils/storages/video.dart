@@ -1,5 +1,5 @@
-import 'package:entrance_tricks/utils/storages/base.dart';
-import 'package:entrance_tricks/models/models.dart';
+import 'package:vector_academy/utils/storages/base.dart';
+import 'package:vector_academy/models/models.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class HiveVideoStorage extends BaseObjectStorage<List<Video>> {
@@ -40,6 +40,7 @@ class HiveVideoStorage extends BaseObjectStorage<List<Video>> {
   Future<void> setVideos(int chapterId, List<Video> videos) async {
     _box?.put('videos_$chapterId', videos);
   }
+
   Future<List<Video>> getAllVideos() async {
     final videos = _box?.get('videos') ?? [];
     final downloadedVideos = await getDownloadedVideos();
@@ -55,6 +56,7 @@ class HiveVideoStorage extends BaseObjectStorage<List<Video>> {
     }
     return videos.cast<Video>();
   }
+
   Future<void> setAllVideos(List<Video> videos) async {
     _box?.put('videos', videos);
   }

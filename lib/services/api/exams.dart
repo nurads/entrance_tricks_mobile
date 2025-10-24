@@ -1,5 +1,5 @@
 import 'package:get/get.dart' hide Response, FormData, MultipartFile;
-import 'package:entrance_tricks/services/api/exceptions.dart';
+import 'package:vector_academy/services/api/exceptions.dart';
 import 'api.dart';
 import '../../models/exam.dart';
 import '../../models/question.dart';

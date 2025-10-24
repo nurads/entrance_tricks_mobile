@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
-import 'package:entrance_tricks/controllers/controllers.dart';
+import 'package:vector_academy/controllers/controllers.dart';
 
 class VideoPlayerScreen extends StatelessWidget {
   final String videoUrl;

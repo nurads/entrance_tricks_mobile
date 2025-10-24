@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/controllers/subject/chapter_detail_controller.dart';
-import 'package:entrance_tricks/views/tabs/video_tab.dart';
-import 'package:entrance_tricks/views/tabs/notes_tab.dart';
-import 'package:entrance_tricks/views/tabs/quiz_tab.dart';
+import 'package:vector_academy/controllers/subject/chapter_detail_controller.dart';
+import 'package:vector_academy/views/tabs/video_tab.dart';
+import 'package:vector_academy/views/tabs/notes_tab.dart';
+import 'package:vector_academy/views/tabs/quiz_tab.dart';
 
 class ChapterDetail extends StatelessWidget {
   const ChapterDetail({super.key});

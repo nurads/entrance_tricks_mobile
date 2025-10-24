@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/models/models.dart';
-import 'package:entrance_tricks/services/services.dart';
-import 'package:entrance_tricks/services/api/exceptions.dart';
-import 'package:entrance_tricks/utils/utils.dart';
-import 'package:entrance_tricks/views/views.dart';
-import 'package:entrance_tricks/services/api/device.dart';
+import 'package:vector_academy/models/models.dart';
+import 'package:vector_academy/services/services.dart';
+import 'package:vector_academy/services/api/exceptions.dart';
+import 'package:vector_academy/utils/utils.dart';
+import 'package:vector_academy/views/views.dart';
+import 'package:vector_academy/services/api/device.dart';
 
 class RegisterController extends GetxController {
   final formKey = GlobalKey<FormState>();

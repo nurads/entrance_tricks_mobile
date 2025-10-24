@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tex/flutter_tex.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:entrance_tricks/models/models.dart';
-import 'package:entrance_tricks/components/ui/custom_cards.dart';
+import 'package:vector_academy/models/models.dart';
+import 'package:vector_academy/components/ui/custom_cards.dart';
 
 class QuestionCard extends StatelessWidget {
   final Question question;

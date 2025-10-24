@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/controllers/on_boarding/verify_phone_controller.dart';
-import 'package:entrance_tricks/components/components.dart';
+import 'package:vector_academy/controllers/on_boarding/verify_phone_controller.dart';
+import 'package:vector_academy/components/components.dart';
 
 class VerifyPhone extends StatelessWidget {
   VerifyPhone({super.key});

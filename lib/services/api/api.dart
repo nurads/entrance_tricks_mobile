@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart' hide Response, FormData, MultipartFile;
-import "package:entrance_tricks/utils/utils.dart";
+import "package:vector_academy/utils/utils.dart";
 import 'package:flutter/material.dart';
 
 class BaseApiClient {

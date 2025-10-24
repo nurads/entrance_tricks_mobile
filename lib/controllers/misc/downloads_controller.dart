@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/models/models.dart';
-import 'package:entrance_tricks/utils/utils.dart';
-import 'package:entrance_tricks/utils/storages/storages.dart';
-import 'package:entrance_tricks/services/services.dart';
-import 'package:entrance_tricks/utils/device/device.dart';
+import 'package:vector_academy/models/models.dart';
+import 'package:vector_academy/utils/utils.dart';
+import 'package:vector_academy/utils/storages/storages.dart';
+import 'package:vector_academy/services/services.dart';
+import 'package:vector_academy/utils/device/device.dart';
 import 'dart:io';
-import 'package:entrance_tricks/views/common/video_player_screen.dart';
-import 'package:entrance_tricks/views/common/pdf_reader_screen.dart';
-import 'package:entrance_tricks/views/exam/exam_detail_page.dart';
-import 'package:entrance_tricks/controllers/exam/exam_controller.dart';
+import 'package:vector_academy/views/common/video_player_screen.dart';
+import 'package:vector_academy/views/common/pdf_reader_screen.dart';
+import 'package:vector_academy/views/exam/exam_detail_page.dart';
+import 'package:vector_academy/controllers/exam/exam_controller.dart';
 
 class DownloadsController extends GetxController {
   // API Services

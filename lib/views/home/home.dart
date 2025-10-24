@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:entrance_tricks/views/home/home_dashboard.dart';
-import 'package:entrance_tricks/views/exam/exam_page.dart';
-import 'package:entrance_tricks/views/news/news_page.dart';
-import 'package:entrance_tricks/views/common/profile_page.dart';
-import 'package:entrance_tricks/controllers/controllers.dart';
+import 'package:vector_academy/views/home/home_dashboard.dart';
+import 'package:vector_academy/views/exam/exam_page.dart';
+import 'package:vector_academy/views/news/news_page.dart';
+import 'package:vector_academy/views/common/profile_page.dart';
+import 'package:vector_academy/controllers/controllers.dart';
 
 class Home extends StatelessWidget {
   const Home({super.key});

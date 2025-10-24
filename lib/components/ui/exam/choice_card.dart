@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tex/flutter_tex.dart';
-import 'package:entrance_tricks/models/models.dart';
+import 'package:vector_academy/models/models.dart';
 
 enum ChoiceState { unselected, selected, correct, incorrect, disabled }
 

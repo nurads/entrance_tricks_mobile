@@ -1,7 +1,7 @@
-import 'package:entrance_tricks/services/api/api.dart';
-import 'package:entrance_tricks/utils/device/device.dart';
-import 'package:entrance_tricks/services/api/exceptions.dart';
-import 'package:entrance_tricks/utils/utils.dart';
+import 'package:vector_academy/services/api/api.dart';
+import 'package:vector_academy/utils/device/device.dart';
+import 'package:vector_academy/services/api/exceptions.dart';
+import 'package:vector_academy/utils/utils.dart';
 
 class DeviceService {
   final ApiClient apiClient = ApiClient();
