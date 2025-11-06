@@ -2,7 +2,9 @@ import 'package:get/get.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/services.dart';
 import 'dart:io';
+import 'dart:async';
 import '../../utils/utils.dart'; // Import logger
 
 class PDFReaderController extends GetxController {
@@ -14,6 +16,9 @@ class PDFReaderController extends GetxController {
   final RxInt _totalPages = RxInt(0);
   final RxBool _isReady = RxBool(false);
   final RxString _errorMessage = RxString('');
+  final RxBool _isLandscape = RxBool(false);
+  final RxBool _isReadMode = RxBool(false);
+  final RxBool _showReadModeHint = RxBool(true);
 
   // PDF details
   late String pdfUrl;
@@ -22,6 +27,9 @@ class PDFReaderController extends GetxController {
 
   // PDF Controller
   PDFViewController? _pdfViewController;
+
+  // Timer for hiding hint
+  Timer? _hintTimer;
 
   // Getters
   String get localPath => _localPath.value;
@@ -33,13 +41,26 @@ class PDFReaderController extends GetxController {
   String get errorMessage => _errorMessage.value;
   bool get hasError => _errorMessage.value.isNotEmpty;
   bool get hasLocalPath => _localPath.value.isNotEmpty;
+  bool get isLandscape => _isLandscape.value;
+  bool get isReadMode => _isReadMode.value;
+  bool get showReadModeHint => _showReadModeHint.value;
 
   void initialize(String url, String title, int id) {
     logger.d('Initializing PDF Reader with URL: $url, Title: $title, ID: $id');
     pdfUrl = url;
     pdfTitle = title;
     pdfId = id;
+    _setupOrientations();
     _initializePDF();
+  }
+
+  void _setupOrientations() {
+    // Allow both portrait and landscape initially
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
   }
 
   Future<void> _initializePDF() async {
@@ -213,9 +234,55 @@ class PDFReaderController extends GetxController {
     _errorMessage.value = '';
   }
 
+  void toggleOrientation() {
+    _isLandscape.value = !_isLandscape.value;
+
+    if (_isLandscape.value) {
+      // Switch to landscape
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+    } else {
+      // Switch to portrait
+      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    }
+
+    logger.d(
+      'Orientation toggled to: ${_isLandscape.value ? "landscape" : "portrait"}',
+    );
+  }
+
+  void toggleReadMode() {
+    _isReadMode.value = !_isReadMode.value;
+
+    if (_isReadMode.value) {
+      // Hide system UI in read mode for immersive experience
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+      // Show hint initially
+      _showReadModeHint.value = true;
+      // Hide hint after 3 seconds
+      _hintTimer?.cancel();
+      _hintTimer = Timer(Duration(seconds: 3), () {
+        _showReadModeHint.value = false;
+      });
+    } else {
+      // Show system UI when exiting read mode
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+      _hintTimer?.cancel();
+    }
+
+    logger.d('Read mode: ${_isReadMode.value ? "enabled" : "disabled"}');
+  }
+
   @override
   void onClose() {
     logger.d('Closing PDF Reader Controller');
+    // Reset orientation to portrait when leaving
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    // Reset system UI
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    _hintTimer?.cancel();
     _pdfViewController = null;
     super.onClose();
   }

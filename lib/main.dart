@@ -62,12 +62,6 @@ class MyApp extends StatelessWidget {
         GetPage(name: VIEWS.chapterDetail.path, page: () => ChapterDetail()),
         GetPage(name: VIEWS.editProfile.path, page: () => EditProfilePage()),
         GetPage(name: VIEWS.subjects.path, page: () => SubjectPage()),
-        // Move paymentHistory route before payment route to fix route matching
-        GetPage(
-          name: VIEWS.paymentHistory.path,
-          page: () => PaymentHistoryScreen(),
-        ),
-        GetPage(name: VIEWS.payment.path, page: () => PaymentPage()),
         GetPage(name: VIEWS.downloads.path, page: () => DownloadsPage()),
         GetPage(name: VIEWS.support.path, page: () => SupportPage()),
         GetPage(name: VIEWS.about.path, page: () => AboutPage()),

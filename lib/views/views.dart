@@ -14,10 +14,6 @@ export 'common/pdf_reader_screen.dart';
 export 'subject/subject_page.dart';
 export 'common/search_page.dart';
 export 'common/notifications_page.dart';
-export 'payment/payment_page.dart';
-export 'payment_methods_screen.dart';
-export 'receipt_upload_screen.dart';
-export 'payment_history_screen.dart';
 export 'exam/exam_detail_page.dart';
 export 'exam/exam_result_page.dart';
 export 'news/news_detail_page.dart';
@@ -40,13 +36,9 @@ enum VIEWS {
   chapterDetail('/chapter-detail'),
   videoPlayer('/video-player'),
   pdfReader('/pdf-reader'),
-  paymentMethods('/payment/methods'),
-  receiptUpload('/payment/receipt'),
-  paymentHistory('/payment/history'),
   editProfile('/edit-profile'),
   videos('/videos'),
   notes('/notes'),
-  payment('/payment'),
   examDetail('/exam-detail'),
   downloads('/downloads'),
   subjects('/subjects'),

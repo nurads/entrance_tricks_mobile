@@ -25,12 +25,16 @@ class PDFReaderScreen extends StatelessWidget {
 
     final theme = Theme.of(context);
 
-    return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
-      appBar: _buildAppBar(controller, theme),
-      body: _PDFReaderBody(controller: controller),
-      bottomNavigationBar: _PDFReaderBottomNavigation(controller: controller),
-    );
+    return Obx(() {
+      return Scaffold(
+        backgroundColor: theme.colorScheme.surface,
+        appBar: controller.isReadMode ? null : _buildAppBar(controller, theme),
+        body: _PDFReaderBody(controller: controller),
+        bottomNavigationBar: controller.isReadMode
+            ? null
+            : _PDFReaderBottomNavigation(controller: controller),
+      );
+    });
   }
 
   PreferredSizeWidget _buildAppBar(
@@ -48,6 +52,34 @@ class PDFReaderScreen extends StatelessWidget {
       foregroundColor: theme.colorScheme.onSurface,
       elevation: 0,
       actions: [
+        // Read mode toggle button
+        Obx(() {
+          return IconButton(
+            onPressed: controller.toggleReadMode,
+            icon: Icon(
+              controller.isReadMode
+                  ? Icons.chrome_reader_mode
+                  : Icons.chrome_reader_mode_outlined,
+            ),
+            tooltip: controller.isReadMode
+                ? 'Exit Read Mode'
+                : 'Enter Read Mode',
+          );
+        }),
+        // Orientation toggle button
+        Obx(() {
+          return IconButton(
+            onPressed: controller.toggleOrientation,
+            icon: Icon(
+              controller.isLandscape
+                  ? Icons.screen_lock_landscape
+                  : Icons.screen_lock_portrait,
+            ),
+            tooltip: controller.isLandscape
+                ? 'Switch to Portrait'
+                : 'Switch to Landscape',
+          );
+        }),
         Obx(() {
           if (controller.isReady && controller.totalPages > 0) {
             return Container(
@@ -223,21 +255,61 @@ class _PDFView extends StatelessWidget {
         );
       }
 
-      return PDFView(
-        filePath: controller.localPath,
-        enableSwipe: true,
-        swipeHorizontal: false,
-        autoSpacing: false,
-        pageFling: true,
-        pageSnap: true,
-        onRender: controller.onRender,
-        onViewCreated: controller.onViewCreated,
-        onPageChanged: controller.onPageChanged,
-        onError: controller.onError,
-        backgroundColor: Colors.white,
-        defaultPage: 0,
-        fitPolicy: FitPolicy.BOTH,
-        preventLinkNavigation: false,
+      final isLandscape = controller.isLandscape;
+      // Use WIDTH fit in landscape for better zoom, BOTH in portrait
+      final fitPolicy = isLandscape ? FitPolicy.WIDTH : FitPolicy.BOTH;
+
+      return Stack(
+        children: [
+          GestureDetector(
+            onTap: controller.isReadMode ? controller.toggleReadMode : null,
+            child: PDFView(
+              key: ValueKey('pdf_${isLandscape ? "landscape" : "portrait"}'),
+              filePath: controller.localPath,
+              enableSwipe: true,
+              swipeHorizontal: false,
+              autoSpacing: false,
+              pageFling: true,
+              pageSnap: true,
+              onRender: controller.onRender,
+              onViewCreated: controller.onViewCreated,
+              onPageChanged: controller.onPageChanged,
+              onError: controller.onError,
+              backgroundColor: Colors.white,
+              defaultPage: controller.currentPage,
+              fitPolicy: fitPolicy,
+              preventLinkNavigation: false,
+            ),
+          ),
+          // Show a hint in read mode with fade animation
+          if (controller.isReadMode && controller.showReadModeHint)
+            Positioned(
+              top: 16,
+              right: 16,
+              child: AnimatedOpacity(
+                opacity: controller.showReadModeHint ? 1.0 : 0.0,
+                duration: Duration(milliseconds: 500),
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.7),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.touch_app, color: Colors.white, size: 16),
+                      SizedBox(width: 4),
+                      Text(
+                        'Tap to exit',
+                        style: TextStyle(color: Colors.white, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+        ],
       );
     });
   }
@@ -260,7 +332,6 @@ class _PDFReaderBottomNavigation extends StatelessWidget {
         return SizedBox.shrink();
       }
 
-      // Add debug info to see what's happening
       return Container(
         padding: EdgeInsets.all(16),
         decoration: BoxDecoration(

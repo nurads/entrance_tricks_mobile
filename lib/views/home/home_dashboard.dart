@@ -663,22 +663,6 @@ class HomeDashboard extends StatelessWidget {
 
                   SizedBox(height: 20),
 
-                  _buildSectionHeader('Account & Payment'),
-                  _buildModernDrawerMenuItem(
-                    icon: Icons.payment_rounded,
-                    title: 'Payment',
-                    subtitle: 'Manage subscription',
-                    onTap: () => Get.toNamed(VIEWS.payment.path),
-                  ),
-                  _buildModernDrawerMenuItem(
-                    icon: Icons.history_rounded,
-                    title: 'Payment History',
-                    subtitle: 'View transactions',
-                    onTap: () => Get.toNamed(VIEWS.paymentHistory.path),
-                  ),
-
-                  SizedBox(height: 20),
-
                   _buildSectionHeader('Support'),
                   _buildModernDrawerMenuItem(
                     icon: Icons.help_outline_rounded,
