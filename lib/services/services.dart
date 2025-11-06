@@ -12,3 +12,4 @@ export 'api/notes.dart';
 export 'api/video.dart';
 export "api/faq.dart";
 export 'api/notification.dart';
+export 'deep_link_service.dart';

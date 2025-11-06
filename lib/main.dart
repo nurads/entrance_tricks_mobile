@@ -11,6 +11,10 @@ void main() async {
   // Remove debug banner
   WidgetsFlutterBinding.ensureInitialized();
   await initialize();
+
+  // Initialize deep link service
+  DeepLinkService().initialize();
+
   runApp(MyApp());
 }
 
@@ -65,6 +69,7 @@ class MyApp extends StatelessWidget {
         GetPage(name: VIEWS.downloads.path, page: () => DownloadsPage()),
         GetPage(name: VIEWS.support.path, page: () => SupportPage()),
         GetPage(name: VIEWS.about.path, page: () => AboutPage()),
+        GetPage(name: VIEWS.newsDetail.path, page: () => NewsDetailPage()),
         GetPage(
           name: VIEWS.faq.path,
           page: () => FAQPage(),

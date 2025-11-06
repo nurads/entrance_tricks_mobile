@@ -40,6 +40,7 @@ enum VIEWS {
   videos('/videos'),
   notes('/notes'),
   examDetail('/exam-detail'),
+  newsDetail('/news-detail'),
   downloads('/downloads'),
   subjects('/subjects'),
   support('/support'),

@@ -1,16 +1,93 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:get/get.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:vector_academy/models/models.dart';
+import 'package:vector_academy/services/services.dart';
 import 'package:vector_academy/utils/utils.dart';
 
-class NewsDetailPage extends StatelessWidget {
-  final News news;
+class NewsDetailPage extends StatefulWidget {
+  final News? news;
+  final int? newsId;
 
-  const NewsDetailPage({super.key, required this.news});
+  const NewsDetailPage({super.key, this.news, this.newsId})
+    : assert(
+        news != null || newsId != null,
+        'Either news or newsId must be provided',
+      );
+
+  @override
+  State<NewsDetailPage> createState() => _NewsDetailPageState();
+}
+
+class _NewsDetailPageState extends State<NewsDetailPage> {
+  News? _news;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.news != null) {
+      _news = widget.news;
+    } else if (widget.newsId != null) {
+      _loadNewsById(widget.newsId!);
+    } else {
+      // Try to get from route arguments
+      final args = Get.arguments;
+      if (args != null && args['newsId'] != null) {
+        _loadNewsById(args['newsId']);
+      } else if (args != null && args['news'] != null) {
+        _news = args['news'];
+      }
+    }
+  }
+
+  Future<void> _loadNewsById(int newsId) async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final newsService = NewsService();
+      final news = await newsService.getNewsById(newsId);
+      if (news != null) {
+        setState(() {
+          _news = news;
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+        if (mounted) {
+          Get.snackbar('Error', 'News not found');
+          Get.back();
+        }
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      if (mounted) {
+        Get.snackbar('Error', 'Failed to load news');
+        Get.back();
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    if (_news == null) {
+      return Scaffold(
+        appBar: AppBar(title: Text('News')),
+        body: Center(child: Text('News not found')),
+      );
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       body: CustomScrollView(
@@ -26,6 +103,7 @@ class NewsDetailPage extends StatelessWidget {
   }
 
   Widget _buildModernAppBar(BuildContext context) {
+    final news = _news!;
     return SliverAppBar(
       expandedHeight: 300,
       floating: false,
@@ -50,6 +128,26 @@ class NewsDetailPage extends StatelessWidget {
           onPressed: () => Get.back(),
         ),
       ),
+      actions: [
+        Container(
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.9),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: IconButton(
+            icon: const Icon(Icons.share, color: Color(0xFF2D3748)),
+            onPressed: () => _shareNews(context),
+          ),
+        ),
+      ],
 
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
@@ -81,6 +179,7 @@ class NewsDetailPage extends StatelessWidget {
   }
 
   Widget _buildArticleContent(BuildContext context) {
+    final news = _news!;
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -272,5 +371,26 @@ class NewsDetailPage extends StatelessWidget {
     // Rough estimation: 200 words per minute
     final wordCount = content.split(' ').length;
     return (wordCount / 200).ceil().clamp(1, 60);
+  }
+
+  Future<void> _shareNews(BuildContext context) async {
+    if (_news == null) return;
+
+    try {
+      final shareLink = ShareUtils.generateNewsLink(_news!.id);
+      final shareText = '${_news!.title}\n\n$shareLink';
+
+      await Share.share(shareText, subject: _news!.title);
+    } catch (e) {
+      logger.e('Error sharing news: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to share news'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    }
   }
 }

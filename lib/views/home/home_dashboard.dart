@@ -6,6 +6,7 @@ import "package:vector_academy/utils/utils.dart";
 import "package:vector_academy/services/services.dart";
 import 'package:vector_academy/views/views.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeDashboard extends StatelessWidget {
   HomeDashboard({super.key});
@@ -123,7 +124,7 @@ class HomeDashboard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Vector Academy!',
+                  'Ethio Entrance Tricks!',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 24,
@@ -152,11 +153,23 @@ class HomeDashboard extends StatelessWidget {
                         color: Colors.blue.shade300,
                         borderRadius: BorderRadius.circular(25),
                       ),
-                      child: Text(
-                        'Contact us',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        onPressed: () async {
+                          if (!await launchUrl(
+                            Uri.parse('https://t.me/entrance_tricks'),
+                          )) {}
+                        },
+                        child: Text(
+                          'Contact us',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ),
