@@ -199,7 +199,7 @@ class EditProfilePage extends StatelessWidget {
           SizedBox(height: 12),
           TextField(
             controller: controller,
-            onSubmitted: onChanged,
+            onChanged: onChanged,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
