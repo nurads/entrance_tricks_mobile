@@ -15,6 +15,8 @@ class User {
   final String phoneNumber;
   @JsonKey(name: 'is_phone_verified')
   final bool isPhoneVerified;
+  @JsonKey(name: 'profile_pic')
+  final String? profilePic;
   final Grade grade;
   @JsonKey(name: 'created_at')
   final String createdAt;
@@ -26,6 +28,7 @@ class User {
     this.lastName,
     required this.phoneNumber,
     required this.isPhoneVerified,
+    this.profilePic,
     required this.grade,
     required this.createdAt,
     required this.updatedAt,

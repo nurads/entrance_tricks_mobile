@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vector_academy/controllers/controllers.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -65,40 +66,28 @@ class ProfilePage extends StatelessWidget {
               right: 0,
               child: Column(
                 children: [
-                  Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 4),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.3),
-                          blurRadius: 20,
-                          offset: Offset(0, 8),
-                        ),
-                        BoxShadow(
-                          color: Colors.blue.withValues(alpha: 0.2),
-                          blurRadius: 30,
-                          offset: Offset(0, 12),
-                        ),
-                      ],
-                    ),
-                    child: ClipOval(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [Colors.blue[100]!, Colors.blue[200]!],
+                  GestureDetector(
+                    onTap: () => controller.showProfileImagePickerOptions(),
+                    child: Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 4),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.3),
+                            blurRadius: 20,
+                            offset: Offset(0, 8),
                           ),
-                        ),
-                        child: Icon(
-                          Icons.person,
-                          size: 60,
-                          color: Colors.blue[700],
-                        ),
+                          BoxShadow(
+                            color: Colors.blue.withValues(alpha: 0.2),
+                            blurRadius: 30,
+                            offset: Offset(0, 12),
+                          ),
+                        ],
                       ),
+                      child: ClipOval(child: _buildProfilePicture(controller)),
                     ),
                   ),
                   SizedBox(height: 12),
@@ -381,6 +370,66 @@ class ProfilePage extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildProfilePicture(ProfileController controller) {
+    // Show selected image if available (for preview before upload)
+    if (controller.selectedProfileImage != null) {
+      return Image.file(
+        controller.selectedProfileImage!,
+        width: 120,
+        height: 120,
+        fit: BoxFit.cover,
+      );
+    }
+
+    // Show network image if profile picture exists
+    final profilePicUrl = controller.user?.profilePic;
+    if (profilePicUrl != null && profilePicUrl.isNotEmpty) {
+      return CachedNetworkImage(
+        imageUrl: profilePicUrl,
+        width: 120,
+        height: 120,
+        fit: BoxFit.cover,
+        placeholder: (context, url) => Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Colors.blue[100]!, Colors.blue[200]!],
+            ),
+          ),
+          child: Center(
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.blue[700]!),
+            ),
+          ),
+        ),
+        errorWidget: (context, url, error) => Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Colors.blue[100]!, Colors.blue[200]!],
+            ),
+          ),
+          child: Icon(Icons.person, size: 60, color: Colors.blue[700]),
+        ),
+      );
+    }
+
+    // Default placeholder
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Colors.blue[100]!, Colors.blue[200]!],
+        ),
+      ),
+      child: Icon(Icons.person, size: 60, color: Colors.blue[700]),
     );
   }
 }

@@ -5,8 +5,10 @@ import 'package:vector_academy/services/services.dart';
 import 'package:vector_academy/models/models.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'dart:async';
+import 'dart:io';
 import 'package:vector_academy/utils/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ProfileController extends GetxController {
   bool _isLoading = true;
@@ -38,6 +40,12 @@ class ProfileController extends GetxController {
 
   final TextEditingController _deleteConfirmationController =
       TextEditingController();
+
+  final ImagePicker _picker = ImagePicker();
+  File? _selectedProfileImage;
+  File? get selectedProfileImage => _selectedProfileImage;
+  bool _isUploadingProfilePicture = false;
+  bool get isUploadingProfilePicture => _isUploadingProfilePicture;
 
   @override
   void onInit() async {
@@ -138,13 +146,16 @@ class ProfileController extends GetxController {
     isUpdating = true;
     update();
     try {
+      // Update user with profile picture in a single request if selected
       final user_ = await UserService().updateUser(
         phoneNumber: phoneEditController.text.trim(),
         name: nameEditController.text.trim(),
         grade: _selectedGrade?.id ?? 0,
+        profilePicturePath: _selectedProfileImage?.path,
       );
       await AuthService().saveUser(user_);
       hasChangeOnEditProfile = false;
+      _selectedProfileImage = null;
     } catch (e) {
       logger.e(e);
       AppSnackbar.showError('Error', 'Failed to update user');
@@ -156,6 +167,123 @@ class ProfileController extends GetxController {
       nameEditController.text = fullName;
       update();
       Get.back();
+    }
+  }
+
+  Future<void> pickProfileImageFromGallery() async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+
+      if (image != null) {
+        _selectedProfileImage = File(image.path);
+        hasChangeOnEditProfile = true;
+        update();
+      }
+    } catch (e) {
+      logger.e(e);
+      AppSnackbar.showError('Error', 'Failed to pick image');
+    }
+  }
+
+  Future<void> pickProfileImageFromCamera() async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.camera,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+
+      if (image != null) {
+        _selectedProfileImage = File(image.path);
+        hasChangeOnEditProfile = true;
+        update();
+      }
+    } catch (e) {
+      logger.e(e);
+      AppSnackbar.showError('Error', 'Failed to take photo');
+    }
+  }
+
+  void showProfileImagePickerOptions() {
+    Get.bottomSheet(
+      Container(
+        padding: EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.photo_library, color: Colors.blue[600]),
+              title: Text('Choose from Gallery'),
+              onTap: () {
+                Get.back();
+                pickProfileImageFromGallery();
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.camera_alt, color: Colors.blue[600]),
+              title: Text('Take Photo'),
+              onTap: () {
+                Get.back();
+                pickProfileImageFromCamera();
+              },
+            ),
+            if (_selectedProfileImage != null)
+              ListTile(
+                leading: Icon(Icons.delete, color: Colors.red),
+                title: Text('Remove Photo'),
+                onTap: () {
+                  Get.back();
+                  _selectedProfileImage = null;
+                  hasChangeOnEditProfile = true;
+                  update();
+                },
+              ),
+            SizedBox(height: 10),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> uploadProfilePicture() async {
+    if (_selectedProfileImage == null) return;
+
+    _isUploadingProfilePicture = true;
+    update();
+
+    try {
+      final user_ = await UserService().uploadProfilePicture(
+        _selectedProfileImage!.path,
+      );
+      await AuthService().saveUser(user_);
+      _selectedProfileImage = null;
+      AppSnackbar.showSuccess('Success', 'Profile picture updated');
+    } catch (e) {
+      logger.e(e);
+      AppSnackbar.showError('Error', 'Failed to upload profile picture');
+      rethrow;
+    } finally {
+      _isUploadingProfilePicture = false;
+      update();
     }
   }
 

@@ -234,6 +234,7 @@ class BaseApiClient {
     Map<String, dynamic>? additionalData,
     Map<String, dynamic>? queryParameters,
     bool authenticated = false,
+    method = 'POST',
     ProgressCallback? onSendProgress,
   }) async {
     final file = File(filePath);
@@ -255,13 +256,33 @@ class BaseApiClient {
       ...?additionalData,
     });
 
-    final response = await dio.post(
-      path,
-      data: formData,
-      queryParameters: queryParameters,
-      options: options,
-      onSendProgress: onSendProgress,
-    );
+    Response response;
+
+    if (method == 'PATCH') {
+      response = await dio.patch(
+        path,
+        data: formData,
+        queryParameters: queryParameters,
+        options: options,
+        onSendProgress: onSendProgress,
+      );
+    } else if (method == 'PUT') {
+      response = await dio.put(
+        path,
+        data: formData,
+        queryParameters: queryParameters,
+        options: options,
+        onSendProgress: onSendProgress,
+      );
+    } else {
+      response = await dio.post(
+        path,
+        data: formData,
+        queryParameters: queryParameters,
+        options: options,
+        onSendProgress: onSendProgress,
+      );
+    }
     return response;
   }
 

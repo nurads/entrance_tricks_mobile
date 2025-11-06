@@ -91,10 +91,35 @@ class UserService extends GetxController {
     required String phoneNumber,
     required String name,
     required int grade,
+    String? profilePicturePath,
   }) async {
     final firstName = name.split(' ').first;
     final lastName = name.replaceAll(firstName, '').trim();
     logger.i(grade);
+
+    // If profile picture is provided, use multipart upload
+    if (profilePicturePath != null) {
+      final response = await apiClient.uploadFile(
+        '/auth/me/update/',
+        filePath: profilePicturePath,
+        method: 'PATCH',
+        fieldName: 'profile_pic',
+        additionalData: {
+          'phone_number': phoneNumber,
+          'first_name': firstName,
+          'last_name': lastName,
+          'grade_id': grade,
+        },
+        authenticated: true,
+      );
+      logger.i(response.data);
+      if (response.statusCode == 200) {
+        return User.fromJson(response.data);
+      }
+      throw ApiException(response.data['detail'] ?? "Failed to update user");
+    }
+
+    // Otherwise, use regular PATCH request
     final response = await apiClient.patch(
       '/auth/me/update/',
       data: {
@@ -125,5 +150,22 @@ class UserService extends GetxController {
     }
     logger.e(response.data);
     throw ApiException(response.data['detail'] ?? "Failed to verify phone");
+  }
+
+  Future<User> uploadProfilePicture(String filePath) async {
+    final response = await apiClient.uploadFile(
+      '/auth/me/update/',
+      filePath: filePath,
+      method: 'PATCH',
+      fieldName: 'profile_pic',
+      authenticated: true,
+    );
+    logger.i(response.data);
+    if (response.statusCode == 200) {
+      return User.fromJson(response.data);
+    }
+    throw ApiException(
+      response.data['detail'] ?? "Failed to upload profile picture",
+    );
   }
 }
