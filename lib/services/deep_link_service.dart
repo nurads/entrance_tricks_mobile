@@ -142,10 +142,19 @@ class DeepLinkService {
         // News detail with ID
         case '/news':
         case '/news-detail':
+          logger.d('queryParams: $queryParams');
           if (queryParams.containsKey('id')) {
             final newsId = int.tryParse(queryParams['id'] ?? '');
+            logger.d('newsId: $newsId');
             if (newsId != null) {
-              Get.toNamed(VIEWS.newsDetail.path, arguments: {'newsId': newsId});
+              final args = {'newsId': newsId};
+              logger.d(
+                'About to call Get.toNamed with path: ${VIEWS.newsDetail.path}, arguments: $args',
+              );
+              Get.toNamed(VIEWS.newsDetail.path, arguments: args);
+              logger.d(
+                'After Get.toNamed call, checking Get.arguments: ${Get.arguments}',
+              );
             }
           }
           break;

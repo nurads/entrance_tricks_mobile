@@ -1,8 +1,6 @@
-import 'package:vector_academy/utils/constants/constants.dart';
-
 class ShareUtils {
   /// Base URL for deep links
-  static const String baseUrl = 'https://entrancetricks.com';
+  static const String baseUrl = 'entrancetricks.com';
 
   /// Custom scheme for deep links
   static const String customScheme = 'entrancetricks';

@@ -10,11 +10,7 @@ class NewsDetailPage extends StatefulWidget {
   final News? news;
   final int? newsId;
 
-  const NewsDetailPage({super.key, this.news, this.newsId})
-    : assert(
-        news != null || newsId != null,
-        'Either news or newsId must be provided',
-      );
+  const NewsDetailPage({super.key, this.news, this.newsId});
 
   @override
   State<NewsDetailPage> createState() => _NewsDetailPageState();
@@ -27,17 +23,32 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
   @override
   void initState() {
     super.initState();
+    // Use post-frame callback to ensure Get.arguments is available
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeNews();
+    });
+  }
+
+  void _initializeNews() {
     if (widget.news != null) {
       _news = widget.news;
-    } else if (widget.newsId != null) {
+      setState(() {});
+      return;
+    }
+
+    if (widget.newsId != null) {
       _loadNewsById(widget.newsId!);
-    } else {
-      // Try to get from route arguments
-      final args = Get.arguments;
-      if (args != null && args['newsId'] != null) {
-        _loadNewsById(args['newsId']);
-      } else if (args != null && args['news'] != null) {
-        _news = args['news'];
+      return;
+    }
+
+    // Try multiple ways to get arguments
+    var args = Get.parameters;
+
+    if (args['id'] != null) {
+      final newsId = args['id'];
+      if (newsId != null) {
+        final id = int.tryParse(newsId);
+        if (id != null) _loadNewsById(id);
       }
     }
   }
@@ -59,19 +70,21 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
         setState(() {
           _isLoading = false;
         });
-        if (mounted) {
-          Get.snackbar('Error', 'News not found');
-          Get.back();
-        }
+        Future.microtask(() {
+          if (mounted) {
+            Get.back();
+          }
+        });
       }
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
-      if (mounted) {
-        Get.snackbar('Error', 'Failed to load news');
-        Get.back();
-      }
+      Future.microtask(() {
+        if (mounted) {
+          Get.back();
+        }
+      });
     }
   }
 
