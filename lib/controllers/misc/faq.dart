@@ -9,7 +9,7 @@ class FAQController extends GetxController {
   bool isLoading = false;
   List<FAQ> faqs = [];
 
-  loadFaq() async {
+  Future<void> loadFaq() async {
     try {
       isLoading = true;
       update();

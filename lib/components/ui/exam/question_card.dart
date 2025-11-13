@@ -110,7 +110,7 @@ class QuestionCard extends StatelessWidget {
             fit: BoxFit.contain,
             placeholder: (context, url) => Container(
               height: 200,
-              color: theme.colorScheme.surfaceVariant,
+              color: theme.colorScheme.surfaceContainerHighest,
               child: Center(
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
@@ -120,7 +120,7 @@ class QuestionCard extends StatelessWidget {
             ),
             errorWidget: (context, url, error) => Container(
               height: 200,
-              color: theme.colorScheme.surfaceVariant,
+              color: theme.colorScheme.surfaceContainerHighest,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

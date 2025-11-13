@@ -684,12 +684,12 @@ class DownloadsController extends GetxController {
                   await _examStorage.clearCompleted(exam.id);
 
                   // Clear questions and question images
-                  final questions = await _examStorage.getQuestions(exam.id);
-                  for (var question in questions) {
-                    // Remove question images if they exist
-                    // Note: You might need to delete the actual image files from storage
-                    // depending on how they're stored
-                  }
+                  // final questions = await _examStorage.getQuestions(exam.id);
+                  // for (var question in questions) {
+                  // Remove question images if they exist
+                  // Note: You might need to delete the actual image files from storage
+                  // depending on how they're stored
+                  // }
 
                   // Remove questions for this exam
                   await _examStorage.setQuestions(exam.id, []);

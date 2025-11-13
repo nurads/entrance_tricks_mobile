@@ -331,7 +331,8 @@ class ChipButton extends StatelessWidget {
       avatar: avatar,
       selectedColor:
           selectedColor ?? theme.colorScheme.primary.withOpacity(0.2),
-      backgroundColor: unselectedColor ?? theme.colorScheme.surfaceVariant,
+      backgroundColor:
+          unselectedColor ?? theme.colorScheme.surfaceContainerHighest,
       checkmarkColor: theme.colorScheme.primary,
       labelStyle: TextStyle(
         color: isSelected

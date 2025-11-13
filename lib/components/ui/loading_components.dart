@@ -137,9 +137,9 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,
               colors: [
-                widget.baseColor ?? theme.colorScheme.surfaceVariant,
+                widget.baseColor ?? theme.colorScheme.surfaceContainerHighest,
                 widget.highlightColor ?? theme.colorScheme.surface,
-                widget.baseColor ?? theme.colorScheme.surfaceVariant,
+                widget.baseColor ?? theme.colorScheme.surfaceContainerHighest,
               ],
               stops: [0.0, 0.5, 1.0],
               transform: GradientRotation(_animation.value * 3.14159),
@@ -176,7 +176,7 @@ class LoadingListTile extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceVariant,
+                  color: theme.colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(24),
                 ),
               )
@@ -185,7 +185,7 @@ class LoadingListTile extends StatelessWidget {
           height: 16,
           width: double.infinity,
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceVariant,
+            color: theme.colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(8),
           ),
         ),
@@ -195,7 +195,7 @@ class LoadingListTile extends StatelessWidget {
                 width: 200,
                 margin: EdgeInsets.only(top: 8),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceVariant,
+                  color: theme.colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(6),
                 ),
               )
@@ -205,7 +205,7 @@ class LoadingListTile extends StatelessWidget {
                 width: 24,
                 height: 24,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceVariant,
+                  color: theme.colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(12),
                 ),
               )
@@ -250,7 +250,7 @@ class SkeletonCard extends StatelessWidget {
                   width: double.infinity,
                   height: 120,
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceVariant,
+                    color: theme.colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
@@ -261,7 +261,7 @@ class SkeletonCard extends StatelessWidget {
                   height: 20,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceVariant,
+                    color: theme.colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
@@ -272,7 +272,7 @@ class SkeletonCard extends StatelessWidget {
                   height: 16,
                   width: 200,
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceVariant,
+                    color: theme.colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),

@@ -7,6 +7,7 @@ export 'subject/subject_detail.dart';
 export 'subject/chapter_detail.dart';
 export 'exam/exam_page.dart';
 export 'news/news_page.dart';
+export 'leaderboard/leaderboard_page.dart';
 export 'common/profile_page.dart';
 export 'common/edit_profile_page.dart';
 export 'common/video_player_screen.dart';

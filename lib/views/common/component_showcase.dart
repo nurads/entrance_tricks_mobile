@@ -91,7 +91,7 @@ class ComponentShowcase extends StatelessWidget {
                     icon: Icons.settings_outlined,
                     title: 'Settings',
                     subtitle: 'App preferences and configuration',
-                    badge: NotificationBadge(child: Container(), count: 3),
+                    badge: NotificationBadge(count: 3, child: Container()),
                     onTap: () {},
                   ),
                 ],

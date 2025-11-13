@@ -77,7 +77,7 @@ class StatusBadge extends StatelessWidget {
         textColor = const Color(0xFF3B82F6);
         break;
       case BadgeStatus.neutral:
-        backgroundColor = theme.colorScheme.surfaceVariant;
+        backgroundColor = theme.colorScheme.surfaceContainerHighest;
         textColor = theme.colorScheme.onSurfaceVariant;
         break;
     }

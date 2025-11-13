@@ -23,6 +23,8 @@ class Exam {
   final DateTime createdAt;
   @JsonKey(name: 'updated_at')
   final DateTime updatedAt;
+  @JsonKey(name: 'mode_type')
+  final String modeType;
   @JsonKey(name: 'is_downloaded')
   bool isDownloaded;
 
@@ -52,6 +54,7 @@ class Exam {
     required this.updatedAt,
     this.isDownloaded = false,
     this.questions = const [],
+    this.modeType = 'both',
   });
 
   factory Exam.fromJson(Map<String, dynamic> json) => _$ExamFromJson(json);

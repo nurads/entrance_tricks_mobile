@@ -522,7 +522,7 @@ class HomeDashboard extends StatelessWidget {
   }
 
   Widget _buildNavigationDrawer(BuildContext context) {
-    final _coreService = Get.find<CoreService>();
+    final coreService = Get.find<CoreService>();
     return Drawer(
       child: Container(
         decoration: BoxDecoration(
@@ -585,7 +585,7 @@ class HomeDashboard extends StatelessWidget {
                         ),
                         SizedBox(height: 4),
                         Text(
-                          _coreService.authService.user.value?.firstName ??
+                          coreService.authService.user.value?.firstName ??
                               'User',
                           style: TextStyle(
                             fontSize: 20,
@@ -595,8 +595,7 @@ class HomeDashboard extends StatelessWidget {
                         ),
                         SizedBox(height: 2),
                         Text(
-                          _coreService.authService.user.value?.phoneNumber ??
-                              '',
+                          coreService.authService.user.value?.phoneNumber ?? '',
                           style: TextStyle(fontSize: 12, color: Colors.white60),
                         ),
                       ],

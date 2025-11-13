@@ -4,10 +4,7 @@ import 'package:get/get.dart';
 class QuizTakingPage extends StatefulWidget {
   final Map<String, dynamic> quiz;
 
-  const QuizTakingPage({
-    super.key,
-    required this.quiz,
-  });
+  const QuizTakingPage({super.key, required this.quiz});
 
   @override
   State<QuizTakingPage> createState() => _QuizTakingPageState();
@@ -17,7 +14,7 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
   int currentQuestionIndex = 0;
   int? selectedAnswer;
   List<int> userAnswers = [];
-  
+
   // Mock questions for now
   final List<Map<String, dynamic>> questions = [
     {
@@ -44,17 +41,12 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
     },
     {
       'question': 'What is the SI unit of force?',
-      'options': [
-        'Newton',
-        'Joule',
-        'Watt',
-        'Pascal',
-        'Ampere',
-      ],
+      'options': ['Newton', 'Joule', 'Watt', 'Pascal', 'Ampere'],
       'correctAnswer': 0,
     },
     {
-      'question': 'Which law states that every action has an equal and opposite reaction?',
+      'question':
+          'Which law states that every action has an equal and opposite reaction?',
       'options': [
         'Newton\'s First Law',
         'Newton\'s Second Law',
@@ -66,13 +58,7 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
     },
     {
       'question': 'What is the formula for kinetic energy?',
-      'options': [
-        'KE = mgh',
-        'KE = ½mv²',
-        'KE = Fd',
-        'KE = Pt',
-        'KE = qV',
-      ],
+      'options': ['KE = mgh', 'KE = ½mv²', 'KE = Fd', 'KE = Pt', 'KE = qV'],
       'correctAnswer': 1,
     },
   ];
@@ -92,15 +78,13 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
           children: [
             // Top Bar with Timer
             _buildTopBar(context),
-            
+
             // Progress Indicator
             _buildProgressIndicator(context),
-            
+
             // Question Card
-            Expanded(
-              child: _buildQuestionCard(context),
-            ),
-            
+            Expanded(child: _buildQuestionCard(context)),
+
             // Navigation Buttons
             _buildNavigationButtons(context),
           ],
@@ -123,16 +107,12 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
                 color: Colors.blue[600],
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                Icons.arrow_back,
-                color: Colors.white,
-                size: 20,
-              ),
+              child: Icon(Icons.arrow_back, color: Colors.white, size: 20),
             ),
           ),
-          
+
           SizedBox(width: 16),
-          
+
           // Quiz Title
           Expanded(
             child: Text(
@@ -144,7 +124,7 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
               ),
             ),
           ),
-          
+
           // Timer
           Container(
             padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -177,32 +157,32 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
             backgroundColor: Colors.grey[300],
             valueColor: AlwaysStoppedAnimation<Color>(Colors.blue[600]!),
           ),
-          
+
           SizedBox(height: 16),
-          
+
           // Question Numbers
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: List.generate(questions.length, (index) {
               final isCurrent = index == currentQuestionIndex;
               final isAnswered = userAnswers[index] != -1;
-              
+
               return Container(
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: isCurrent 
+                  color: isCurrent
                       ? Colors.blue[600]
-                      : isAnswered 
-                          ? Colors.green[100]
-                          : Colors.grey[100],
+                      : isAnswered
+                      ? Colors.green[100]
+                      : Colors.grey[100],
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: isCurrent 
+                    color: isCurrent
                         ? Colors.blue[600]!
-                        : isAnswered 
-                            ? Colors.green[600]!
-                            : Colors.grey[400]!,
+                        : isAnswered
+                        ? Colors.green[600]!
+                        : Colors.grey[400]!,
                     width: 2,
                   ),
                 ),
@@ -210,11 +190,11 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
                   child: Text(
                     '${index + 1}',
                     style: TextStyle(
-                      color: isCurrent 
+                      color: isCurrent
                           ? Colors.white
-                          : isAnswered 
-                              ? Colors.green[600]
-                              : Colors.grey[600],
+                          : isAnswered
+                          ? Colors.green[600]
+                          : Colors.grey[600],
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -229,7 +209,7 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
 
   Widget _buildQuestionCard(BuildContext context) {
     final question = questions[currentQuestionIndex];
-    
+
     return Padding(
       padding: EdgeInsets.all(20),
       child: Column(
@@ -244,9 +224,9 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
               color: Colors.black87,
             ),
           ),
-          
+
           SizedBox(height: 32),
-          
+
           // Options
           Expanded(
             child: ListView.builder(
@@ -255,7 +235,7 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
                 final option = question['options'][index];
                 final isSelected = selectedAnswer == index;
                 final isAnswered = userAnswers[currentQuestionIndex] != -1;
-                
+
                 return Container(
                   margin: EdgeInsets.only(bottom: 16),
                   child: GestureDetector(
@@ -263,12 +243,10 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
                     child: Container(
                       padding: EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: isSelected 
-                            ? Colors.blue[600]
-                            : Colors.grey[100],
+                        color: isSelected ? Colors.blue[600] : Colors.grey[100],
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: isSelected 
+                          color: isSelected
                               ? Colors.blue[600]!
                               : Colors.grey[300]!,
                           width: 2,
@@ -280,16 +258,18 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
                             width: 24,
                             height: 24,
                             decoration: BoxDecoration(
-                              color: isSelected 
+                              color: isSelected
                                   ? Colors.white
                                   : Colors.grey[400],
                               shape: BoxShape.circle,
                             ),
                             child: Center(
                               child: Text(
-                                String.fromCharCode(65 + index), // A, B, C, D, E
+                                String.fromCharCode(
+                                  65 + index,
+                                ), // A, B, C, D, E
                                 style: TextStyle(
-                                  color: isSelected 
+                                  color: isSelected
                                       ? Colors.blue[600]
                                       : Colors.white,
                                   fontWeight: FontWeight.bold,
@@ -298,18 +278,18 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
                               ),
                             ),
                           ),
-                          
+
                           SizedBox(width: 16),
-                          
+
                           Expanded(
                             child: Text(
                               option,
                               style: TextStyle(
                                 fontSize: 16,
-                                color: isSelected 
+                                color: isSelected
                                     ? Colors.white
                                     : Colors.black87,
-                                fontWeight: isSelected 
+                                fontWeight: isSelected
                                     ? FontWeight.w600
                                     : FontWeight.w500,
                               ),
@@ -336,7 +316,7 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
           // Previous Button
           Expanded(
             child: ElevatedButton.icon(
-              onPressed: currentQuestionIndex > 0 
+              onPressed: currentQuestionIndex > 0
                   ? () => _previousQuestion()
                   : null,
               icon: Icon(Icons.arrow_back, color: Colors.blue[600]),
@@ -354,30 +334,28 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
               ),
             ),
           ),
-          
+
           SizedBox(width: 16),
-          
+
           // Next/Submit Button
           Expanded(
             child: ElevatedButton(
-              onPressed: selectedAnswer != null 
-                  ? () => _nextQuestion()
-                  : null,
+              onPressed: selectedAnswer != null ? () => _nextQuestion() : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue[600],
+                padding: EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
               child: Text(
-                currentQuestionIndex == questions.length - 1 
+                currentQuestionIndex == questions.length - 1
                     ? "Submit Quiz"
                     : "Next",
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue[600],
-                padding: EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
             ),
@@ -425,13 +403,15 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
         correctAnswers++;
       }
     }
-    
+
     // Navigate to results page
-    Get.off(() => QuizResultPage(
-      score: correctAnswers,
-      totalQuestions: questions.length,
-      correctAnswers: correctAnswers,
-    ));
+    Get.off(
+      () => QuizResultPage(
+        score: correctAnswers,
+        totalQuestions: questions.length,
+        correctAnswers: correctAnswers,
+      ),
+    );
   }
 
   void _showQuitDialog(BuildContext context) {
@@ -440,7 +420,9 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Quit Quiz?'),
-          content: Text('Are you sure you want to quit? Your progress will be lost.'),
+          content: Text(
+            'Are you sure you want to quit? Your progress will be lost.',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -500,9 +482,9 @@ class QuizResultPage extends StatelessWidget {
                     ),
                   ),
                 ),
-                
+
                 SizedBox(height: 30),
-                
+
                 // Score Modal
                 Container(
                   width: double.infinity,
@@ -521,9 +503,9 @@ class QuizResultPage extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      
+
                       SizedBox(height: 20),
-                      
+
                       Text(
                         "$score/$totalQuestions",
                         style: TextStyle(
@@ -532,27 +514,27 @@ class QuizResultPage extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      
+
                       SizedBox(height: 30),
-                      
+
                       // Finish Button
-                      Container(
+                      SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () => Get.back(),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
                           child: Text(
                             "FINISH",
                             style: TextStyle(
                               color: Colors.blue[600],
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
                         ),

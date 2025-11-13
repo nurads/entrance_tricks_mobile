@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:vector_academy/views/home/home_dashboard.dart';
 import 'package:vector_academy/views/exam/exam_page.dart';
 import 'package:vector_academy/views/news/news_page.dart';
+import 'package:vector_academy/views/leaderboard/leaderboard_page.dart';
 import 'package:vector_academy/views/common/profile_page.dart';
 import 'package:vector_academy/controllers/controllers.dart';
 
@@ -15,6 +16,7 @@ class Home extends StatelessWidget {
       HomeDashboard(),
       ExamPage(),
       NewsPage(),
+      LeaderboardPage(),
       ProfilePage(),
     ];
 
@@ -69,6 +71,14 @@ class Home extends StatelessWidget {
                       context: context,
                       controller: controller,
                       index: 3,
+                      icon: Icons.leaderboard_rounded,
+                      activeIcon: Icons.leaderboard_rounded,
+                      label: 'Leaderboard',
+                    ),
+                    _buildNavItem(
+                      context: context,
+                      controller: controller,
+                      index: 4,
                       icon: Icons.person_rounded,
                       activeIcon: Icons.person_rounded,
                       label: 'Profile',
@@ -138,14 +148,21 @@ class Home extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 3),
-              AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 300),
-                style: TextStyle(
-                  color: isSelected ? primaryColor : onSurfaceVariant,
-                  fontSize: isSelected ? 11 : 10,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+              Flexible(
+                child: AnimatedDefaultTextStyle(
+                  duration: const Duration(milliseconds: 300),
+                  style: TextStyle(
+                    color: isSelected ? primaryColor : onSurfaceVariant,
+                    fontSize: isSelected ? 11 : 10,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  ),
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-                child: Text(label),
               ),
             ],
           ),

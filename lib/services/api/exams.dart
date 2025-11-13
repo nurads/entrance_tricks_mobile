@@ -67,4 +67,23 @@ class ExamService extends GetxService {
       );
     }
   }
+
+  Future<void> submitAnswers(
+    String deviceId,
+    int examId,
+    int questionId,
+    int choiceId,
+  ) async {
+    final response = await apiClient.post(
+      '/app/user-answers/',
+      authenticated: true,
+      queryParameters: {'device': deviceId},
+      data: {'exam': examId, 'question': questionId, 'answer': choiceId},
+    );
+    if (response.statusCode == 200) {
+      return;
+    } else {
+      throw ApiException(response.data['detail'] ?? 'Failed to submit answers');
+    }
+  }
 }

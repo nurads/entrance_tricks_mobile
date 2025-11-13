@@ -5,6 +5,10 @@ import 'package:vector_academy/views/exam/exam_result_page.dart';
 import 'package:vector_academy/views/exam/question_page.dart';
 import 'package:vector_academy/models/models.dart';
 import 'package:vector_academy/controllers/exam/question_page_controller.dart';
+import 'package:vector_academy/services/services.dart';
+import 'package:vector_academy/utils/device/device.dart';
+import 'package:vector_academy/utils/storages/storages.dart';
+import 'package:vector_academy/utils/utils.dart';
 
 class ExamDetailPage extends StatefulWidget {
   final Exam exam;
@@ -31,6 +35,7 @@ class _ExamDetailPageState extends State<ExamDetailPage> {
     final timeLimit = widget.exam.duration; // in minutes
 
     return _ExamModeGate(
+      exam: widget.exam,
       examTitle: examTitle,
       timeLimit: timeLimit,
       questions: widget.exam.questions,
@@ -79,6 +84,7 @@ class _ExamDetailPageState extends State<ExamDetailPage> {
 }
 
 class _ExamModeGate extends StatefulWidget {
+  final Exam exam;
   final String examTitle;
   final int timeLimit;
   final List<Question> questions;
@@ -86,6 +92,7 @@ class _ExamModeGate extends StatefulWidget {
   final int examId;
 
   const _ExamModeGate({
+    required this.exam,
     required this.examTitle,
     required this.timeLimit,
     required this.questions,
@@ -107,6 +114,22 @@ class _ExamModeGateState extends State<_ExamModeGate> {
   }
 
   void _showModePicker() async {
+    final modeType = widget.exam.modeType.toLowerCase();
+    final bool allowPractice = modeType == 'both' || modeType == 'practice';
+    final bool allowExam = modeType == 'both' || modeType == 'exam';
+
+    // If only one mode is allowed, skip the dialog and go directly
+    if (!allowPractice && allowExam) {
+      // Only exam mode allowed
+      _navigateToQuestionPage(QuestionMode.exam);
+      return;
+    } else if (allowPractice && !allowExam) {
+      // Only practice mode allowed
+      _navigateToQuestionPage(QuestionMode.practice);
+      return;
+    }
+
+    // Both modes allowed, show dialog
     final mode = await showDialog<_ExamMode>(
       context: context,
       barrierDismissible: true,
@@ -140,23 +163,25 @@ class _ExamModeGateState extends State<_ExamModeGate> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _ModeCard(
-                accent: theme.colorScheme.primary,
-                icon: Icons.school,
-                title: 'Practice Mode',
-                subtitle: 'See correctness instantly and review as you go',
-                badgeText: 'Recommended for learning',
-                onTap: () => Navigator.of(context).pop(_ExamMode.practice),
-              ),
-              SizedBox(height: 12),
-              _ModeCard(
-                accent: theme.colorScheme.secondary,
-                icon: Icons.fact_check,
-                title: 'Exam Mode',
-                subtitle: 'No feedback until you submit at the end',
-                badgeText: 'Simulates real exam',
-                onTap: () => Navigator.of(context).pop(_ExamMode.exam),
-              ),
+              if (allowPractice)
+                _ModeCard(
+                  accent: theme.colorScheme.primary,
+                  icon: Icons.school,
+                  title: 'Practice Mode',
+                  subtitle: 'See correctness instantly and review as you go',
+                  badgeText: 'Recommended for learning',
+                  onTap: () => Navigator.of(context).pop(_ExamMode.practice),
+                ),
+              if (allowPractice && allowExam) SizedBox(height: 12),
+              if (allowExam)
+                _ModeCard(
+                  accent: theme.colorScheme.secondary,
+                  icon: Icons.fact_check,
+                  title: 'Exam Mode',
+                  subtitle: 'No feedback until you submit at the end',
+                  badgeText: 'Simulates real exam',
+                  onTap: () => Navigator.of(context).pop(_ExamMode.exam),
+                ),
             ],
           ),
           actions: [
@@ -176,15 +201,67 @@ class _ExamModeGateState extends State<_ExamModeGate> {
     }
 
     final isPractice = mode == _ExamMode.practice;
+    _navigateToQuestionPage(
+      isPractice ? QuestionMode.practice : QuestionMode.exam,
+    );
+  }
+
+  void _navigateToQuestionPage(QuestionMode questionMode) async {
+    List<Question> questionsToShow = widget.questions;
+
+    // In exam mode, reload questions from backend and filter unanswered ones
+    if (questionMode == QuestionMode.exam) {
+      try {
+        final user = await HiveUserStorage().getUser();
+        if (user != null) {
+          final device = await UserDevice.getDeviceInfo(user.phoneNumber);
+          final examService = ExamService();
+
+          // Reload questions from backend
+          final allQuestions = await examService.getQuestions(
+            device.id,
+            widget.examId,
+          );
+
+          // Filter to show only unanswered questions
+          questionsToShow = allQuestions
+              .where((q) => !q.hasUserAnswered)
+              .toList();
+
+          logger.i(
+            'Exam mode: Loaded ${allQuestions.length} total questions, showing ${questionsToShow.length} unanswered',
+          );
+
+          // If no unanswered questions, show a message and go back
+          if (questionsToShow.isEmpty) {
+            if (!mounted) return;
+            Get.back();
+            Get.snackbar(
+              'No Questions Available',
+              'All questions in this exam have been answered.',
+              snackPosition: SnackPosition.BOTTOM,
+            );
+            return;
+          }
+        }
+      } catch (e) {
+        logger.e('Failed to reload questions for exam mode: $e');
+        // Fallback to original questions if reload fails
+        questionsToShow = widget.questions;
+      }
+    }
+
+    if (!mounted) return;
+
     Get.off(
       () => QuestionPage(
         title: widget.examTitle,
         initialTimeMinutes: widget.timeLimit,
-        questions: widget.questions,
+        questions: questionsToShow,
         onComplete: widget.onComplete,
         allowReview: true,
         showTimer: true,
-        mode: isPractice ? QuestionMode.practice : QuestionMode.exam,
+        mode: questionMode,
         examId: widget.examId,
       ),
     );

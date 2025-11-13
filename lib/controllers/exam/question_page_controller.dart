@@ -4,6 +4,9 @@ import 'package:get/get.dart';
 import 'package:vector_academy/models/models.dart';
 import 'package:vector_academy/views/exam/exam_result_page.dart';
 import 'package:vector_academy/utils/storages/storages.dart';
+import 'package:vector_academy/services/services.dart';
+import 'package:vector_academy/utils/device/device.dart';
+import 'package:vector_academy/utils/utils.dart';
 
 enum QuestionMode { practice, exam }
 
@@ -29,6 +32,7 @@ class QuestionPageController extends GetxController {
   late QuestionMode mode;
   late int examId;
   final HiveExamStorage _examStorage = HiveExamStorage();
+  final ExamService _examService = ExamService();
 
   void initializeQuiz({
     required String title,
@@ -118,6 +122,44 @@ class QuestionPageController extends GetxController {
     _persistProgress();
   }
 
+  Future<void> _submitAnswerToServer(int questionIndex) async {
+    if (examId == 0 ||
+        questions.isEmpty ||
+        questionIndex < 0 ||
+        questionIndex >= questions.length) {
+      logger.w('Cannot submit answer: invalid examId or questionIndex');
+      return;
+    }
+
+    final answer = userAnswers[questionIndex];
+    if (answer == null) {
+      logger.w(
+        'Cannot submit answer: no answer selected for question $questionIndex',
+      );
+      return; // Don't submit if no answer selected
+    }
+
+    try {
+      final user = await HiveUserStorage().getUser();
+      if (user == null) {
+        logger.w('Cannot submit answer: user is null');
+        return;
+      }
+
+      final device = await UserDevice.getDeviceInfo(user.phoneNumber);
+      final question = questions[questionIndex];
+
+      logger.i(
+        'Submitting answer: examId=$examId, questionId=${question.id}, choiceId=$answer',
+      );
+      await _examService.submitAnswers(device.id, examId, question.id, answer);
+      logger.i('Successfully submitted answer for question ${question.id}');
+    } catch (e) {
+      // Log the error but don't interrupt the user experience
+      logger.e('Failed to submit answer for question $questionIndex: $e');
+    }
+  }
+
   void previousQuestion() {
     if (questions.isNotEmpty && currentQuestionIndex.value > 0) {
       currentQuestionIndex.value--;
@@ -127,9 +169,12 @@ class QuestionPageController extends GetxController {
     }
   }
 
-  void nextQuestion() {
+  void nextQuestion() async {
     if (questions.isNotEmpty &&
         currentQuestionIndex.value < questions.length - 1) {
+      // Submit the current answer before moving to next question
+      await _submitAnswerToServer(currentQuestionIndex.value);
+
       currentQuestionIndex.value++;
       showSolution.value = false; // Reset solution state when navigating
       update();
@@ -147,8 +192,11 @@ class QuestionPageController extends GetxController {
     }
   }
 
-  void submitQuiz() {
+  void submitQuiz() async {
     _timer?.cancel();
+    // Submit the current answer before final submission
+    await _submitAnswerToServer(currentQuestionIndex.value);
+
     isCompleted.value = true;
     _examStorage.clearProgress(
       examId,

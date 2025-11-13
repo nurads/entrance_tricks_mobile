@@ -191,7 +191,7 @@ class GroupAvatar extends StatelessWidget {
                   width: size * 0.8,
                   height: size * 0.8,
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceVariant,
+                    color: theme.colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(size * 0.4),
                     border: Border.all(
                       color: theme.scaffoldBackgroundColor,

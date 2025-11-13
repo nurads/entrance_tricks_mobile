@@ -4,7 +4,7 @@ import 'package:vector_academy/controllers/on_boarding/verify_phone_controller.d
 import 'package:vector_academy/components/components.dart';
 
 class VerifyPhone extends StatelessWidget {
-  VerifyPhone({super.key});
+  const VerifyPhone({super.key});
 
   @override
   Widget build(BuildContext context) {

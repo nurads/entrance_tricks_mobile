@@ -15,6 +15,9 @@ class Question {
 
   String? explanation;
 
+  @JsonKey(name: 'has_user_answered')
+  bool hasUserAnswered;
+
   Question({
     required this.id,
     required this.content,
@@ -22,6 +25,7 @@ class Question {
     required this.choices,
     this.imagePath,
     this.explanation,
+    this.hasUserAnswered = false,
   });
 
   factory Question.fromJson(Map<String, dynamic> json) =>

@@ -175,7 +175,7 @@ class LaTeXUtils {
           text: match.group(1)!,
           style: theme.textTheme.bodyMedium?.copyWith(
             fontFamily: 'monospace',
-            backgroundColor: theme.colorScheme.surfaceVariant,
+            backgroundColor: theme.colorScheme.surfaceContainerHighest,
             color: textColor,
           ),
         ),

@@ -71,7 +71,7 @@ class NotificationsPage extends StatelessWidget {
           child: controller.isLoading
               ? SingleChildScrollView(
                   physics: AlwaysScrollableScrollPhysics(),
-                  child: Container(
+                  child: SizedBox(
                     height: MediaQuery.of(context).size.height * 0.7,
                     child: Center(child: CircularProgressIndicator()),
                   ),
@@ -79,7 +79,7 @@ class NotificationsPage extends StatelessWidget {
               : controller.notifications.isEmpty
               ? SingleChildScrollView(
                   physics: AlwaysScrollableScrollPhysics(),
-                  child: Container(
+                  child: SizedBox(
                     height: MediaQuery.of(context).size.height * 0.7,
                     child: _buildEmptyState(),
                   ),

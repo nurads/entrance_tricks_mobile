@@ -5,7 +5,7 @@ class MainNavigationController extends GetxController {
   int get currentIndex => _currentIndex;
 
   void changeIndex(int index) {
-    if (index >= 0 && index < 4) { // Only 4 tabs: Home, Exams, News, My Profile
+    if (index >= 0 && index < 5) { // 5 tabs: Home, Exams, News, Leaderboard, My Profile
       _currentIndex = index;
       update();
     }

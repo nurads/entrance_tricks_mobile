@@ -15,7 +15,7 @@ class NewsController extends GetxController {
   int selectedCategoryIndex = 0;
   List<String> categories = [];
 
-  setSelectedCategoryIndex(int index) {
+  void setSelectedCategoryIndex(int index) {
     selectedCategoryIndex = index;
     update();
   }

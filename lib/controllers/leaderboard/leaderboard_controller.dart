@@ -1,0 +1,223 @@
+import 'dart:async';
+import 'package:get/get.dart';
+import 'package:vector_academy/models/models.dart';
+import 'package:vector_academy/services/api/leaderboard.dart';
+import 'package:vector_academy/services/api/exams.dart';
+import 'package:vector_academy/utils/storages/storages.dart';
+import 'package:vector_academy/utils/device/device.dart';
+import 'package:vector_academy/utils/utils.dart';
+
+enum LeaderboardType { competition, exam }
+
+class LeaderboardController extends GetxController {
+  final LeaderboardService _leaderboardService = LeaderboardService();
+  final ExamService _examService = ExamService();
+
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
+
+  bool _isRefreshing = false;
+
+  String? _error;
+  String? get error => _error;
+
+  LeaderboardType _selectedType = LeaderboardType.competition;
+  LeaderboardType get selectedType => _selectedType;
+
+  List<LeaderboardEntry> _leaderboardEntries = [];
+  List<LeaderboardEntry> get leaderboardEntries => _leaderboardEntries;
+
+  List<Map<String, dynamic>> _competitions = [];
+  List<Map<String, dynamic>> get competitions => _competitions;
+
+  List<Exam> _exams = [];
+  List<Exam> get exams => _exams;
+
+  int? _selectedCompetitionId;
+  int? get selectedCompetitionId => _selectedCompetitionId;
+
+  int? _selectedExamId;
+  int? get selectedExamId => _selectedExamId;
+
+  User? _user;
+
+  int get tabIndex => _selectedType == LeaderboardType.competition ? 0 : 1;
+
+  @override
+  void onInit() async {
+    super.onInit();
+    _user = await HiveUserStorage().getUser();
+    await loadCompetitions();
+    await loadExams();
+    HiveUserStorage().listen((event) {
+      _user = event;
+      loadCompetitions();
+      loadExams();
+    }, 'user');
+  }
+
+  void onTabChanged(int index) {
+    final newType = index == 0
+        ? LeaderboardType.competition
+        : LeaderboardType.exam;
+
+    // Only update if the type actually changed to avoid unnecessary updates
+    if (_selectedType != newType) {
+      setLeaderboardType(newType);
+    }
+  }
+
+  bool _isAutoSelecting = false;
+
+  Future<void> loadCompetitions() async {
+    try {
+      final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
+      _competitions = await _leaderboardService.getAvailableCompetitions(
+        device.id,
+      );
+
+      // Auto-select first competition if none selected and competitions available
+      // Only do this once to prevent loops
+      if (!_isAutoSelecting &&
+          _selectedCompetitionId == null &&
+          _competitions.isNotEmpty &&
+          _selectedType == LeaderboardType.competition) {
+        _isAutoSelecting = true;
+        _selectedCompetitionId = _competitions.first['id'] as int;
+        await loadLeaderboard();
+        _isAutoSelecting = false;
+      }
+
+      update();
+    } catch (e) {
+      logger.e('Failed to load competitions: $e');
+      _competitions = [];
+      _isAutoSelecting = false;
+      update();
+    }
+  }
+
+  Future<void> loadExams() async {
+    try {
+      final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
+      final grade = _user?.grade;
+      _exams = await _examService.getAvailableExams(
+        device.id,
+        gradeId: grade?.id,
+      );
+
+      // Auto-select first exam if none selected and exams available
+      // Only do this once to prevent loops
+      if (!_isAutoSelecting &&
+          _selectedExamId == null &&
+          _exams.isNotEmpty &&
+          _selectedType == LeaderboardType.exam) {
+        _isAutoSelecting = true;
+        _selectedExamId = _exams.first.id;
+        await loadLeaderboard();
+        _isAutoSelecting = false;
+      }
+
+      update();
+    } catch (e) {
+      logger.e('Failed to load exams: $e');
+      _exams = [];
+      _isAutoSelecting = false;
+      update();
+    }
+  }
+
+  void setLeaderboardType(LeaderboardType type) {
+    if (_selectedType == type) return; // No change needed
+
+    _selectedType = type;
+    _selectedCompetitionId = null;
+    _selectedExamId = null;
+    _leaderboardEntries = [];
+    _error = null;
+    _isAutoSelecting = false; // Reset flag to allow auto-selection for new type
+    update();
+  }
+
+  void selectCompetition(int? competitionId) {
+    _selectedCompetitionId = competitionId;
+    _selectedExamId = null;
+    _leaderboardEntries = [];
+    _error = null;
+    update();
+    if (competitionId != null) {
+      loadLeaderboard();
+    }
+  }
+
+  void selectExam(int? examId) {
+    _selectedExamId = examId;
+    _selectedCompetitionId = null;
+    _leaderboardEntries = [];
+    _error = null;
+    update();
+    if (examId != null) {
+      loadLeaderboard();
+    }
+  }
+
+  Future<void> loadLeaderboard() async {
+    if (_selectedType == LeaderboardType.competition &&
+        _selectedCompetitionId == null) {
+      return;
+    }
+    if (_selectedType == LeaderboardType.exam && _selectedExamId == null) {
+      return;
+    }
+
+    // Prevent multiple simultaneous loads
+    if (_isLoading || _isRefreshing) {
+      logger.w('loadLeaderboard: Already loading, skipping');
+      return;
+    }
+
+    _isLoading = true;
+    _error = null;
+    update();
+
+    try {
+      final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
+
+      if (_selectedType == LeaderboardType.competition) {
+        _leaderboardEntries = await _leaderboardService
+            .getCompetitionLeaderboard(device.id, _selectedCompetitionId!);
+      } else {
+        _leaderboardEntries = await _leaderboardService.getExamLeaderboard(
+          device.id,
+          _selectedExamId!,
+        );
+      }
+    } catch (e) {
+      logger.e('Failed to load leaderboard: $e');
+      _error = e.toString();
+      _leaderboardEntries = [];
+    } finally {
+      _isLoading = false;
+      _isRefreshing = false;
+      update();
+    }
+  }
+
+  Future<void> refreshLeaderboard() async {
+    // Prevent multiple simultaneous refreshes
+    if (_isRefreshing || _isLoading) {
+      logger.w('refresh: Already refreshing/loading, skipping');
+      return;
+    }
+
+    _isRefreshing = true;
+    try {
+      await loadLeaderboard();
+    } finally {
+      // loadLeaderboard will reset _isRefreshing, but ensure it's reset here too
+      if (_isRefreshing) {
+        _isRefreshing = false;
+      }
+    }
+  }
+}
