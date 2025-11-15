@@ -30,7 +30,7 @@ class HomeDashboard extends StatelessWidget {
             children: [
               _buildTopBar(context, controller),
 
-              _buildPromotionalBanner(context),
+              _buildPromotionalBanner(context, controller),
 
               Expanded(child: _buildSubjectSelection(context, controller)),
             ],
@@ -106,7 +106,10 @@ class HomeDashboard extends StatelessWidget {
     );
   }
 
-  Widget _buildPromotionalBanner(BuildContext context) {
+  Widget _buildPromotionalBanner(
+    BuildContext context,
+    HomeDashboardController controller,
+  ) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       padding: EdgeInsets.all(24),
@@ -125,7 +128,7 @@ class HomeDashboard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Ethio Entrance Tricks!',
+                  controller.appHeader?.text ?? 'Ethio Entrance Tricks!',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 24,
@@ -134,7 +137,7 @@ class HomeDashboard extends StatelessWidget {
                 ),
                 SizedBox(height: 8),
                 Text(
-                  'For HighSchool Class',
+                  controller.appHeader?.text ?? 'For HighSchool Class',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.9),
                     fontSize: 16,
@@ -162,7 +165,10 @@ class HomeDashboard extends StatelessWidget {
                         ),
                         onPressed: () async {
                           if (!await launchUrl(
-                            Uri.parse('https://t.me/entrance_tricks'),
+                            Uri.parse(
+                              controller.appHeader?.link ??
+                                  'https://t.me/entrance_tricks',
+                            ),
                           )) {}
                         },
                         child: Text(
@@ -187,7 +193,7 @@ class HomeDashboard extends StatelessWidget {
               color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Icon(Icons.person, size: 40, color: Colors.white),
+            child: Icon(Icons.telegram, size: 40, color: Colors.white),
           ),
         ],
       ),

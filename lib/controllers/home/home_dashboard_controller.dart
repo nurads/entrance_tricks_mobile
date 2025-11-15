@@ -8,6 +8,8 @@ import 'package:vector_academy/services/services.dart';
 import 'package:vector_academy/utils/utils.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:vector_academy/utils/device/device.dart';
+import 'package:vector_academy/utils/storages/app_header.dart';
+import 'package:vector_academy/services/api/app_header_text.dart';
 
 class HomeDashboardController extends GetxController {
   bool _isLoading = true;
@@ -17,6 +19,9 @@ class HomeDashboardController extends GetxController {
 
   List<Subject> _subjects = [];
   List<Subject> get subjects => _subjects;
+  AppHeaderText? _appHeader;
+  AppHeaderText? get appHeader => _appHeader;
+
   User? _user;
 
   @override
@@ -25,6 +30,7 @@ class HomeDashboardController extends GetxController {
 
     _user = await HiveUserStorage().getUser();
     loadSubjects();
+    loadAppHeader();
 
     InternetConnection().onStatusChange.listen((event) {
       logger.i('Internet status changed: $event');
@@ -32,12 +38,31 @@ class HomeDashboardController extends GetxController {
         loadSubjects();
       }
     });
+    HiveAppHeaderStorage().listen((event) {
+      _appHeader = event;
+      update();
+    }, 'current_header_text');
 
     HiveUserStorage().listen((event) {
       _user = event;
       loadSubjects();
       update();
     }, 'user');
+  }
+
+  void loadAppHeader() async {
+    _appHeader = await HiveAppHeaderStorage().getCurrentHeaderText();
+    update();
+    try {
+      final gradeId = _user?.grade.id;
+      final appHeaderTexts = await AppHeaderTextService().getAppHeaderTexts(
+        gradeId ?? 0,
+      );
+      _appHeader = appHeaderTexts.first;
+      await HiveAppHeaderStorage().setCurrentHeaderText(_appHeader!);
+    } catch (e) {
+      logger.e(e);
+    }
   }
 
   Future<void> loadSubjects() async {
