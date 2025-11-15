@@ -5,6 +5,7 @@ import "package:vector_academy/models/models.dart";
 import "package:vector_academy/utils/utils.dart";
 import "package:vector_academy/services/services.dart";
 import 'package:vector_academy/views/views.dart';
+import 'package:vector_academy/views/common/profile_page.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -646,10 +647,10 @@ class HomeDashboard extends StatelessWidget {
                     title: 'Profile',
                     subtitle: 'Account & Settings',
                     onTap: () {
-                      Get.find<MainNavigationController>().changeIndex(3);
+                      Navigator.of(context).pop(); // Close drawer
+                      Get.to(() => ProfilePage());
                     },
-                    isSelected:
-                        Get.find<MainNavigationController>().currentIndex == 3,
+                    isSelected: false,
                   ),
 
                   SizedBox(height: 20),

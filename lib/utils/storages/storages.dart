@@ -5,3 +5,4 @@ export 'base.dart';
 export 'misc.dart';
 export 'note.dart';
 export 'video.dart';
+export 'study_plan.dart';

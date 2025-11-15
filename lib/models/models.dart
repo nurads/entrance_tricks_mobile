@@ -16,3 +16,4 @@ export 'notification.dart';
 export "faq.dart";
 export 'leaderboard_entry.dart';
 export 'app_header_text.dart';
+export 'study_plan.dart';

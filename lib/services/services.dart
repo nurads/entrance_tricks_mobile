@@ -13,4 +13,6 @@ export 'api/video.dart';
 export "api/faq.dart";
 export 'api/notification.dart';
 export 'api/leaderboard.dart';
+export 'api/study_planner.dart';
 export 'deep_link_service.dart';
+export 'notification_service.dart';

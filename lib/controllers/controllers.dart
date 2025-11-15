@@ -18,3 +18,5 @@ export 'leaderboard/leaderboard_controller.dart';
 export "on_boarding/login_controller.dart";
 export "on_boarding/register_controller.dart";
 export "on_boarding/verify_phone_controller.dart";
+export 'study_planner/study_planner_controller.dart';
+export 'study_planner/add_plan_controller.dart';

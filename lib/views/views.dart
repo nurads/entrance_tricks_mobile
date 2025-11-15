@@ -24,6 +24,8 @@ export 'downloads/downloads_page.dart';
 export 'support/support_page.dart';
 export 'about/about_page.dart';
 export 'faq/faq_page.dart';
+export 'study_planner/study_planner_page.dart';
+export 'study_planner/add_plan_page.dart';
 
 enum VIEWS {
   home('/home'),

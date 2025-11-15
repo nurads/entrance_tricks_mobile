@@ -40,6 +40,8 @@ class MyApp extends StatelessWidget {
             Get.put(ExamController(), permanent: true);
             Get.put(NewsController(), permanent: true);
             Get.put(DownloadsController(), permanent: true);
+            Get.put(StudyPlannerService(), permanent: true);
+            Get.put(StudyPlannerController(), permanent: true);
           }),
         ),
         GetPage(
@@ -80,6 +82,13 @@ class MyApp extends StatelessWidget {
           page: () => FAQPage(),
           binding: BindingsBuilder(() {
             Get.put(FAQController());
+          }),
+        ),
+        GetPage(
+          name: '/add-plan',
+          page: () => AddPlanPage(),
+          binding: BindingsBuilder(() {
+            Get.lazyPut(() => AddPlanController());
           }),
         ),
       ],

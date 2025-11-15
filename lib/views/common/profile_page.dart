@@ -37,7 +37,11 @@ class ProfilePage extends StatelessWidget {
       pinned: true,
       backgroundColor: Colors.blue[600],
       elevation: 0,
-      automaticallyImplyLeading: false, // Add this line
+      automaticallyImplyLeading: true,
+      leading: IconButton(
+        icon: Icon(Icons.arrow_back, color: Colors.white),
+        onPressed: () => Get.back(),
+      ),
       actions: [
         IconButton(
           icon: Icon(Icons.edit, color: Colors.white),
