@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'Vector Academy',
+      title: 'Ethio Entrance, Freshman Tricks',
       theme: lightTheme(context),
       debugShowCheckedModeBanner: true, // Remove debug banner
       getPages: [

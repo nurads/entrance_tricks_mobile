@@ -101,10 +101,10 @@ class LeaderboardController extends GetxController {
     try {
       final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
       final grade = _user?.grade;
-      _exams = await _examService.getAvailableExams(
+      _exams = (await _examService.getAvailableExams(
         device.id,
         gradeId: grade?.id,
-      );
+      )).where((e) => e.modeType == 'exam_mode').toList();
 
       // Auto-select first exam if none selected and exams available
       // Only do this once to prevent loops

@@ -13,12 +13,17 @@ class AppHeaderText {
   final String? gradientEnd;
   @JsonKey(name: 'telegram_channel_url')
   final String? link;
-
+  @JsonKey(name: 'tag_line_text')
+  final String? tagLineText;
+  @JsonKey(name: 'show_tag_line_text')
+  final bool? showTagLineText;
   AppHeaderText({
     required this.text,
     this.gradientStart,
     this.gradientEnd,
     this.link,
+    this.tagLineText,
+    this.showTagLineText,
   });
 
   factory AppHeaderText.fromJson(Map<String, dynamic> json) =>

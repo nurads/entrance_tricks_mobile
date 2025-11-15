@@ -136,52 +136,14 @@ class HomeDashboard extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 8),
-                Text(
-                  controller.appHeader?.text ?? 'For HighSchool Class',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.9),
-                    fontSize: 16,
-                  ),
-                ),
-                SizedBox(height: 16),
-                GestureDetector(
-                  onTap: () {},
-                  child: MouseRegion(
-                    cursor: SystemMouseCursors.click,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade300,
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        onPressed: () async {
-                          if (!await launchUrl(
-                            Uri.parse(
-                              controller.appHeader?.link ??
-                                  'https://t.me/entrance_tricks',
-                            ),
-                          )) {}
-                        },
-                        child: Text(
-                          'Contact us',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
+                if (controller.appHeader?.showTagLineText == true)
+                  Text(
+                    controller.appHeader?.tagLineText ?? 'For HighSchool Class',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.9),
+                      fontSize: 16,
                     ),
                   ),
-                ),
               ],
             ),
           ),
@@ -193,7 +155,17 @@ class HomeDashboard extends StatelessWidget {
               color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Icon(Icons.telegram, size: 40, color: Colors.white),
+            child: IconButton(
+              onPressed: () async {
+                if (!await launchUrl(
+                  Uri.parse(
+                    controller.appHeader?.link ??
+                        'https://t.me/entrance_tricks',
+                  ),
+                )) {}
+              },
+              icon: Icon(Icons.telegram, size: 40, color: Colors.white),
+            ),
           ),
         ],
       ),

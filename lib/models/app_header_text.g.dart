@@ -12,6 +12,8 @@ AppHeaderText _$AppHeaderTextFromJson(Map<String, dynamic> json) =>
       gradientStart: json['gradient_start_color'] as String?,
       gradientEnd: json['gradient_end_color'] as String?,
       link: json['telegram_channel_url'] as String?,
+      tagLineText: json['tag_line_text'] as String?,
+      showTagLineText: json['show_tag_line_text'] as bool?,
     );
 
 Map<String, dynamic> _$AppHeaderTextToJson(AppHeaderText instance) =>
@@ -20,4 +22,6 @@ Map<String, dynamic> _$AppHeaderTextToJson(AppHeaderText instance) =>
       'gradient_start_color': instance.gradientStart,
       'gradient_end_color': instance.gradientEnd,
       'telegram_channel_url': instance.link,
+      'tag_line_text': instance.tagLineText,
+      'show_tag_line_text': instance.showTagLineText,
     };
