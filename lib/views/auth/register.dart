@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:get/get.dart';
 import 'package:vector_academy/controllers/on_boarding/register_controller.dart';
 import 'package:vector_academy/models/models.dart';
+import 'package:vector_academy/components/components.dart';
 
 class Register extends StatelessWidget {
   const Register({super.key});
@@ -27,7 +29,6 @@ class Register extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(height: 10),
                 Image.asset('assets/images/logo.png'),
                 Text('Welcome', style: Theme.of(context).textTheme.titleLarge),
                 Text(
@@ -222,6 +223,54 @@ class Register extends StatelessWidget {
                     ),
                   ),
                 ),
+                SizedBox(height: 20),
+                // Terms and Privacy Links
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                      children: [
+                        TextSpan(
+                          text: 'By creating an account, you agree to our ',
+                        ),
+                        TextSpan(
+                          text: 'Terms & Conditions',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                                decoration: TextDecoration.underline,
+                              ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () => TermsAndConditionsDialog.show(),
+                        ),
+                        TextSpan(
+                          text: ' and our ',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withValues(alpha: 0.5),
+                              ),
+                        ),
+                        TextSpan(
+                          text: 'Privacy Policy',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                                decoration: TextDecoration.underline,
+                              ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () => PrivacyPolicyDialog.show(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20),
               ],
             ),
           ),
