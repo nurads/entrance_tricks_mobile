@@ -36,6 +36,7 @@ class HomeDashboardController extends GetxController {
       logger.i('Internet status changed: $event');
       if (event == InternetStatus.connected) {
         loadSubjects();
+        loadAppHeader();
       }
     });
     HiveAppHeaderStorage().listen((event) {
@@ -46,6 +47,7 @@ class HomeDashboardController extends GetxController {
     HiveUserStorage().listen((event) {
       _user = event;
       loadSubjects();
+      loadAppHeader();
       update();
     }, 'user');
   }

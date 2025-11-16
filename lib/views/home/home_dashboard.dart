@@ -117,7 +117,28 @@ class HomeDashboard extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Colors.blue, Colors.blue.shade700],
+          colors: [
+            controller.appHeader?.gradientStart != null
+                ? Color(
+                    int.parse(
+                      (controller.appHeader!.gradientStart!).replaceAll(
+                        '#',
+                        '0xFF',
+                      ),
+                    ),
+                  )
+                : Colors.blue,
+            controller.appHeader?.gradientEnd != null
+                ? Color(
+                    int.parse(
+                      (controller.appHeader!.gradientEnd!).replaceAll(
+                        '#',
+                        '0xFF',
+                      ),
+                    ),
+                  )
+                : Colors.blue.shade700,
+          ],
         ),
         borderRadius: BorderRadius.circular(20),
       ),
@@ -130,7 +151,16 @@ class HomeDashboard extends StatelessWidget {
                 Text(
                   controller.appHeader?.text ?? 'Ethio Entrance Tricks!',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: controller.appHeader?.textColor != null
+                        ? Color(
+                            int.parse(
+                              (controller.appHeader!.textColor!).replaceAll(
+                                '#',
+                                '0xFF',
+                              ),
+                            ),
+                          )
+                        : Colors.white,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
@@ -140,7 +170,14 @@ class HomeDashboard extends StatelessWidget {
                   Text(
                     controller.appHeader?.tagLineText ?? 'For HighSchool Class',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.9),
+                      color: controller.appHeader?.tagLineTextColor != null
+                          ? Color(
+                              int.parse(
+                                (controller.appHeader!.tagLineTextColor!)
+                                    .replaceAll('#', '0xFF'),
+                              ),
+                            )
+                          : Colors.white.withValues(alpha: 0.9),
                       fontSize: 16,
                     ),
                   ),

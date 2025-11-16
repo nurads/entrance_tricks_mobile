@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:vector_academy/models/models.dart';
 import 'package:vector_academy/utils/utils.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'dart:io' show Platform;
 
 /// Local Notification Service for handling local notifications using awesome_notifications
 class LocalNotificationService extends GetxService {
@@ -55,11 +57,49 @@ class LocalNotificationService extends GetxService {
         return false;
       }
 
+      // Request SCHEDULE_EXACT_ALARM permission for Android 14+ (API 34+)
+      // This is required for precise alarm scheduling (study plan reminders)
+      if (Platform.isAndroid) {
+        await _requestExactAlarmPermission();
+      }
+
       logger.i('Notification permissions granted: $isAllowed');
       return isAllowed;
     } catch (e) {
       logger.e('Error requesting notification permissions: $e');
       return false;
+    }
+  }
+
+  /// Request SCHEDULE_EXACT_ALARM permission for Android 14+
+  /// This ensures precise scheduling of study plan reminders
+  Future<void> _requestExactAlarmPermission() async {
+    try {
+      final status = await Permission.scheduleExactAlarm.status;
+      
+      if (status.isDenied) {
+        // On Android 14+, this will open app settings where user can grant the permission
+        final result = await Permission.scheduleExactAlarm.request();
+        
+        if (result.isGranted) {
+          logger.i('Exact alarm permission granted');
+        } else if (result.isDenied) {
+          logger.w('Exact alarm permission denied');
+          // Show user-friendly message
+          Get.snackbar(
+            'Permission Required',
+            'For accurate study plan reminders, please enable "Alarms & reminders" permission in app settings.',
+            duration: const Duration(seconds: 5),
+            backgroundColor: Colors.orange,
+            colorText: Colors.white,
+            snackPosition: SnackPosition.BOTTOM,
+          );
+        }
+      } else if (status.isGranted) {
+        logger.i('Exact alarm permission already granted');
+      }
+    } catch (e) {
+      logger.e('Error requesting exact alarm permission: $e');
     }
   }
 

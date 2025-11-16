@@ -5,20 +5,15 @@ class PrivacyPolicyDialog extends StatelessWidget {
   const PrivacyPolicyDialog({super.key});
 
   static void show() {
-    Get.dialog(
-      const PrivacyPolicyDialog(),
-      barrierDismissible: true,
-    );
+    Get.dialog(const PrivacyPolicyDialog(), barrierDismissible: true);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         constraints: BoxConstraints(
           maxHeight: MediaQuery.of(context).size.height * 0.8,
@@ -38,10 +33,7 @@ class PrivacyPolicyDialog extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.privacy_tip,
-                    color: theme.colorScheme.onPrimary,
-                  ),
+                  Icon(Icons.privacy_tip, color: theme.colorScheme.onPrimary),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -53,10 +45,7 @@ class PrivacyPolicyDialog extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    icon: Icon(
-                      Icons.close,
-                      color: theme.colorScheme.onPrimary,
-                    ),
+                    icon: Icon(Icons.close, color: theme.colorScheme.onPrimary),
                     onPressed: () => Get.back(),
                   ),
                 ],
@@ -72,55 +61,111 @@ class PrivacyPolicyDialog extends StatelessWidget {
                     _buildSection(
                       context,
                       '1. Information We Collect',
-                      'We collect information that you provide directly to us, such as when you create an account, update your profile, or use our services. This may include your name, phone number, email address, and academic information.',
+                      'We collect the following information:\n\n'
+                          '• Personal Information: Name, phone number, grade/academic level\n'
+                          '• Device Information: Device ID, brand, model, manufacturer, operating system\n'
+                          '• Profile Data: Profile pictures (if you choose to upload)\n'
+                          '• Usage Data: Study plans, exam progress, downloaded content\n'
+                          '• Payment Information: Payment receipts and transaction records (if applicable)',
                     ),
                     const SizedBox(height: 16),
                     _buildSection(
                       context,
                       '2. How We Use Your Information',
-                      'We use the information we collect to provide, maintain, and improve our services, process transactions, send you notifications, and personalize your experience.',
+                      'We use your information to:\n\n'
+                          '• Provide and maintain Ethio Entrance, Freshman Tricks services\n'
+                          '• Authenticate your account and prevent fraud\n'
+                          '• Process your subscription payments\n'
+                          '• Send study plan reminders and notifications\n'
+                          '• Personalize your learning experience\n'
+                          '• Store your downloaded study materials locally\n'
+                          '• Improve our app and develop new features',
                     ),
                     const SizedBox(height: 16),
                     _buildSection(
                       context,
-                      '3. Information Sharing',
-                      'We do not sell, trade, or rent your personal information to third parties. We may share your information only with your consent or as required by law.',
+                      '3. Information Sharing and Data Storage',
+                      'Your Privacy is Our Priority:\n\n'
+                          '• We DO NOT sell your personal information to third parties\n'
+                          '• We DO NOT share your data with advertisers\n'
+                          '• Device information is used solely for account security and multi-device management\n'
+                          '• Your data is transmitted securely to our servers via HTTPS\n'
+                          '• Study materials (PDFs, videos) are stored locally on your device\n'
+                          '• We may disclose information only when required by law',
                     ),
                     const SizedBox(height: 16),
                     _buildSection(
                       context,
                       '4. Data Security',
-                      'We implement appropriate security measures to protect your personal information. However, no method of transmission over the internet is 100% secure, and we cannot guarantee absolute security.',
+                      'Security Measures We Implement:\n\n'
+                          '• HTTPS encryption for all data transmission\n'
+                          '• Secure password storage with industry-standard hashing\n'
+                          '• Device verification to prevent unauthorized access\n'
+                          '• Regular security updates and monitoring\n\n'
+                          'Please note: No internet transmission is 100% secure. We recommend using a strong password and keeping your device secure.',
                     ),
                     const SizedBox(height: 16),
                     _buildSection(
                       context,
-                      '5. Your Rights',
-                      'You have the right to access, update, or delete your personal information at any time through your account settings or by contacting us directly.',
+                      '5. Your Rights and Data Control',
+                      'You Have Full Control:\n\n'
+                          '• Access: View your personal data at any time\n'
+                          '• Update: Edit your profile, phone number, and grade\n'
+                          '• Delete: Permanently delete your account and associated data\n'
+                          '• Download: Access downloaded study materials offline\n'
+                          '• Opt-out: Disable notifications in app settings\n\n'
+                          'To delete your account, go to Settings > Profile > Delete Account.',
                     ),
                     const SizedBox(height: 16),
                     _buildSection(
                       context,
-                      '6. Cookies and Tracking',
-                      'We may use cookies and similar tracking technologies to track activity on our application and hold certain information to improve your experience.',
+                      '6. Local Data Storage',
+                      'App-Specific Storage:\n\n'
+                          '• We store downloaded PDFs and videos locally on your device in app-specific directories\n'
+                          '• Study plans and progress are cached locally for offline access\n'
+                          '• Authentication tokens are stored securely using encrypted local storage\n'
+                          '• No browser cookies or third-party tracking technologies are used\n'
+                          '• Clearing app data will remove all locally stored content',
                     ),
                     const SizedBox(height: 16),
                     _buildSection(
                       context,
                       '7. Children\'s Privacy',
-                      'Our services are not intended for children under the age of 13. We do not knowingly collect personal information from children under 13.',
+                      'Age Requirements:\n\n'
+                          '• Ethio Entrance, Freshman Tricks is an educational platform designed for students in Grades 9-12\n'
+                          '• Our services are intended for students aged 13 and above\n'
+                          '• We do not knowingly collect information from children under 13\n'
+                          '• Parents/guardians should supervise usage for younger students\n'
+                          '• If we discover we have collected data from a child under 13, we will delete it immediately',
                     ),
                     const SizedBox(height: 16),
                     _buildSection(
                       context,
-                      '8. Changes to This Policy',
-                      'We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last Updated" date.',
+                      '8. Notifications and Permissions',
+                      'App Permissions Explained:\n\n'
+                          '• Notifications: For study plan reminders and important updates\n'
+                          '• Alarms & Reminders: To send precise scheduled notifications for your study plans\n'
+                          '• Camera/Photos: Only when you choose to upload a profile picture (optional)\n'
+                          '• Storage: For downloading and storing study materials locally\n\n'
+                          'All permissions are requested only when needed and can be revoked in device settings.',
                     ),
                     const SizedBox(height: 16),
                     _buildSection(
                       context,
-                      '9. Contact Us',
-                      'If you have any questions about this Privacy Policy, please contact us through the support section of the application.',
+                      '9. Changes to This Policy',
+                      'We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy in the app and on our website. Continued use of the app after changes constitutes acceptance of the updated policy.\n\n'
+                          'Last Updated: November 2025',
+                    ),
+                    const SizedBox(height: 16),
+                    _buildSection(
+                      context,
+                      '10. Contact Us',
+                      'Questions or Concerns?\n\n'
+                          'If you have any questions about this Privacy Policy or how we handle your data, please contact us:\n\n'
+                          '• Through the support section in the app\n'
+                          '• Via our website: entrancetricks.com\n'
+                          '• Email: support@entrancetricks.com\n\n'
+                          'We typically respond within 48 hours.',
                     ),
                   ],
                 ),
@@ -169,14 +214,8 @@ class PrivacyPolicyDialog extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Text(
-          content,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            height: 1.5,
-          ),
-        ),
+        Text(content, style: theme.textTheme.bodyMedium?.copyWith(height: 1.5)),
       ],
     );
   }
 }
-

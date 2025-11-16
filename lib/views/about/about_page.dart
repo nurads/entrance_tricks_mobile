@@ -202,7 +202,7 @@ class _AboutPageState extends State<AboutPage> {
           const SizedBox(height: 20),
 
           const Text(
-            'Vector Academy',
+            'Ethio Entrance, Freshman Tricks',
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w800,
@@ -224,7 +224,7 @@ class _AboutPageState extends State<AboutPage> {
           const SizedBox(height: 16),
 
           Text(
-            'Vector Academy is a comprehensive educational platform designed to help students excel in their entrance examinations. We provide high-quality study materials, practice tests, and expert guidance to ensure your success.',
+            'Ethio Entrance, Freshman Tricks is a comprehensive educational platform designed to help students excel in their entrance examinations. We provide high-quality study materials, practice tests, and expert guidance to ensure your success.',
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey.shade700,
@@ -591,7 +591,7 @@ class _AboutPageState extends State<AboutPage> {
           const SizedBox(height: 16),
 
           Text(
-            '© ${DateTime.now().year} Vector Academy. All rights reserved.',
+            '© ${DateTime.now().year} Ethio Entrance, Freshman Tricks. All rights reserved.',
             style: TextStyle(
               fontSize: 12,
               color: Colors.grey.withValues(alpha: 0.8),

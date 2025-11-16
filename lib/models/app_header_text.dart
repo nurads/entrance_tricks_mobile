@@ -17,6 +17,10 @@ class AppHeaderText {
   final String? tagLineText;
   @JsonKey(name: 'show_tag_line_text')
   final bool? showTagLineText;
+  @JsonKey(name: 'text_color')
+  final String? textColor;
+  @JsonKey(name: 'tag_line_text_color')
+  final String? tagLineTextColor;
   AppHeaderText({
     required this.text,
     this.gradientStart,
@@ -24,6 +28,8 @@ class AppHeaderText {
     this.link,
     this.tagLineText,
     this.showTagLineText,
+    this.textColor,
+    this.tagLineTextColor,
   });
 
   factory AppHeaderText.fromJson(Map<String, dynamic> json) =>

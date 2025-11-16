@@ -200,6 +200,64 @@ class Register extends StatelessWidget {
                     textInputAction: TextInputAction.done,
                   ),
                 ),
+                SizedBox(height: 10),
+                // Privacy Policy Consent Checkbox
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Checkbox(
+                        value: controller.hasAcceptedPrivacyPolicy,
+                        onChanged: controller.togglePrivacyPolicyAcceptance,
+                        activeColor: Theme.of(context).colorScheme.primary,
+                      ),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => controller.togglePrivacyPolicyAcceptance(
+                            !controller.hasAcceptedPrivacyPolicy,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 12),
+                            child: RichText(
+                              text: TextSpan(
+                                style: Theme.of(context).textTheme.bodySmall,
+                                children: [
+                                  TextSpan(
+                                    text: 'I have read and agree to the ',
+                                  ),
+                                  TextSpan(
+                                    text: 'Privacy Policy',
+                                    style: TextStyle(
+                                      color: Theme.of(context).colorScheme.primary,
+                                      decoration: TextDecoration.underline,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () => PrivacyPolicyDialog.show(),
+                                  ),
+                                  TextSpan(
+                                    text: ' and ',
+                                  ),
+                                  TextSpan(
+                                    text: 'Terms & Conditions',
+                                    style: TextStyle(
+                                      color: Theme.of(context).colorScheme.primary,
+                                      decoration: TextDecoration.underline,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () => TermsAndConditionsDialog.show(),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 SizedBox(height: 20),
                 SizedBox(
                   height: 50,

@@ -7,11 +7,10 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" /> 
 
     <application
-        android:label="Vector Academy"
+        android:label="Ethio Entrance, Freshman Tricks"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
-        android:usesCleartextTraffic="true"
-        android:requestLegacyExternalStorage="true">
+        android:usesCleartextTraffic="false">
         <activity
             android:name=".MainActivity"
             android:exported="true"

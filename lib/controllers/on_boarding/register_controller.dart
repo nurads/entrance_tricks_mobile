@@ -30,6 +30,9 @@ class RegisterController extends GetxController {
   bool _allowStreamSelection = false;
   bool get allowStreamSelection => _allowStreamSelection;
 
+  bool _hasAcceptedPrivacyPolicy = false;
+  bool get hasAcceptedPrivacyPolicy => _hasAcceptedPrivacyPolicy;
+
   // Grade and Stream properties
 
   String? _selectedStream;
@@ -79,7 +82,24 @@ class RegisterController extends GetxController {
     update();
   }
 
+  void togglePrivacyPolicyAcceptance(bool? value) {
+    _hasAcceptedPrivacyPolicy = value ?? false;
+    update();
+  }
+
   void register() async {
+    if (!_hasAcceptedPrivacyPolicy) {
+      Get.snackbar(
+        'Privacy Policy Required',
+        'Please accept the Privacy Policy and Terms & Conditions to continue',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+      );
+      return;
+    }
+
     if (formKey.currentState!.validate()) {
       _setLoading(true);
 
