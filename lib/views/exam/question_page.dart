@@ -14,6 +14,7 @@ class QuestionPage extends StatelessWidget {
   final bool showTimer;
   final QuestionMode mode;
   final int examId;
+  final String examModeType;
 
   const QuestionPage({
     super.key,
@@ -25,6 +26,7 @@ class QuestionPage extends StatelessWidget {
     this.showTimer = true,
     this.mode = QuestionMode.exam,
     this.examId = 0,
+    this.examModeType = 'both',
   });
 
   @override
@@ -42,6 +44,7 @@ class QuestionPage extends StatelessWidget {
       showTimer: showTimer,
       mode: mode,
       examId: examId,
+      examModeType: examModeType,
     );
 
     return GetBuilder<QuestionPageController>(
@@ -764,36 +767,45 @@ class QuestionPage extends StatelessWidget {
 
             // Next/Submit button
             Expanded(
-              child: ElevatedButton.icon(
-                onPressed:
-                    (controller.userAnswers[controller
-                            .currentQuestionIndex
-                            .value] !=
-                        null)
-                    ? (controller.currentQuestionIndex.value ==
-                              controller.questions.length - 1
+              child: Obx(() {
+                final isLastQuestion = controller.currentQuestionIndex.value ==
+                    controller.questions.length - 1;
+                final canProceed = controller.canMoveToNext;
+                final isSubmitting = controller.isSubmitting.value;
+                
+                return ElevatedButton.icon(
+                  onPressed: canProceed && !isSubmitting
+                      ? (isLastQuestion
                           ? controller.submitQuiz
                           : controller.nextQuestion)
-                    : null,
-                icon: Icon(
-                  controller.currentQuestionIndex.value ==
-                          controller.questions.length - 1
-                      ? Icons.check
-                      : Icons.arrow_forward,
-                ),
-                label: Text(
-                  controller.currentQuestionIndex.value ==
-                          controller.questions.length - 1
-                      ? 'Submit'
-                      : 'Next',
-                ),
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                      : null,
+                  icon: isSubmitting
+                      ? SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              theme.colorScheme.onPrimary,
+                            ),
+                          ),
+                        )
+                      : Icon(
+                          isLastQuestion ? Icons.check : Icons.arrow_forward,
+                        ),
+                  label: Text(
+                    isSubmitting
+                        ? 'Submitting...'
+                        : (isLastQuestion ? 'Submit' : 'Next'),
                   ),
-                ),
-              ),
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                );
+              }),
             ),
           ],
         ),

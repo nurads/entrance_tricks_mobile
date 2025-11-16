@@ -50,8 +50,9 @@ class LocalNotificationService extends GetxService {
   /// Request notification permissions
   Future<bool> requestPermissions() async {
     try {
-      final isAllowed = await AwesomeNotifications().requestPermissionToSendNotifications();
-      
+      final isAllowed = await AwesomeNotifications()
+          .requestPermissionToSendNotifications();
+
       if (!isAllowed) {
         logger.w('Notification permission denied');
         return false;
@@ -76,11 +77,11 @@ class LocalNotificationService extends GetxService {
   Future<void> _requestExactAlarmPermission() async {
     try {
       final status = await Permission.scheduleExactAlarm.status;
-      
+
       if (status.isDenied) {
         // On Android 14+, this will open app settings where user can grant the permission
         final result = await Permission.scheduleExactAlarm.request();
-        
+
         if (result.isGranted) {
           logger.i('Exact alarm permission granted');
         } else if (result.isDenied) {
@@ -120,29 +121,37 @@ class LocalNotificationService extends GetxService {
       await cancelStudyPlanNotifications(plan.id);
 
       // If plan has no start date or end date, don't schedule
-      if (plan.startDate == null && plan.endDate == null && plan.dueDate == null) {
+      if (plan.startDate == null) {
         logger.d('Plan ${plan.id} has no date, skipping notification');
         return;
       }
 
-      // Use startDate if available, otherwise use endDate or dueDate
-      final notificationDate = plan.startDate ?? plan.endDate ?? plan.dueDate;
-      if (notificationDate == null) return;
-
-      // Don't schedule notifications for past dates
-      if (notificationDate.isBefore(DateTime.now())) {
-        logger.d('Plan ${plan.id} date is in the past, skipping notification');
-        return;
-      }
-
-      // Schedule 15 minutes before the study plan time
-      final notificationTime = notificationDate.subtract(const Duration(minutes: 15));
-
       if (plan.isRepeating && plan.repeatDays.isNotEmpty) {
-        // Schedule repeating notifications
-        await _scheduleRepeatingNotification(plan, notificationTime);
+        // For repeating schedules, use only the time from startDate
+        final startTime = plan.startDate;
+        if (startTime == null) {
+          logger.d('Plan ${plan.id} has no start time for repeating schedule');
+          return;
+        }
+        // Extract time only (hour and minute) and schedule repeating notifications
+        await _scheduleRepeatingNotification(plan, startTime);
       } else {
-        // Schedule one-time notification
+        // For one-time schedules, use the full date+time
+        final notificationDate = plan.dueDate ?? plan.startDate ?? plan.endDate;
+        if (notificationDate == null) return;
+
+        // Don't schedule notifications for past dates
+        if (notificationDate.isBefore(DateTime.now())) {
+          logger.d(
+            'Plan ${plan.id} date is in the past, skipping notification',
+          );
+          return;
+        }
+
+        // Schedule 15 minutes before the study plan time
+        final notificationTime = notificationDate.subtract(
+          const Duration(minutes: 15),
+        );
         await _scheduleOneTimeNotification(plan, notificationTime);
       }
 
@@ -162,7 +171,8 @@ class LocalNotificationService extends GetxService {
         id: plan.id,
         channelKey: channelKey,
         title: 'Study Plan Reminder',
-        body: '${plan.title}${plan.subject.isNotEmpty ? ' - ${plan.subject}' : ''}',
+        body:
+            '${plan.title}${plan.subject.isNotEmpty ? ' - ${plan.subject}' : ''}',
         notificationLayout: NotificationLayout.Default,
         category: NotificationCategory.Reminder,
         wakeUpScreen: true,
@@ -177,15 +187,27 @@ class LocalNotificationService extends GetxService {
   }
 
   /// Schedule repeating notifications based on repeatDays
+  /// Uses only the time portion (hour and minute) from baseTime
   Future<void> _scheduleRepeatingNotification(
     StudyPlan plan,
     DateTime baseTime,
   ) async {
+    // Extract only the time portion (subtract 15 minutes for notification reminder)
+    final notificationHour = plan.startDate!.hour;
+    final notificationMinute = plan.startDate!.minute;
+
+    int finalHour = notificationHour;
+    int finalMinute = notificationMinute;
+
     // For each repeat day, schedule a notification
     for (final dayOfWeek in plan.repeatDays) {
       // Calculate the next occurrence of this day
-      final nextDate = _getNextDateForDayOfWeek(dayOfWeek, baseTime);
-      
+      final nextDate = _getNextDateForDayOfWeek(
+        dayOfWeek,
+        finalHour,
+        finalMinute,
+      );
+
       if (nextDate == null) continue;
 
       // Create a unique ID for each day (plan.id * 10 + dayOfWeek)
@@ -196,7 +218,8 @@ class LocalNotificationService extends GetxService {
           id: notificationId,
           channelKey: channelKey,
           title: 'Study Plan Reminder',
-          body: '${plan.title}${plan.subject.isNotEmpty ? ' - ${plan.subject}' : ''}',
+          body:
+              '${plan.title}${plan.subject.isNotEmpty ? ' - ${plan.subject}' : ''}',
           notificationLayout: NotificationLayout.Default,
           category: NotificationCategory.Reminder,
           wakeUpScreen: true,
@@ -207,11 +230,11 @@ class LocalNotificationService extends GetxService {
           },
         ),
         schedule: NotificationCalendar(
-          year: nextDate.year,
-          month: nextDate.month,
-          day: nextDate.day,
-          hour: nextDate.hour,
-          minute: nextDate.minute,
+          year: null,
+          month: null,
+          day: null,
+          hour: finalHour,
+          minute: finalMinute,
           second: 0,
           millisecond: 0,
           repeats: true,
@@ -223,31 +246,21 @@ class LocalNotificationService extends GetxService {
     }
   }
 
-  /// Get the next date for a specific day of week
-  DateTime? _getNextDateForDayOfWeek(int dayOfWeek, DateTime baseTime) {
+  /// Get the next date for a specific day of week using only time (hour and minute)
+  DateTime? _getNextDateForDayOfWeek(int dayOfWeek, int hour, int minute) {
     final now = DateTime.now();
     final daysUntilNext = (dayOfWeek - now.weekday + 7) % 7;
-    
+
     // If today is the target day and time hasn't passed, use today
-    if (daysUntilNext == 0 && baseTime.hour * 60 + baseTime.minute > now.hour * 60 + now.minute) {
-      return DateTime(
-        now.year,
-        now.month,
-        now.day,
-        baseTime.hour,
-        baseTime.minute,
-      );
+    if (daysUntilNext == 0 && hour * 60 + minute > now.hour * 60 + now.minute) {
+      return DateTime(now.year, now.month, now.day, hour, minute);
     }
 
     // Otherwise, get the next occurrence
-    final nextDate = now.add(Duration(days: daysUntilNext == 0 ? 7 : daysUntilNext));
-    return DateTime(
-      nextDate.year,
-      nextDate.month,
-      nextDate.day,
-      baseTime.hour,
-      baseTime.minute,
+    final nextDate = now.add(
+      Duration(days: daysUntilNext == 0 ? 7 : daysUntilNext),
     );
+    return DateTime(nextDate.year, nextDate.month, nextDate.day, hour, minute);
   }
 
   /// Cancel all notifications for a study plan
@@ -319,4 +332,3 @@ class LocalNotificationService extends GetxService {
     logger.d('Notification dismissed: ${receivedAction.id}');
   }
 }
-

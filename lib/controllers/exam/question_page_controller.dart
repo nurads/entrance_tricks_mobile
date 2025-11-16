@@ -18,6 +18,8 @@ class QuestionPageController extends GetxController {
   final RxBool isCompleted = false.obs;
   final RxBool showAnswers = false.obs;
   final RxBool showSolution = false.obs;
+  final RxBool isSubmitting = false.obs; // Track submission status
+  final RxList<bool> submittedQuestions = <bool>[].obs; // Track which questions have been submitted
 
   // Timer
   Timer? _timer;
@@ -31,6 +33,7 @@ class QuestionPageController extends GetxController {
   late bool showTimer;
   late QuestionMode mode;
   late int examId;
+  late String examModeType; // Track exam mode type
   final HiveExamStorage _examStorage = HiveExamStorage();
   final ExamService _examService = ExamService();
 
@@ -43,6 +46,7 @@ class QuestionPageController extends GetxController {
     bool showTimer = true,
     QuestionMode mode = QuestionMode.exam,
     int examId = 0,
+    String examModeType = 'both',
   }) {
     this.title = title;
     this.initialTimeMinutes = initialTimeMinutes;
@@ -52,15 +56,18 @@ class QuestionPageController extends GetxController {
     this.showTimer = showTimer;
     this.mode = mode;
     this.examId = examId;
+    this.examModeType = examModeType;
 
     // Handle empty questions
     if (questions.isEmpty) {
       userAnswers.value = [];
       timeRemaining.value = 0;
+      submittedQuestions.value = [];
       return;
     }
 
     userAnswers.value = List.filled(questions.length, null);
+    submittedQuestions.value = List.filled(questions.length, false);
     timeRemaining.value = initialTimeMinutes * 60;
     _restoreProgressIfAny();
     if (showTimer) {
@@ -120,15 +127,39 @@ class QuestionPageController extends GetxController {
     userAnswers[currentQuestionIndex.value] = choiceId;
     update();
     _persistProgress();
+    
+    // For exam_mode type, automatically submit the answer
+    final modeType = examModeType.toLowerCase();
+    if (modeType == 'exam_mode' || modeType == 'exam mode') {
+      _submitCurrentAnswer();
+    }
+  }
+  
+  /// Submit current question's answer (for exam_mode type)
+  Future<void> _submitCurrentAnswer() async {
+    if (isSubmitting.value) return; // Prevent double submission
+    
+    isSubmitting.value = true;
+    update();
+    
+    try {
+      final success = await _submitAnswerToServer(currentQuestionIndex.value);
+      if (success) {
+        submittedQuestions[currentQuestionIndex.value] = true;
+      }
+    } finally {
+      isSubmitting.value = false;
+      update();
+    }
   }
 
-  Future<void> _submitAnswerToServer(int questionIndex) async {
+  Future<bool> _submitAnswerToServer(int questionIndex) async {
     if (examId == 0 ||
         questions.isEmpty ||
         questionIndex < 0 ||
         questionIndex >= questions.length) {
       logger.w('Cannot submit answer: invalid examId or questionIndex');
-      return;
+      return false;
     }
 
     final answer = userAnswers[questionIndex];
@@ -136,14 +167,14 @@ class QuestionPageController extends GetxController {
       logger.w(
         'Cannot submit answer: no answer selected for question $questionIndex',
       );
-      return; // Don't submit if no answer selected
+      return false; // Don't submit if no answer selected
     }
 
     try {
       final user = await HiveUserStorage().getUser();
       if (user == null) {
         logger.w('Cannot submit answer: user is null');
-        return;
+        return false;
       }
 
       final device = await UserDevice.getDeviceInfo(user.phoneNumber);
@@ -154,9 +185,18 @@ class QuestionPageController extends GetxController {
       );
       await _examService.submitAnswers(device.id, examId, question.id, answer);
       logger.i('Successfully submitted answer for question ${question.id}');
+      return true;
     } catch (e) {
-      // Log the error but don't interrupt the user experience
+      // Log the error and show user feedback for exam_mode type
       logger.e('Failed to submit answer for question $questionIndex: $e');
+      final modeType = examModeType.toLowerCase();
+      if (modeType == 'exam_mode' || modeType == 'exam mode') {
+        AppSnackbar.showError(
+          'Submission Failed',
+          'Failed to submit your answer. Please try again.',
+        );
+      }
+      return false;
     }
   }
 
@@ -170,16 +210,52 @@ class QuestionPageController extends GetxController {
   }
 
   void nextQuestion() async {
-    if (questions.isNotEmpty &&
-        currentQuestionIndex.value < questions.length - 1) {
-      // Submit the current answer before moving to next question
-      await _submitAnswerToServer(currentQuestionIndex.value);
-
-      currentQuestionIndex.value++;
-      showSolution.value = false; // Reset solution state when navigating
-      update();
-      _persistProgress();
+    if (questions.isEmpty || currentQuestionIndex.value >= questions.length - 1) {
+      return;
     }
+    
+    final modeType = examModeType.toLowerCase();
+    final isExamModeType = modeType == 'exam_mode' || modeType == 'exam mode';
+    
+    // For exam_mode type, check if current question has been successfully submitted
+    if (isExamModeType) {
+      final currentIndex = currentQuestionIndex.value;
+      
+      // If not submitted yet, block navigation
+      if (!submittedQuestions[currentIndex]) {
+        AppSnackbar.showError(
+          'Not Submitted',
+          'Please wait for your answer to be submitted before moving to the next question.',
+        );
+        return;
+      }
+    } else {
+      // For other exam types, submit as before (non-blocking)
+      await _submitAnswerToServer(currentQuestionIndex.value);
+    }
+
+    currentQuestionIndex.value++;
+    showSolution.value = false; // Reset solution state when navigating
+    update();
+    _persistProgress();
+  }
+  
+  /// Check if next button should be enabled
+  bool get canMoveToNext {
+    if (userAnswers[currentQuestionIndex.value] == null) {
+      return false; // No answer selected
+    }
+    
+    final modeType = examModeType.toLowerCase();
+    final isExamModeType = modeType == 'exam_mode' || modeType == 'exam mode';
+    
+    if (isExamModeType) {
+      // For exam_mode, must be submitted and not currently submitting
+      return submittedQuestions[currentQuestionIndex.value] && !isSubmitting.value;
+    }
+    
+    // For other modes, just need an answer selected
+    return true;
   }
 
   void goToQuestion(int index) {
@@ -194,8 +270,26 @@ class QuestionPageController extends GetxController {
 
   void submitQuiz() async {
     _timer?.cancel();
-    // Submit the current answer before final submission
-    await _submitAnswerToServer(currentQuestionIndex.value);
+    
+    final modeType = examModeType.toLowerCase();
+    final isExamModeType = modeType == 'exam_mode' || modeType == 'exam mode';
+    
+    // For exam_mode type, check if current question has been submitted
+    if (isExamModeType) {
+      final currentIndex = currentQuestionIndex.value;
+      
+      // If not submitted yet, block submission
+      if (!submittedQuestions[currentIndex]) {
+        AppSnackbar.showError(
+          'Not Submitted',
+          'Please wait for your answer to be submitted before submitting the exam.',
+        );
+        return;
+      }
+    } else {
+      // For other exam types, submit the current answer before final submission
+      await _submitAnswerToServer(currentQuestionIndex.value);
+    }
 
     isCompleted.value = true;
     _examStorage.clearProgress(

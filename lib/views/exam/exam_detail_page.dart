@@ -116,7 +116,8 @@ class _ExamModeGateState extends State<_ExamModeGate> {
   void _showModePicker() async {
     final modeType = widget.exam.modeType.toLowerCase();
     final bool allowPractice = modeType == 'both' || modeType == 'practice';
-    final bool allowExam = modeType == 'both' || modeType == 'exam';
+    final bool allowExam =
+        modeType == 'both' || modeType == 'exam' || modeType == 'exam_mode';
 
     // If only one mode is allowed, skip the dialog and go directly
     if (!allowPractice && allowExam) {
@@ -263,6 +264,7 @@ class _ExamModeGateState extends State<_ExamModeGate> {
         showTimer: true,
         mode: questionMode,
         examId: widget.examId,
+        examModeType: widget.exam.modeType,
       ),
     );
   }
