@@ -1,9 +1,14 @@
 import 'dart:async';
 import 'package:app_links/app_links.dart';
 import 'package:get/get.dart';
-import 'package:vector_academy/views/views.dart';
-import 'package:vector_academy/utils/utils.dart';
+import 'package:vector_academy/controllers/controllers.dart';
+import 'package:vector_academy/models/models.dart';
 import 'package:vector_academy/services/services.dart';
+import 'package:vector_academy/utils/device/device.dart';
+import 'package:vector_academy/utils/storages/storages.dart';
+import 'package:vector_academy/utils/utils.dart';
+import 'package:vector_academy/views/exam/exam_detail_page.dart';
+import 'package:vector_academy/views/views.dart';
 
 class DeepLinkService {
   static final DeepLinkService _instance = DeepLinkService._internal();
@@ -12,12 +17,15 @@ class DeepLinkService {
 
   final AppLinks _appLinks = AppLinks();
   StreamSubscription<Uri>? _linkSubscription;
+  final HiveExamStorage _examStorage = HiveExamStorage();
+  final HiveUserStorage _userStorage = HiveUserStorage();
+  final ExamService _examService = ExamService();
 
   /// Initialize deep link listening
   void initialize() {
     // Listen to incoming links when app is already running
     _linkSubscription = _appLinks.uriLinkStream.listen(
-      _handleDeepLink,
+      (uri) => _handleDeepLink(uri),
       onError: (err) {
         logger.e('Deep link error: $err');
       },
@@ -32,7 +40,7 @@ class DeepLinkService {
     try {
       final initialUri = await _appLinks.getInitialLink();
       if (initialUri != null) {
-        _handleDeepLink(initialUri);
+        await _handleDeepLink(initialUri);
       }
     } catch (e) {
       logger.e('Error getting initial link: $e');
@@ -40,7 +48,7 @@ class DeepLinkService {
   }
 
   /// Handle incoming deep link
-  void _handleDeepLink(Uri uri) {
+  Future<void> _handleDeepLink(Uri uri) async {
     logger.i('Received deep link: $uri');
 
     try {
@@ -130,12 +138,15 @@ class DeepLinkService {
 
         // Exam detail with ID
         case '/exam':
+        case '/exams':
+          if (!await _handleExamDetailQuery(queryParams)) {
+            _navigateToExamTab();
+          }
+          break;
+
         case '/exam-detail':
-          if (queryParams.containsKey('id')) {
-            final examId = int.tryParse(queryParams['id'] ?? '');
-            if (examId != null) {
-              Get.toNamed(VIEWS.examDetail.path, arguments: {'examId': examId});
-            }
+          if (!await _handleExamDetailQuery(queryParams)) {
+            _navigateToExamTab();
           }
           break;
 
@@ -230,13 +241,13 @@ class DeepLinkService {
             if (parts.length >= 3) {
               final examId = int.tryParse(parts[2]);
               if (examId != null) {
-                Get.toNamed(
-                  VIEWS.examDetail.path,
-                  arguments: {'examId': examId},
-                );
+                if (!await _handleExamDetailId(examId)) {
+                  _navigateToExamTab();
+                }
                 return;
               }
             }
+            _navigateToExamTab();
           } else if (path.startsWith('/news/')) {
             final parts = path.split('/');
             if (parts.length >= 3) {
@@ -282,5 +293,73 @@ class DeepLinkService {
   /// Dispose resources
   void dispose() {
     _linkSubscription?.cancel();
+  }
+
+  Future<bool> _handleExamDetailQuery(Map<String, String> queryParams) async {
+    if (queryParams.containsKey('id')) {
+      final examId = int.tryParse(queryParams['id'] ?? '');
+      if (examId != null) {
+        return _handleExamDetailId(examId);
+      }
+    }
+    return false;
+  }
+
+  Future<bool> _handleExamDetailId(int examId) async {
+    try {
+      Exam? exam = await _getCachedExam(examId);
+      exam ??= await _fetchExamFromServer(examId);
+
+      if (exam != null) {
+        _openExamDetail(exam);
+        return true;
+      }
+    } catch (e) {
+      logger.e('Failed to open exam detail for $examId: $e');
+    }
+    return false;
+  }
+
+  void _navigateToExamTab() {
+    _navigateToRoute(VIEWS.home.path);
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (Get.isRegistered<MainNavigationController>()) {
+        Get.find<MainNavigationController>().changeIndex(1);
+      }
+    });
+  }
+
+  Future<Exam?> _getCachedExam(int examId) async {
+    final exams = await _examStorage.getExams();
+    try {
+      return exams.firstWhere((exam) => exam.id == examId);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<Exam?> _fetchExamFromServer(int examId) async {
+    final user = await _userStorage.getUser();
+    if (user == null) return null;
+
+    final device = await UserDevice.getDeviceInfo(user.phoneNumber);
+    final exams = await _examService.getAvailableExams(
+      device.id,
+      gradeId: user.grade.id,
+    );
+    await _examStorage.setExams(exams);
+    try {
+      return exams.firstWhere((exam) => exam.id == examId);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  void _openExamDetail(Exam exam) {
+    if (Get.currentRoute == VIEWS.examDetail.path) {
+      Get.off(() => ExamDetailPage(exam: exam));
+    } else {
+      Get.to(() => ExamDetailPage(exam: exam));
+    }
   }
 }

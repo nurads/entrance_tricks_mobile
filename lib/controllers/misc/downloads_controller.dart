@@ -344,12 +344,14 @@ class DownloadsController extends GetxController {
 
   // Start exam
   Future<void> startExam(Exam exam) async {
-    if (!exam.isDownloaded || exam.questions.isEmpty) {
-      Get.snackbar('Error', 'Exam not downloaded');
+    if (exam.isLocked) {
+      Get.snackbar(
+        'Locked Exam',
+        'Please unlock this exam before attempting it.',
+      );
       return;
     }
 
-    // Check for completion and confirm retake using unified storage
     final isCompleted = await _examStorage.isCompleted(exam.id);
 
     if (isCompleted) {
@@ -361,11 +363,9 @@ class DownloadsController extends GetxController {
             TextButton(onPressed: () => Get.back(), child: Text('Cancel')),
             TextButton(
               onPressed: () async {
-                // Clear saved progress for both modes and proceed
                 await _examStorage.clearProgress(exam.id, 'exam');
                 await _examStorage.clearProgress(exam.id, 'practice');
                 await _examStorage.clearCompleted(exam.id);
-                // Refresh badges in exam list if controller exists
                 if (Get.isRegistered<ExamController>()) {
                   await Get.find<ExamController>().refreshCompletionBadges();
                 }
@@ -377,10 +377,10 @@ class DownloadsController extends GetxController {
           ],
         ),
       );
-    } else {
-      // Navigate to exam screen
-      Get.to(() => ExamDetailPage(exam: exam));
+      return;
     }
+
+    Get.to(() => ExamDetailPage(exam: exam));
   }
 
   // Delete video

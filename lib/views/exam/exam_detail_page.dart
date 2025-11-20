@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vector_academy/controllers/exam/exam_controller.dart';
-import 'package:vector_academy/views/exam/exam_result_page.dart';
-import 'package:vector_academy/views/exam/question_page.dart';
-import 'package:vector_academy/models/models.dart';
 import 'package:vector_academy/controllers/exam/question_page_controller.dart';
+import 'package:vector_academy/controllers/misc/downloads_controller.dart';
+import 'package:vector_academy/models/models.dart';
 import 'package:vector_academy/services/services.dart';
 import 'package:vector_academy/utils/device/device.dart';
 import 'package:vector_academy/utils/storages/storages.dart';
 import 'package:vector_academy/utils/utils.dart';
+import 'package:vector_academy/views/exam/exam_result_page.dart';
+import 'package:vector_academy/views/exam/question_page.dart';
 
 class ExamDetailPage extends StatefulWidget {
   final Exam exam;
@@ -20,262 +21,590 @@ class ExamDetailPage extends StatefulWidget {
 }
 
 class _ExamDetailPageState extends State<ExamDetailPage> {
-  late ExamController controller;
+  late Exam _exam;
+  final HiveExamStorage _examStorage = HiveExamStorage();
+  final ExamService _examService = ExamService();
+  DownloadsController? _downloadsController;
+  ExamController? _examController;
+  bool _isStarting = false;
+  bool _isDownloading = false;
 
   @override
   void initState() {
     super.initState();
-    controller = Get.put(ExamController());
+    _exam = widget.exam;
+    _downloadsController = Get.isRegistered<DownloadsController>()
+        ? Get.find<DownloadsController>()
+        : Get.put(DownloadsController());
+    if (Get.isRegistered<ExamController>()) {
+      _examController = Get.find<ExamController>();
+    }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    // Get exam data from arguments
-    final examTitle = widget.exam.name;
-    final timeLimit = widget.exam.duration; // in minutes
-
-    return _ExamModeGate(
-      exam: widget.exam,
-      examTitle: examTitle,
-      timeLimit: timeLimit,
-      questions: widget.exam.questions,
-      examId: widget.exam.id,
-      onComplete: (answers, timeSpent) {
-        final correctAnswers = _calculateCorrectAnswers(
-          answers,
-          widget.exam.questions,
-        );
-        final score = (correctAnswers / widget.exam.questions.length * 100)
-            .round();
-        Get.to(
-          () => ExamResultPage(
-            score: score,
-            correctAnswers: correctAnswers,
-            totalQuestions: widget.exam.questions.length,
-          ),
-        );
-      },
-    );
+  bool get _isDownloaded => _exam.isDownloaded && _exam.questions.isNotEmpty;
+  bool get _allowPractice {
+    final modeType = (_exam.modeType).toLowerCase();
+    return modeType == 'both' || modeType == 'practice';
   }
 
-  int _calculateCorrectAnswers(
-    List<int> userAnswers,
-    List<Question> questions,
-  ) {
-    // Remove hardcoded answers and use actual question data
-    int correct = 0;
-    for (int i = 0; i < userAnswers.length && i < questions.length; i++) {
-      final question = questions[i];
-      final userAnswerId = userAnswers[i];
+  bool get _allowExam {
+    final modeType = (_exam.modeType).toLowerCase();
+    return modeType == 'both' ||
+        modeType == 'exam' ||
+        modeType == 'exam_mode' ||
+        modeType == 'exam mode';
+  }
 
-      // Find the correct choice for this question
-      final correctChoice = question.choices.firstWhere(
-        (choice) => choice.isCorrect,
-        orElse: () =>
-            question.choices.first, // fallback if no correct choice found
-      );
+  ExamProgress? get _progress => _exam.progress;
 
-      if (userAnswerId == correctChoice.id) {
-        correct++;
+  Future<void> _refreshExam() async {
+    final exams = await _examStorage.getExams();
+    for (final exam in exams) {
+      if (exam.id == _exam.id) {
+        setState(() {
+          _exam = exam;
+        });
+        break;
       }
     }
-    return correct;
+    await _examController?.refreshExamDownloadStatus();
   }
-}
 
-class _ExamModeGate extends StatefulWidget {
-  final Exam exam;
-  final String examTitle;
-  final int timeLimit;
-  final List<Question> questions;
-  final Function(List<int> answers, int timeSpent)? onComplete;
-  final int examId;
-
-  const _ExamModeGate({
-    required this.exam,
-    required this.examTitle,
-    required this.timeLimit,
-    required this.questions,
-    required this.examId,
-    this.onComplete,
-  });
-
-  @override
-  State<_ExamModeGate> createState() => _ExamModeGateState();
-}
-
-class _ExamModeGateState extends State<_ExamModeGate> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _showModePicker();
+  Future<void> _handleDownload() async {
+    if (_downloadsController == null || _isDownloading) return;
+    setState(() {
+      _isDownloading = true;
     });
+    try {
+      await _downloadsController!.downloadExam(_exam);
+      await _refreshExam();
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isDownloading = false;
+        });
+      }
+    }
   }
 
-  void _showModePicker() async {
-    final modeType = widget.exam.modeType.toLowerCase();
-    final bool allowPractice = modeType == 'both' || modeType == 'practice';
-    final bool allowExam =
-        modeType == 'both' || modeType == 'exam' || modeType == 'exam_mode';
+  Future<void> _handleStart() async {
+    await _startExamFlow();
+  }
 
-    // If only one mode is allowed, skip the dialog and go directly
-    if (!allowPractice && allowExam) {
-      // Only exam mode allowed
-      _navigateToQuestionPage(QuestionMode.exam);
-      return;
-    } else if (allowPractice && !allowExam) {
-      // Only practice mode allowed
-      _navigateToQuestionPage(QuestionMode.practice);
+  Future<void> _handleContinue() async {
+    if (_progress == null) return;
+    final mode = _progress!.mode == 'practice'
+        ? QuestionMode.practice
+        : QuestionMode.exam;
+    await _startExamFlow(presetMode: mode, resume: true);
+  }
+
+  Future<void> _startExamFlow({
+    QuestionMode? presetMode,
+    bool resume = false,
+  }) async {
+    if (_exam.isLocked) {
+      AppSnackbar.showInfo(
+        'Locked Exam',
+        'Please unlock this exam before starting.',
+      );
       return;
     }
 
-    // Both modes allowed, show dialog
-    final mode = await showDialog<_ExamMode>(
+    if (!_isDownloaded) {
+      await _handleDownload();
+      if (!_isDownloaded) return;
+    }
+
+    final selectedMode = presetMode ?? await _pickMode();
+    if (selectedMode == null) return;
+
+    if (!mounted) return;
+    setState(() {
+      _isStarting = true;
+    });
+
+    try {
+      final questions =
+          await _resolveQuestionsForMode(selectedMode, resume: resume);
+      if (questions.isEmpty) {
+        AppSnackbar.showInfo(
+          'No Questions Available',
+          'All questions for this exam have already been answered.',
+        );
+        return;
+      }
+
+      Get.to(
+        () => QuestionPage(
+          title: _exam.name,
+          initialTimeMinutes: _exam.duration,
+          questions: questions,
+          onComplete: (answers, _) {
+            final correctAnswers = _calculateCorrectAnswers(
+              answers,
+              questions,
+            );
+            final score = questions.isEmpty
+                ? 0
+                : (correctAnswers / questions.length * 100).round();
+            Get.to(
+              () => ExamResultPage(
+                score: score,
+                correctAnswers: correctAnswers,
+                totalQuestions: questions.length,
+              ),
+            );
+          },
+          allowReview: true,
+          showTimer: true,
+          mode: selectedMode,
+          examId: _exam.id,
+          examModeType: _exam.modeType,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isStarting = false;
+        });
+      }
+    }
+  }
+
+  Future<QuestionMode?> _pickMode() async {
+    if (!_allowPractice && _allowExam) {
+      return QuestionMode.exam;
+    }
+    if (_allowPractice && !_allowExam) {
+      return QuestionMode.practice;
+    }
+
+    final result = await showDialog<QuestionMode>(
       context: context,
-      barrierDismissible: true,
       builder: (context) {
         final theme = Theme.of(context);
         return AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          titlePadding: EdgeInsets.only(top: 20, left: 24, right: 24),
-          contentPadding: EdgeInsets.only(left: 16, right: 16, bottom: 20),
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Choose Mode',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              SizedBox(height: 6),
-              Text(
-                'How would you like to take this exam?',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                ),
-              ),
-              SizedBox(height: 12),
-            ],
+          title: Text(
+            'How would you like to proceed?',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (allowPractice)
-                _ModeCard(
-                  accent: theme.colorScheme.primary,
-                  icon: Icons.school,
-                  title: 'Practice Mode',
-                  subtitle: 'See correctness instantly and review as you go',
-                  badgeText: 'Recommended for learning',
-                  onTap: () => Navigator.of(context).pop(_ExamMode.practice),
-                ),
-              if (allowPractice && allowExam) SizedBox(height: 12),
-              if (allowExam)
-                _ModeCard(
-                  accent: theme.colorScheme.secondary,
-                  icon: Icons.fact_check,
-                  title: 'Exam Mode',
-                  subtitle: 'No feedback until you submit at the end',
-                  badgeText: 'Simulates real exam',
-                  onTap: () => Navigator.of(context).pop(_ExamMode.exam),
-                ),
+              _ModeCard(
+                accent: theme.colorScheme.primary,
+                icon: Icons.school,
+                title: 'Practice Mode',
+                subtitle: 'Check answers immediately and learn as you go.',
+                badgeText: _allowExam ? 'Learning focused' : null,
+                enabled: _allowPractice,
+                onTap: () => Navigator.of(context).pop(QuestionMode.practice),
+              ),
+              SizedBox(height: 12),
+              _ModeCard(
+                accent: theme.colorScheme.secondary,
+                icon: Icons.fact_check,
+                title: 'Exam Mode',
+                subtitle: 'Simulate real exam conditions.',
+                badgeText: _allowPractice ? 'Timed challenge' : null,
+                enabled: _allowExam,
+                onTap: () => Navigator.of(context).pop(QuestionMode.exam),
+              ),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).maybePop(),
-              child: Text('Close'),
+              child: Text('Cancel'),
             ),
           ],
         );
       },
     );
-
-    if (!mounted) return;
-    if (mode == null) {
-      Get.back();
-      return;
-    }
-
-    final isPractice = mode == _ExamMode.practice;
-    _navigateToQuestionPage(
-      isPractice ? QuestionMode.practice : QuestionMode.exam,
-    );
+    return result;
   }
 
-  void _navigateToQuestionPage(QuestionMode questionMode) async {
-    List<Question> questionsToShow = widget.questions;
+  Future<List<Question>> _resolveQuestionsForMode(
+    QuestionMode mode, {
+    bool resume = false,
+  }) async {
+    List<Question> questionsToShow = _exam.questions;
 
-    // In exam mode, reload questions from backend and filter unanswered ones
-    if (questionMode == QuestionMode.exam) {
+    if (mode == QuestionMode.exam && !resume) {
       try {
         final user = await HiveUserStorage().getUser();
         if (user != null) {
           final device = await UserDevice.getDeviceInfo(user.phoneNumber);
-          final examService = ExamService();
-
-          // Reload questions from backend
-          final allQuestions = await examService.getQuestions(
+          final allQuestions = await _examService.getQuestions(
             device.id,
-            widget.examId,
+            _exam.id,
           );
+          final filtered =
+              allQuestions.where((question) => !question.hasUserAnswered).toList();
 
-          // Filter to show only unanswered questions
-          questionsToShow = allQuestions
-              .where((q) => !q.hasUserAnswered)
-              .toList();
-
-          logger.i(
-            'Exam mode: Loaded ${allQuestions.length} total questions, showing ${questionsToShow.length} unanswered',
-          );
-
-          // If no unanswered questions, show a message and go back
-          if (questionsToShow.isEmpty) {
-            if (!mounted) return;
-            Get.back();
-            Get.snackbar(
-              'No Questions Available',
-              'All questions in this exam have been answered.',
-              snackPosition: SnackPosition.BOTTOM,
-            );
-            return;
+          if (filtered.isNotEmpty) {
+            questionsToShow = filtered;
+          } else {
+            return [];
           }
         }
       } catch (e) {
         logger.e('Failed to reload questions for exam mode: $e');
-        // Fallback to original questions if reload fails
-        questionsToShow = widget.questions;
       }
     }
 
-    if (!mounted) return;
+    return questionsToShow;
+  }
 
-    Get.off(
-      () => QuestionPage(
-        title: widget.examTitle,
-        initialTimeMinutes: widget.timeLimit,
-        questions: questionsToShow,
-        onComplete: widget.onComplete,
-        allowReview: true,
-        showTimer: true,
-        mode: questionMode,
-        examId: widget.examId,
-        examModeType: widget.exam.modeType,
+  Future<void> _confirmRestartAttempt() async {
+    final shouldReset = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Start Over?'),
+        content: Text(
+          'Your saved progress will be cleared so you can retake this exam from the beginning.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text('Start Over'),
+          ),
+        ],
       ),
     );
+
+    if (shouldReset != true) return;
+
+    await _examStorage.clearProgress(_exam.id, 'exam');
+    await _examStorage.clearProgress(_exam.id, 'practice');
+    await _examStorage.clearCompleted(_exam.id);
+    _exam.progress = null;
+    _exam.isCompleted = false;
+    setState(() {});
+    await _examController?.refreshCompletionBadges();
+  }
+
+  int _calculateCorrectAnswers(
+    List<int> userAnswers,
+    List<Question> questions,
+  ) {
+    int correct = 0;
+    for (int i = 0; i < userAnswers.length && i < questions.length; i++) {
+      final question = questions[i];
+      final userAnswerId = userAnswers[i];
+      final correctChoice = question.choices.firstWhere(
+        (choice) => choice.isCorrect,
+        orElse: () => question.choices.first,
+      );
+      if (userAnswerId == correctChoice.id) {
+        correct++;
+      }
+    }
+    return correct;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: SizedBox.shrink());
+    final theme = Theme.of(context);
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Exam Details'),
+      ),
+      body: RefreshIndicator(
+        onRefresh: _refreshExam,
+        child: ListView(
+          physics: AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.all(20),
+          children: [
+            Text(
+              _exam.name,
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              _exam.subject?.name ?? 'General',
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.primary,
+              ),
+            ),
+            SizedBox(height: 16),
+            _buildHighlights(theme),
+            SizedBox(height: 24),
+            _buildStatusSection(theme),
+            SizedBox(height: 24),
+            _buildActionSection(theme),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHighlights(ThemeData theme) {
+    return Row(
+      children: [
+        Expanded(
+          child: _HighlightTile(
+            icon: Icons.schedule,
+            label: 'Duration',
+            value: '${_exam.duration} min',
+          ),
+        ),
+        SizedBox(width: 12),
+        Expanded(
+          child: _HighlightTile(
+            icon: Icons.help_center,
+            label: 'Questions',
+            value: _exam.totalQuestions?.toString() ??
+                (_exam.questions.isNotEmpty
+                    ? '${_exam.questions.length}'
+                    : 'Unknown'),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatusSection(ThemeData theme) {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Status',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                _StatusChip(
+                  icon: Icons.download_done,
+                  label: _isDownloaded ? 'Downloaded' : 'Not downloaded',
+                  color:
+                      _isDownloaded ? Colors.green : theme.colorScheme.secondary,
+                ),
+                if (_exam.year != null)
+                  _StatusChip(
+                    icon: Icons.calendar_month,
+                    label: 'Year ${_exam.year}',
+                    color: theme.colorScheme.primary,
+                  ),
+                if (_exam.isLocked)
+                  _StatusChip(
+                    icon: Icons.lock,
+                    label: 'Locked',
+                    color: Colors.orange,
+                  ),
+                if (_exam.isCompleted)
+                  _StatusChip(
+                    icon: Icons.emoji_events,
+                    label: 'Completed',
+                    color: Colors.green,
+                  ),
+                if (_progress != null)
+                  _StatusChip(
+                    icon: Icons.play_circle,
+                    label:
+                        'In progress (${_progress!.mode == 'practice' ? 'Practice' : 'Exam'})',
+                    color: Colors.blueGrey,
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionSection(ThemeData theme) {
+    final isBusy = _isDownloading || _isStarting;
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Actions',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            SizedBox(height: 16),
+            if (_exam.isLocked)
+              _DisabledBanner(
+                message:
+                    'This exam is currently locked. Please unlock it to continue.',
+              )
+            else if (!_isDownloaded)
+              ElevatedButton.icon(
+                onPressed: _isDownloading ? null : _handleDownload,
+                icon: _isDownloading
+                    ? SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Icon(Icons.download),
+                label: Text('Download Exam'),
+              )
+            else if (_progress != null)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  ElevatedButton(
+                    onPressed: isBusy ? null : _handleContinue,
+                    child: Text(
+                      'Continue ${_progress!.mode == 'practice' ? 'Practice' : 'Exam'} Mode',
+                    ),
+                  ),
+                  SizedBox(height: 12),
+                  OutlinedButton(
+                    onPressed: isBusy ? null : _handleStart,
+                    child: Text('Start a New Attempt'),
+                  ),
+                  TextButton(
+                    onPressed: isBusy ? null : _confirmRestartAttempt,
+                    child: Text('Clear saved progress'),
+                  ),
+                ],
+              )
+            else
+              ElevatedButton.icon(
+                onPressed: isBusy ? null : _handleStart,
+                icon: _isStarting
+                    ? SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Icon(Icons.play_arrow),
+                label: Text('Start Exam'),
+              ),
+            SizedBox(height: 12),
+            Text(
+              _isDownloaded
+                  ? 'Choose a mode to begin. Practice mode gives instant feedback, while Exam mode mirrors the official experience.'
+                  : 'Download the exam to review details, attempt questions, and track your progress offline.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
-enum _ExamMode { practice, exam }
+class _HighlightTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+
+  const _HighlightTile({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.1),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: theme.colorScheme.primary),
+          SizedBox(height: 8),
+          Text(
+            label,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
+          ),
+          SizedBox(height: 4),
+          Text(
+            value,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatusChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+
+  const _StatusChip({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: color.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          SizedBox(width: 6),
+          Text(
+            label,
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: color,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class _ModeCard extends StatelessWidget {
   final Color accent;
@@ -283,6 +612,7 @@ class _ModeCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final String? badgeText;
+  final bool enabled;
   final VoidCallback onTap;
 
   const _ModeCard({
@@ -291,87 +621,119 @@ class _ModeCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     this.badgeText,
+    required this.enabled,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        width: double.infinity,
-        padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: theme.colorScheme.outline.withValues(alpha: 0.2),
+    return Opacity(
+      opacity: enabled ? 1 : 0.5,
+      child: InkWell(
+        onTap: enabled ? onTap : null,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: theme.colorScheme.outline.withValues(alpha: 0.2),
+            ),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: theme.colorScheme.shadow.withValues(alpha: 0.05),
-              blurRadius: 8,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: accent.withValues(alpha: 0.15),
-                shape: BoxShape.circle,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: accent),
               ),
-              child: Icon(icon, color: accent),
-            ),
-            SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: theme.colorScheme.onSurface,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  if (badgeText != null) ...[
-                    SizedBox(height: 6),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: accent.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(20),
+              SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
                       ),
-                      child: Text(
-                        badgeText!,
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: accent,
-                          fontWeight: FontWeight.w600,
+                    ),
+                    if (badgeText != null) ...[
+                      SizedBox(height: 6),
+                      Container(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: accent.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          badgeText!,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: accent,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                    SizedBox(height: 6),
+                    Text(
+                      subtitle,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.75,
                         ),
                       ),
                     ),
                   ],
-                  SizedBox(height: 6),
-                  Text(
-                    subtitle,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurface.withValues(
-                        alpha: 0.75,
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+class _DisabledBanner extends StatelessWidget {
+  final String message;
+
+  const _DisabledBanner({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.orange.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.orange.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.info, color: Colors.orange),
+          SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              message,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.orange[900],
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+          ),
+        ],
       ),
     );
   }

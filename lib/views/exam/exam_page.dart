@@ -329,12 +329,7 @@ Widget _buildExamList(BuildContext context, ExamController controller) {
               itemBuilder: (context, index) {
                 final exam = controller.exams[index];
                 return GetBuilder<DownloadsController>(
-                  builder: (downloadsController) => _buildExamCard(
-                    context,
-                    exam,
-                    controller,
-                    downloadsController,
-                  ),
+                  builder: (_) => _buildExamCard(context, exam, controller),
                 );
               },
             ),
@@ -349,177 +344,177 @@ Widget _buildExamCard(
   BuildContext context,
   Exam exam,
   ExamController controller,
-  DownloadsController downloadsController,
 ) {
-  return Container(
-    margin: EdgeInsets.only(bottom: 8),
-    decoration: BoxDecoration(
-      color: exam.isLocked ? Colors.grey[50] : Colors.white,
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(
-        color: exam.isLocked
-            ? Colors.grey.withValues(alpha: 0.3)
-            : Colors.grey.withValues(alpha: 0.2),
-        width: 1,
-      ),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.grey.withValues(alpha: 0.05),
-          blurRadius: 8,
-          offset: Offset(0, 1),
+  return GestureDetector(
+    behavior: HitTestBehavior.opaque,
+    onTap: () => controller.navigateToExamDetail(exam.id),
+    child: Container(
+      margin: EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: exam.isLocked ? Colors.grey[50] : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: exam.isLocked
+              ? Colors.grey.withValues(alpha: 0.3)
+              : Colors.grey.withValues(alpha: 0.2),
+          width: 1,
         ),
-      ],
-    ),
-    child: Padding(
-      padding: EdgeInsets.all(12),
-      child: Row(
-        children: [
-          // Exam Icon with Lock Status
-          Container(
-            width: 45,
-            height: 45,
-            decoration: BoxDecoration(
-              color: exam.isLocked ? Colors.grey[300] : Colors.blue[100],
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Stack(
-              children: [
-                Center(
-                  child: Icon(
-                    Icons.quiz,
-                    color: exam.isLocked ? Colors.grey[500] : Colors.blue[600],
-                    size: 24,
-                  ),
-                ),
-                if (exam.isLocked)
-                  Positioned(
-                    top: 2,
-                    right: 2,
-                    child: Container(
-                      width: 12,
-                      height: 12,
-                      decoration: BoxDecoration(
-                        color: Colors.red[600],
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(Icons.lock, color: Colors.white, size: 8),
-                    ),
-                  ),
-              ],
-            ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: Offset(0, 1),
           ),
-
-          SizedBox(width: 12),
-
-          // Exam Details - Enhanced with download status
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  exam.title,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: exam.isLocked ? Colors.grey[600] : Colors.blue[700],
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                if (controller.completedExamIds.contains(exam.id))
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: Colors.green.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(12),
+        ],
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(12),
+        child: Row(
+          children: [
+            Container(
+              width: 45,
+              height: 45,
+              decoration: BoxDecoration(
+                color: exam.isLocked ? Colors.grey[300] : Colors.blue[100],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Stack(
+                children: [
+                  Center(
+                    child: Icon(
+                      Icons.quiz,
+                      color: exam.isLocked
+                          ? Colors.grey[500]
+                          : Colors.blue[600],
+                      size: 24,
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.check_circle, size: 12, color: Colors.green),
-                        SizedBox(width: 4),
-                        Text(
-                          'Completed',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.green[800],
-                          ),
+                  ),
+                  if (exam.isLocked)
+                    Positioned(
+                      top: 2,
+                      right: 2,
+                      child: Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: Colors.red[600],
+                          shape: BoxShape.circle,
                         ),
-                      ],
+                        child: Icon(Icons.lock, color: Colors.white, size: 8),
+                      ),
                     ),
+                ],
+              ),
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    exam.title,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: exam.isLocked
+                          ? Colors.grey[600]
+                          : Colors.blue[700],
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                SizedBox(height: 4),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.quiz_outlined,
-                      size: 12,
-                      color: Colors.grey[500],
+                  const SizedBox(height: 4),
+                  if (controller.completedExamIds.contains(exam.id))
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.check_circle,
+                            size: 12,
+                            color: Colors.green,
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            'Completed',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.green[800],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    SizedBox(width: 4),
-                    Text(
-                      "${exam.totalQuestions} Q",
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                    ),
-                    SizedBox(width: 12),
-                    Icon(Icons.access_time, size: 12, color: Colors.grey[500]),
-                    SizedBox(width: 4),
-                    Text(
-                      "${exam.duration}m",
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 4),
-                // Download status indicator
-                Row(
-                  children: [
-                    Icon(
-                      exam.isDownloaded
-                          ? Icons.download_done
-                          : Icons.cloud_download,
-                      size: 12,
-                      color: exam.isDownloaded
-                          ? Colors.green[600]
-                          : Colors.orange[600],
-                    ),
-                    SizedBox(width: 4),
-                    Text(
-                      exam.isDownloaded ? "Downloaded" : "Not Downloaded",
-                      style: TextStyle(
-                        fontSize: 11,
+                  SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.quiz_outlined,
+                        size: 12,
+                        color: Colors.grey[500],
+                      ),
+                      SizedBox(width: 4),
+                      Text(
+                        "${exam.totalQuestions} Q",
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      ),
+                      SizedBox(width: 12),
+                      Icon(
+                        Icons.access_time,
+                        size: 12,
+                        color: Colors.grey[500],
+                      ),
+                      SizedBox(width: 4),
+                      Text(
+                        "${exam.duration}m",
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(
+                        exam.isDownloaded
+                            ? Icons.download_done
+                            : Icons.cloud_download,
+                        size: 12,
                         color: exam.isDownloaded
                             ? Colors.green[600]
                             : Colors.orange[600],
-                        fontWeight: FontWeight.w500,
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                      SizedBox(width: 4),
+                      Text(
+                        exam.isDownloaded ? "Downloaded" : "Not Downloaded",
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: exam.isDownloaded
+                              ? Colors.green[600]
+                              : Colors.orange[600],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-
-          SizedBox(width: 8),
-
-          // Action Button - Enhanced with download functionality
-          SizedBox(
-            width: 85,
-            child: buildExamActionButton(exam, controller, downloadsController),
-          ),
-        ],
+            SizedBox(width: 8),
+            SizedBox(width: 85, child: buildExamActionButton(exam, controller)),
+          ],
+        ),
       ),
     ),
   );
 }
 
-Widget buildExamActionButton(
-  Exam exam,
-  ExamController controller,
-  DownloadsController downloadsController,
-) {
+Widget buildExamActionButton(Exam exam, ExamController controller) {
   if (exam.isLocked) {
     // Locked exam
     return ElevatedButton(
@@ -585,45 +580,16 @@ Widget buildExamActionButton(
     );
   }
 
-  if (exam.isDownloaded) {
-    // Downloaded exam - can start
-    return ElevatedButton(
-      onPressed: () async => await downloadsController.startExam(exam),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.green[600],
-        foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-        padding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-        minimumSize: Size(0, 0),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.play_arrow, size: 10, color: Colors.white),
-          SizedBox(width: 3),
-          Flexible(
-            child: Text(
-              "Start",
-              style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  final backgroundColor = exam.isDownloaded
+      ? Colors.green[600]
+      : Colors.blue[600];
+  final icon = exam.isDownloaded ? Icons.open_in_new : Icons.info;
+  final label = exam.isDownloaded ? 'Open' : 'Details';
 
-  // Not downloaded exam - download and start
   return ElevatedButton(
-    onPressed: () async {
-      await downloadsController.downloadExam(exam);
-      if (exam.isDownloaded) {
-        await downloadsController.startExam(exam);
-      }
-    },
+    onPressed: () => controller.navigateToExamDetail(exam.id),
     style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.blue[600],
+      backgroundColor: backgroundColor,
       foregroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
       padding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
@@ -633,11 +599,11 @@ Widget buildExamActionButton(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(Icons.download, size: 10, color: Colors.white),
+        Icon(icon, size: 10, color: Colors.white),
         SizedBox(width: 3),
         Flexible(
           child: Text(
-            "Download",
+            label,
             style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
             overflow: TextOverflow.ellipsis,
           ),
@@ -686,15 +652,10 @@ class ExamSearchDelegate extends SearchDelegate<Exam> {
   @override
   Widget buildSuggestions(BuildContext context) {
     final controller = Get.find<ExamController>();
-    final downloadsController = Get.find<DownloadsController>();
     return ListView.builder(
       itemCount: controller.exams.length,
-      itemBuilder: (context, index) => _buildExamCard(
-        context,
-        controller.exams[index],
-        controller,
-        downloadsController,
-      ),
+      itemBuilder: (context, index) =>
+          _buildExamCard(context, controller.exams[index], controller),
     );
   }
 
@@ -704,15 +665,10 @@ class ExamSearchDelegate extends SearchDelegate<Exam> {
 
   Widget _buildSearchResults(BuildContext context, List<Exam> exams) {
     final controller = Get.find<ExamController>();
-    final downloadsController = Get.find<DownloadsController>();
     return ListView.builder(
       itemCount: exams.length,
-      itemBuilder: (context, index) => _buildExamCard(
-        context,
-        exams[index],
-        controller,
-        downloadsController,
-      ),
+      itemBuilder: (context, index) =>
+          _buildExamCard(context, exams[index], controller),
     );
   }
 }

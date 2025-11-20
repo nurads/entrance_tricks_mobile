@@ -80,7 +80,7 @@ class ExamService extends GetxService {
       queryParameters: {'device': deviceId},
       data: {'exam': examId, 'question': questionId, 'answer': choiceId},
     );
-    if (response.statusCode == 200) {
+    if (response.statusCode == 201 || response.statusCode == 200) {
       return;
     } else {
       throw ApiException(response.data['detail'] ?? 'Failed to submit answers');

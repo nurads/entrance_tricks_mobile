@@ -216,7 +216,7 @@ We may update our Privacy Policy from time to time to reflect changes in:
 - Significant changes will be notified via in-app notification
 - Last updated date will be changed at the top of this policy
 
-**Continued use of Vector Academy after changes constitutes acceptance of the updated policy.**
+**Continued use of Ethio Entrance, Freshman Tricks after changes constitutes acceptance of the updated policy.**
 
 ---
 

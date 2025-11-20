@@ -145,7 +145,7 @@ All user data is encrypted in transit using HTTPS/TLS encryption when communicat
 
 Users can delete their account and all associated data by:
 
-1. Opening Vector Academy app
+1. Opening Ethio Entrance, Freshman Tricks app
 2. Going to **Settings > Profile**
 3. Selecting **Delete Account**
 4. Confirming deletion
@@ -350,7 +350,7 @@ If reviewers have questions or your app is rejected:
 
 **Good luck with your Play Console submission!**
 
-_Vector Academy - Educational Excellence_
+_Ethio Entrance, Freshman Tricks - Educational Excellence_
 
 ---
 
