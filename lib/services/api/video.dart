@@ -61,6 +61,7 @@ class VideoApiService {
         '/app/videos/$videoId?device=$deviceId',
         authenticated: true,
       );
+      logger.d(response.data);
       if (response.statusCode != 200) {
         throw ApiException(
           response.data['detail'] ?? 'Failed to download video',

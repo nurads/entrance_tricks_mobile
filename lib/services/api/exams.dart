@@ -86,4 +86,31 @@ class ExamService extends GetxService {
       throw ApiException(response.data['detail'] ?? 'Failed to submit answers');
     }
   }
+
+  Future<void> submitBulkAnswers(
+    String deviceId,
+    int examId,
+    List<Map<String, int>>
+    answers, // List of {question: questionId, answer: choiceId}
+  ) async {
+    final response = await apiClient.post(
+      '/app/user-answers/bulk-submit/',
+      authenticated: true,
+      queryParameters: {'device': deviceId},
+      data: answers
+          .map(
+            (element) => {
+              'question': element['question'],
+              'answer': element['answer'],
+              'exam': examId,
+            },
+          )
+          .toList(),
+    );
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      return;
+    } else {
+      throw ApiException(response.data['detail'] ?? 'Failed to submit answers');
+    }
+  }
 }
