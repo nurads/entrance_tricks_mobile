@@ -490,12 +490,25 @@ class DownloadsController extends GetxController {
           TextButton(
             onPressed: () async {
               try {
+                // Delete all exam data including questions and question images
+                await _examStorage.deleteExamData(exam.id);
+
                 // Remove from local storage
                 await _examStorage.removeDownloadedExam(exam.id);
 
                 // Update exam state
                 exam.isDownloaded = false;
                 exam.questions.clear();
+                exam.isCompleted = false;
+                exam.progress = null;
+
+                // Clear progress and completion status
+                await _examStorage.clearProgress(exam.id, 'exam');
+                await _examStorage.clearProgress(exam.id, 'practice');
+                await _examStorage.clearCompleted(exam.id);
+
+                // Reload exams to ensure UI reflects the changes
+                await loadAllExams();
 
                 update();
 
@@ -564,21 +577,24 @@ class DownloadsController extends GetxController {
                   exam.isCompleted = false;
                   exam.progress = null;
 
+                  // Delete all exam data including questions and question images
+                  await _examStorage.deleteExamData(exam.id);
+
                   // Clear all progress for this exam (both exam and practice modes)
                   await _examStorage.clearProgress(exam.id, 'exam');
                   await _examStorage.clearProgress(exam.id, 'practice');
 
                   // Clear completion status
                   await _examStorage.clearCompleted(exam.id);
-
-                  // Remove questions for this exam
-                  await _examStorage.setQuestions(exam.id, []);
                 }
 
                 // Clear all storage
                 await _videoStorage.removeAllDownloadedVideos();
                 await _noteStorage.removeAllDownloadedNotes();
                 await _examStorage.removeAllDownloadedExams();
+
+                // Reload exams to ensure UI reflects the changes
+                await loadAllExams();
 
                 // Refresh exam controller if it exists to update UI badges
                 if (Get.isRegistered<ExamController>()) {
@@ -669,12 +685,15 @@ class DownloadsController extends GetxController {
           TextButton(
             onPressed: () async {
               try {
-                // Clear exam downloads and reset state
+                // Clear exam downloads and reset state, and delete all exam data
                 for (var exam in allExams.where((e) => e.isDownloaded)) {
                   exam.isDownloaded = false;
                   exam.questions.clear();
                   exam.isCompleted = false;
                   exam.progress = null;
+
+                  // Delete all exam data including questions and question images
+                  await _examStorage.deleteExamData(exam.id);
 
                   // Clear all progress for this exam (both exam and practice modes)
                   await _examStorage.clearProgress(exam.id, 'exam');
@@ -682,21 +701,13 @@ class DownloadsController extends GetxController {
 
                   // Clear completion status
                   await _examStorage.clearCompleted(exam.id);
-
-                  // Clear questions and question images
-                  // final questions = await _examStorage.getQuestions(exam.id);
-                  // for (var question in questions) {
-                  // Remove question images if they exist
-                  // Note: You might need to delete the actual image files from storage
-                  // depending on how they're stored
-                  // }
-
-                  // Remove questions for this exam
-                  await _examStorage.setQuestions(exam.id, []);
                 }
 
                 // Clear all exam storage
                 await _examStorage.removeAllDownloadedExams();
+
+                // Reload exams to ensure UI reflects the changes
+                await loadAllExams();
 
                 // Refresh exam controller if it exists to update UI badges
                 if (Get.isRegistered<ExamController>()) {

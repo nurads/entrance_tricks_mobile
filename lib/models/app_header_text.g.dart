@@ -14,6 +14,8 @@ AppHeaderText _$AppHeaderTextFromJson(Map<String, dynamic> json) =>
       link: json['telegram_channel_url'] as String?,
       tagLineText: json['tag_line_text'] as String?,
       showTagLineText: json['show_tag_line_text'] as bool?,
+      textColor: json['text_color'] as String?,
+      tagLineTextColor: json['tag_line_text_color'] as String?,
     );
 
 Map<String, dynamic> _$AppHeaderTextToJson(AppHeaderText instance) =>
@@ -24,4 +26,6 @@ Map<String, dynamic> _$AppHeaderTextToJson(AppHeaderText instance) =>
       'telegram_channel_url': instance.link,
       'tag_line_text': instance.tagLineText,
       'show_tag_line_text': instance.showTagLineText,
+      'text_color': instance.textColor,
+      'tag_line_text_color': instance.tagLineTextColor,
     };

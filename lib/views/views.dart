@@ -28,6 +28,8 @@ export 'study_planner/study_planner_page.dart';
 export 'study_planner/add_plan_page.dart';
 export 'payment/payment_page.dart';
 export 'payment_history_screen.dart';
+export 'success_stories/success_stories_page.dart';
+export 'success_stories/success_story_detail_page.dart';
 
 enum VIEWS {
   home('/home'),
@@ -52,7 +54,9 @@ enum VIEWS {
   about('/about'),
   faq('/faq'),
   payments('/payments'),
-  paymentHistory('/payment-history');
+  paymentHistory('/payment-history'),
+  successStories('/success-stories'),
+  successStoryDetail('/success-story-detail');
 
   final String path;
 

@@ -668,6 +668,7 @@ class HomeDashboard extends StatelessWidget {
                     isSelected: false,
                   ),
                   SizedBox(height: 20),
+                  _buildSectionHeader('Payments'),
                   _buildModernDrawerMenuItem(
                     icon: Icons.payment_rounded,
                     title: 'Payments',
@@ -701,6 +702,12 @@ class HomeDashboard extends StatelessWidget {
                     title: 'Downloads',
                     subtitle: 'Offline content',
                     onTap: () => Get.toNamed(VIEWS.downloads.path),
+                  ),
+                  _buildModernDrawerMenuItem(
+                    icon: Icons.emoji_events_rounded,
+                    title: 'Success Stories',
+                    subtitle: 'Student achievements',
+                    onTap: () => Get.toNamed(VIEWS.successStories.path),
                   ),
 
                   SizedBox(height: 20),

@@ -464,7 +464,7 @@ class QuestionPage extends StatelessWidget {
 
   Widget _buildChoiceContent(BuildContext context, String content) {
     if (LaTeXUtils.containsLaTeX(content)) {
-      return TeXWidget(math: content);
+      return _buildSafeTeXWidget(context, content);
     } else {
       return Text(content, style: TextStyle(fontSize: 12));
     }

@@ -106,6 +106,36 @@ class HiveExamStorage extends BaseObjectStorage<List<Exam>> {
     _box.put('downloaded_exams', []);
   }
 
+  /// Deletes all data for a specific exam including questions and question images
+  Future<void> deleteExamData(int examId) async {
+    // Get questions first to find all question IDs for image deletion
+    final questionsValue = _box.get('questions_$examId');
+    if (questionsValue != null && questionsValue is List) {
+      try {
+        final questions = questionsValue.cast<Question>();
+        for (var question in questions) {
+          // Delete question images
+          await _box.delete('question_images_${question.id}');
+        }
+      } catch (e) {
+        // If casting fails, questions might be in a different format
+        // Continue to delete the questions key anyway
+        logger.w('Error casting questions for exam $examId: $e');
+      }
+    }
+    
+    // Delete questions key
+    await _box.delete('questions_$examId');
+  }
+
+  /// Deletes all exam data for all exams (used when clearing all downloads)
+  Future<void> deleteAllExamData() async {
+    final exams = await getExams();
+    for (var exam in exams) {
+      await deleteExamData(exam.id);
+    }
+  }
+
   // --- Added helpers to persist per-exam state on the same box ---
 
   Future<void> markCompleted(int examId) async {

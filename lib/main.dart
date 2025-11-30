@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:vector_academy/services/services.dart';
 import 'package:vector_academy/components/components.dart';
 import 'package:vector_academy/utils/utils.dart';
+import 'package:vector_academy/models/models.dart';
 
 void main() async {
   // Remove debug banner
@@ -88,6 +89,30 @@ class MyApp extends StatelessWidget {
           binding: BindingsBuilder(() {
             Get.put(FAQController());
           }),
+        ),
+        GetPage(
+          name: VIEWS.successStories.path,
+          page: () => SuccessStoriesPage(),
+          binding: BindingsBuilder(() {
+            Get.put(SuccessStoriesController());
+          }),
+        ),
+        GetPage(
+          name: VIEWS.successStoryDetail.path,
+          page: () {
+            final args = Get.arguments;
+            if (args is SuccessStory) {
+              return SuccessStoryDetailPage(story: args);
+            }
+            final params = Get.parameters;
+            if (params['id'] != null) {
+              final id = int.tryParse(params['id']!);
+              if (id != null) {
+                return SuccessStoryDetailPage(storyId: id);
+              }
+            }
+            return SuccessStoryDetailPage();
+          },
         ),
         GetPage(
           name: '/add-plan',
