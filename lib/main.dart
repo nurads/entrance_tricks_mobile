@@ -64,6 +64,11 @@ class MyApp extends StatelessWidget {
           }),
         ),
         GetPage(name: VIEWS.verifyPhone.path, page: () => VerifyPhone()),
+        GetPage(name: VIEWS.payments.path, page: () => PaymentPage()),
+        GetPage(
+          name: VIEWS.paymentHistory.path,
+          page: () => PaymentHistoryScreen(),
+        ),
         GetPage(name: VIEWS.subjectDetail.path, page: () => SubjectDetail()),
         GetPage(name: VIEWS.chapterDetail.path, page: () => ChapterDetail()),
         GetPage(name: VIEWS.editProfile.path, page: () => EditProfilePage()),

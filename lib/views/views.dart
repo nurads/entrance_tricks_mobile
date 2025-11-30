@@ -26,6 +26,8 @@ export 'about/about_page.dart';
 export 'faq/faq_page.dart';
 export 'study_planner/study_planner_page.dart';
 export 'study_planner/add_plan_page.dart';
+export 'payment/payment_page.dart';
+export 'payment_history_screen.dart';
 
 enum VIEWS {
   home('/home'),
@@ -48,7 +50,9 @@ enum VIEWS {
   subjects('/subjects'),
   support('/support'),
   about('/about'),
-  faq('/faq');
+  faq('/faq'),
+  payments('/payments'),
+  paymentHistory('/payment-history');
 
   final String path;
 
