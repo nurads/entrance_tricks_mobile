@@ -189,7 +189,7 @@ class QuestionPage extends StatelessWidget {
             SizedBox(height: 16),
 
             // Question content with LaTeX support
-            _buildQuestionContent(context, question.content),
+            _buildQuestionContent(context, question.content, question.id),
 
             // Image if available
             if (question.image != null && question.image!.isNotEmpty) ...[
@@ -226,9 +226,13 @@ class QuestionPage extends StatelessWidget {
     );
   }
 
-  Widget _buildQuestionContent(BuildContext context, String content) {
+  Widget _buildQuestionContent(
+    BuildContext context,
+    String content,
+    int questionId,
+  ) {
     if (LaTeXUtils.containsLaTeX(content)) {
-      return TeXWidget(math: content);
+      return TeXWidget(key: ValueKey('question_$questionId'), math: content);
     } else {
       return Text(content, style: TextStyle(fontSize: 12));
     }
@@ -435,7 +439,9 @@ class QuestionPage extends StatelessWidget {
             SizedBox(width: 16),
 
             // Choice content
-            Expanded(child: _buildChoiceContent(context, choice.content)),
+            Expanded(
+              child: _buildChoiceContent(context, choice.content, choice.id),
+            ),
 
             // Selection indicator
             if (isSelected) ...[
@@ -462,9 +468,13 @@ class QuestionPage extends StatelessWidget {
     );
   }
 
-  Widget _buildChoiceContent(BuildContext context, String content) {
+  Widget _buildChoiceContent(
+    BuildContext context,
+    String content,
+    int choiceId,
+  ) {
     if (LaTeXUtils.containsLaTeX(content)) {
-      return _buildSafeTeXWidget(context, content);
+      return TeXWidget(key: ValueKey('choice_$choiceId'), math: content);
     } else {
       return Text(content, style: TextStyle(fontSize: 12));
     }
@@ -693,7 +703,11 @@ class QuestionPage extends StatelessWidget {
                       ],
                     ),
                     SizedBox(height: 12),
-                    _buildSolutionContent(context, question.explanation!),
+                    _buildSolutionContent(
+                      context,
+                      question.explanation!,
+                      question.id,
+                    ),
                   ],
                 ),
               ),
@@ -704,9 +718,16 @@ class QuestionPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSolutionContent(BuildContext context, String explanation) {
+  Widget _buildSolutionContent(
+    BuildContext context,
+    String explanation,
+    int questionId,
+  ) {
     if (LaTeXUtils.containsLaTeX(explanation)) {
-      return TeXWidget(math: explanation);
+      return TeXWidget(
+        key: ValueKey('solution_$questionId'),
+        math: explanation,
+      );
     } else {
       return Text(
         explanation,
@@ -768,16 +789,17 @@ class QuestionPage extends StatelessWidget {
             // Next/Submit button
             Expanded(
               child: Obx(() {
-                final isLastQuestion = controller.currentQuestionIndex.value ==
+                final isLastQuestion =
+                    controller.currentQuestionIndex.value ==
                     controller.questions.length - 1;
                 final canProceed = controller.canMoveToNext;
                 final isSubmitting = controller.isSubmitting.value;
-                
+
                 return ElevatedButton.icon(
                   onPressed: canProceed && !isSubmitting
                       ? (isLastQuestion
-                          ? controller.submitQuiz
-                          : controller.nextQuestion)
+                            ? controller.submitQuiz
+                            : controller.nextQuestion)
                       : null,
                   icon: isSubmitting
                       ? SizedBox(
