@@ -15,5 +15,6 @@ export 'api/notification.dart';
 export 'api/leaderboard.dart';
 export 'api/study_planner.dart';
 export 'api/success_stories.dart';
+export 'api/user_results.dart';
 export 'deep_link_service.dart';
 export 'notification_service.dart';

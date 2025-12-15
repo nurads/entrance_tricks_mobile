@@ -18,3 +18,4 @@ export 'leaderboard_entry.dart';
 export 'app_header_text.dart';
 export 'study_plan.dart';
 export 'success_story.dart';
+export 'user_results.dart';

@@ -17,6 +17,8 @@ class LeaderboardController extends GetxController {
   bool get isLoading => _isLoading;
 
   bool _isRefreshing = false;
+  bool _isLoadingCompetitions = false;
+  bool _isLoadingExams = false;
 
   String? _error;
   String? get error => _error;
@@ -42,6 +44,8 @@ class LeaderboardController extends GetxController {
   User? _user;
 
   int get tabIndex => _selectedType == LeaderboardType.competition ? 0 : 1;
+  bool get isLoadingCompetitions => _isLoadingCompetitions;
+  bool get isLoadingExams => _isLoadingExams;
 
   @override
   void onInit() async {
@@ -70,11 +74,28 @@ class LeaderboardController extends GetxController {
   bool _isAutoSelecting = false;
 
   Future<void> loadCompetitions() async {
+    // Prevent multiple simultaneous loads
+    if (_isLoadingCompetitions) {
+      logger.w('loadCompetitions: Already loading, skipping');
+      return;
+    }
+
+    _isLoadingCompetitions = true;
+    update();
+
     try {
       final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
-      _competitions = await _leaderboardService.getAvailableCompetitions(
+      final competitions = await _leaderboardService.getAvailableCompetitions(
         device.id,
       );
+
+      // Filter out competitions with invalid IDs
+      _competitions = competitions.where((comp) {
+        final id = comp['id'];
+        return id != null && id is int;
+      }).toList();
+
+      logger.i('Loaded ${_competitions.length} competitions');
 
       // Auto-select first competition if none selected and competitions available
       // Only do this once to prevent loops
@@ -83,21 +104,37 @@ class LeaderboardController extends GetxController {
           _competitions.isNotEmpty &&
           _selectedType == LeaderboardType.competition) {
         _isAutoSelecting = true;
-        _selectedCompetitionId = _competitions.first['id'] as int;
-        await loadLeaderboard();
-        _isAutoSelecting = false;
+        try {
+          final firstId = _competitions.first['id'] as int;
+          _selectedCompetitionId = firstId;
+          await loadLeaderboard();
+        } catch (e) {
+          logger.e('Failed to auto-select competition: $e');
+        } finally {
+          _isAutoSelecting = false;
+        }
       }
 
-      update();
     } catch (e) {
       logger.e('Failed to load competitions: $e');
       _competitions = [];
       _isAutoSelecting = false;
+    } finally {
+      _isLoadingCompetitions = false;
       update();
     }
   }
 
   Future<void> loadExams() async {
+    // Prevent multiple simultaneous loads
+    if (_isLoadingExams) {
+      logger.w('loadExams: Already loading, skipping');
+      return;
+    }
+
+    _isLoadingExams = true;
+    update();
+
     try {
       final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
       final grade = _user?.grade;
@@ -106,6 +143,8 @@ class LeaderboardController extends GetxController {
         gradeId: grade?.id,
       )).where((e) => e.modeType == 'exam_mode').toList();
 
+      logger.i('Loaded ${_exams.length} exams');
+
       // Auto-select first exam if none selected and exams available
       // Only do this once to prevent loops
       if (!_isAutoSelecting &&
@@ -113,16 +152,22 @@ class LeaderboardController extends GetxController {
           _exams.isNotEmpty &&
           _selectedType == LeaderboardType.exam) {
         _isAutoSelecting = true;
-        _selectedExamId = _exams.first.id;
-        await loadLeaderboard();
-        _isAutoSelecting = false;
+        try {
+          _selectedExamId = _exams.first.id;
+          await loadLeaderboard();
+        } catch (e) {
+          logger.e('Failed to auto-select exam: $e');
+        } finally {
+          _isAutoSelecting = false;
+        }
       }
 
-      update();
     } catch (e) {
       logger.e('Failed to load exams: $e');
       _exams = [];
       _isAutoSelecting = false;
+    } finally {
+      _isLoadingExams = false;
       update();
     }
   }
@@ -140,6 +185,19 @@ class LeaderboardController extends GetxController {
   }
 
   void selectCompetition(int? competitionId) {
+    if (_selectedCompetitionId == competitionId) {
+      return; // Already selected
+    }
+
+    // Validate competition ID exists in the list
+    if (competitionId != null) {
+      final exists = _competitions.any((comp) => comp['id'] == competitionId);
+      if (!exists) {
+        logger.w('selectCompetition: Competition ID $competitionId not found in list');
+        return;
+      }
+    }
+
     _selectedCompetitionId = competitionId;
     _selectedExamId = null;
     _leaderboardEntries = [];
@@ -151,6 +209,19 @@ class LeaderboardController extends GetxController {
   }
 
   void selectExam(int? examId) {
+    if (_selectedExamId == examId) {
+      return; // Already selected
+    }
+
+    // Validate exam ID exists in the list
+    if (examId != null) {
+      final exists = _exams.any((exam) => exam.id == examId);
+      if (!exists) {
+        logger.w('selectExam: Exam ID $examId not found in list');
+        return;
+      }
+    }
+
     _selectedExamId = examId;
     _selectedCompetitionId = null;
     _leaderboardEntries = [];

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vector_academy/controllers/leaderboard/leaderboard_controller.dart';
 import 'package:vector_academy/models/leaderboard_entry.dart';
+import 'package:vector_academy/utils/utils.dart';
 
 class LeaderboardPage extends StatelessWidget {
   const LeaderboardPage({super.key});
@@ -89,6 +90,51 @@ class LeaderboardPage extends StatelessWidget {
     BuildContext context,
     LeaderboardController controller,
   ) {
+    // Show loading state for competitions or exams
+    final isLoadingData = controller.selectedType == LeaderboardType.competition
+        ? controller.isLoadingCompetitions
+        : controller.isLoadingExams;
+
+    if (isLoadingData) {
+      return Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              controller.selectedType == LeaderboardType.competition
+                  ? 'Loading competitions...'
+                  : 'Loading exams...',
+              style: TextStyle(color: Colors.grey[600], fontSize: 15),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -118,8 +164,14 @@ class LeaderboardPage extends StatelessWidget {
           items: controller.selectedType == LeaderboardType.competition
               ? [
                   ...controller.competitions.map((comp) {
+                    // Ensure the ID is valid
+                    final id = comp['id'];
+                    if (id == null || id is! int) {
+                      return null;
+                    }
+                    
                     return DropdownMenuItem<String>(
-                      value: comp['id'].toString(),
+                      value: id.toString(),
                       child: Row(
                         children: [
                           Icon(
@@ -130,7 +182,7 @@ class LeaderboardPage extends StatelessWidget {
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              comp['name'] as String,
+                              comp['name'] as String? ?? 'Unknown Competition',
                               style: const TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w500,
@@ -161,7 +213,7 @@ class LeaderboardPage extends StatelessWidget {
                         ],
                       ),
                     );
-                  }),
+                  }).whereType<DropdownMenuItem<String>>(), // Filter out nulls
                 ]
               : [
                   ...controller.exams.map((exam) {
@@ -192,10 +244,15 @@ class LeaderboardPage extends StatelessWidget {
                 ],
           onChanged: (value) {
             if (value != null) {
-              if (controller.selectedType == LeaderboardType.competition) {
-                controller.selectCompetition(int.parse(value));
-              } else {
-                controller.selectExam(int.parse(value));
+              try {
+                final id = int.parse(value);
+                if (controller.selectedType == LeaderboardType.competition) {
+                  controller.selectCompetition(id);
+                } else {
+                  controller.selectExam(id);
+                }
+              } catch (e) {
+                logger.e('Failed to parse selection ID: $e');
               }
             }
           },

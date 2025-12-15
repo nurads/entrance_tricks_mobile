@@ -12,6 +12,7 @@ export 'misc/video_player_controller.dart';
 export 'misc/pdf_reader_controller.dart';
 export "misc/faq.dart";
 export 'misc/success_stories_controller.dart';
+export 'misc/user_score_controller.dart';
 export 'subject/subject_controller.dart';
 export 'subject/chapter_detail_controller.dart';
 export 'exam/exam_controller.dart';

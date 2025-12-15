@@ -709,6 +709,12 @@ class HomeDashboard extends StatelessWidget {
                     subtitle: 'Student achievements',
                     onTap: () => Get.toNamed(VIEWS.successStories.path),
                   ),
+                  _buildModernDrawerMenuItem(
+                    icon: Icons.assessment_rounded,
+                    title: 'My Scores',
+                    subtitle: 'View competition results',
+                    onTap: () => Get.toNamed(VIEWS.userScore.path),
+                  ),
 
                   SizedBox(height: 20),
 

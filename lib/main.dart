@@ -115,6 +115,14 @@ class MyApp extends StatelessWidget {
           },
         ),
         GetPage(
+          name: VIEWS.userScore.path,
+          page: () => const UserScorePage(),
+          binding: BindingsBuilder(() {
+            Get.put(UserScoreController());
+          }),
+        ),
+
+        GetPage(
           name: '/add-plan',
           page: () => AddPlanPage(),
           binding: BindingsBuilder(() {

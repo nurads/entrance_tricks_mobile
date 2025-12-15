@@ -30,6 +30,7 @@ export 'payment/payment_page.dart';
 export 'payment_history_screen.dart';
 export 'success_stories/success_stories_page.dart';
 export 'success_stories/success_story_detail_page.dart';
+export 'common/user_score_page.dart';
 
 enum VIEWS {
   home('/home'),
@@ -56,7 +57,8 @@ enum VIEWS {
   payments('/payments'),
   paymentHistory('/payment-history'),
   successStories('/success-stories'),
-  successStoryDetail('/success-story-detail');
+  successStoryDetail('/success-story-detail'),
+  userScore('/user-score');
 
   final String path;
 
