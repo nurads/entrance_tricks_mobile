@@ -15,6 +15,7 @@ Question _$QuestionFromJson(Map<String, dynamic> json) => Question(
       .toList(),
   imagePath: json['image_path'] as String?,
   explanation: json['explanation'] as String?,
+  instruction: json['instruction'] as String?,
   hasUserAnswered: json['has_user_answered'] as bool? ?? false,
 );
 
@@ -26,6 +27,7 @@ Map<String, dynamic> _$QuestionToJson(Question instance) => <String, dynamic>{
   'image_path': instance.imagePath,
   'explanation': instance.explanation,
   'has_user_answered': instance.hasUserAnswered,
+  'instruction': instance.instruction,
 };
 
 Choice _$ChoiceFromJson(Map<String, dynamic> json) => Choice(

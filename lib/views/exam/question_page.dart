@@ -188,6 +188,43 @@ class QuestionPage extends StatelessWidget {
 
             SizedBox(height: 16),
 
+            // Instruction if available
+            if (question.instruction != null &&
+                question.instruction!.trim().isNotEmpty) ...[
+              Container(
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.secondaryContainer.withValues(
+                    alpha: 0.5,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: theme.colorScheme.secondary.withValues(alpha: 0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      color: theme.colorScheme.secondary,
+                      size: 20,
+                    ),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: _buildInstructionContent(
+                        context,
+                        question.instruction!,
+                        question.id,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 16),
+            ],
+
             // Question content with LaTeX support
             _buildQuestionContent(context, question.content, question.id),
 
@@ -235,6 +272,29 @@ class QuestionPage extends StatelessWidget {
       return TeXWidget(key: ValueKey('question_$questionId'), math: content);
     } else {
       return Text(content, style: TextStyle(fontSize: 12));
+    }
+  }
+
+  Widget _buildInstructionContent(
+    BuildContext context,
+    String instruction,
+    int questionId,
+  ) {
+    final theme = Theme.of(context);
+    if (LaTeXUtils.containsLaTeX(instruction)) {
+      return TeXWidget(
+        key: ValueKey('instruction_$questionId'),
+        math: instruction,
+      );
+    } else {
+      return Text(
+        instruction,
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: theme.colorScheme.onSecondaryContainer,
+          fontSize: 12,
+          height: 1.4,
+        ),
+      );
     }
   }
 
