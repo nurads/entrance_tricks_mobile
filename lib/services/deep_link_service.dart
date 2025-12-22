@@ -248,6 +248,18 @@ class DeepLinkService {
               }
             }
             _navigateToExamTab();
+          } else if (path.startsWith('/exams/')) {
+            final parts = path.split('/');
+            if (parts.length >= 3) {
+              final examId = int.tryParse(parts[2]);
+              if (examId != null) {
+                if (!await _handleExamDetailId(examId)) {
+                  _navigateToExamTab();
+                }
+                return;
+              }
+            }
+            _navigateToExamTab();
           } else if (path.startsWith('/news/')) {
             final parts = path.split('/');
             if (parts.length >= 3) {
@@ -296,6 +308,7 @@ class DeepLinkService {
   }
 
   Future<bool> _handleExamDetailQuery(Map<String, String> queryParams) async {
+    logger.d('queryParams: $queryParams');
     if (queryParams.containsKey('id')) {
       final examId = int.tryParse(queryParams['id'] ?? '');
       if (examId != null) {

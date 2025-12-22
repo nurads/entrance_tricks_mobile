@@ -44,7 +44,7 @@ class ShareUtils {
     final host = useCustomScheme ? '' : baseUrl;
     final separator = useCustomScheme ? '://' : '://';
 
-    return '$scheme$separator$host/exam-detail?id=$examId';
+    return '$scheme$separator$host/exams/$examId';
   }
 
   /// Generate a shareable link for success story

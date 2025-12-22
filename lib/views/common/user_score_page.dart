@@ -390,7 +390,7 @@ class UserScorePage extends StatelessWidget {
     UserLeaderboardResult result,
   ) {
     final hasAttempted = result.hasUserAttempted;
-    final totalScore = result.totalScore;
+    final averageScore = result.averageScore;
     final examCount = result.exams.length;
 
     return Container(
@@ -474,8 +474,8 @@ class UserScorePage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildSummaryItem(
-                  'Total Score',
-                  totalScore.toStringAsFixed(1),
+                  'Average Score',
+                  averageScore.toStringAsFixed(1),
                   Icons.star,
                 ),
                 Container(

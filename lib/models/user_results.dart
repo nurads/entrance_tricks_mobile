@@ -60,12 +60,16 @@ class UserLeaderboardResult {
   @JsonKey(name: "competition_id")
   final int competitionId;
 
+  @JsonKey(name: "average_score")
+  final double averageScore;
+
   UserLeaderboardResult({
     required this.totalScore,
     required this.competetionName,
     required this.hasUserAttempted,
     required this.exams,
     required this.competitionId,
+    required this.averageScore,
   });
   factory UserLeaderboardResult.fromJson(Map<String, dynamic> json) {
     // Safe parsing with validation
@@ -115,6 +119,7 @@ class UserLeaderboardResult {
       hasUserAttempted: json['has_user_attempted'] as bool? ?? false,
       exams: safeExams,
       competitionId: safeCompetitionId,
+      averageScore: json['average_score'] as double? ?? 0.0,
     );
   }
   Map<String, dynamic> toJson() => _$UserLeaderboardResultToJson(this);

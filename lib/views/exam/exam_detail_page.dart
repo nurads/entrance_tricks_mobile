@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:vector_academy/controllers/exam/exam_controller.dart';
 import 'package:vector_academy/controllers/exam/question_page_controller.dart';
 import 'package:vector_academy/controllers/misc/downloads_controller.dart';
 import 'package:vector_academy/models/models.dart';
 import 'package:vector_academy/services/services.dart';
 import 'package:vector_academy/utils/device/device.dart';
+import 'package:vector_academy/utils/share_utils.dart';
 import 'package:vector_academy/utils/storages/storages.dart';
 import 'package:vector_academy/utils/utils.dart';
 import 'package:vector_academy/views/exam/exam_result_page.dart';
@@ -313,12 +315,38 @@ class _ExamDetailPageState extends State<ExamDetailPage> {
     return correct;
   }
 
+  Future<void> _shareExam(BuildContext context) async {
+    try {
+      final shareLink = ShareUtils.generateExamLink(_exam.id);
+      final shareText = '${_exam.name}\n\n$shareLink';
+
+      await Share.share(shareText, subject: _exam.name);
+    } catch (e) {
+      logger.e('Error sharing exam: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to share exam'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('Exam Details'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.share),
+            onPressed: () => _shareExam(context),
+            tooltip: 'Share exam',
+          ),
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: _refreshExam,
