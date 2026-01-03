@@ -85,16 +85,24 @@ class PaymentService extends GetxController {
     required int paymentMethod,
     required String device,
     required int amount,
+    String? referralCode,
   }) async {
+    final additionalData = <String, dynamic>{
+      'package': package,
+      'method': paymentMethod,
+      'device': device,
+      'amount': amount,
+    };
+    
+    // Add referral_code if provided (convert to uppercase as per API spec)
+    if (referralCode != null && referralCode.trim().isNotEmpty) {
+      additionalData['referral_code'] = referralCode.trim().toUpperCase();
+    }
+    
     final response = await apiClient.postMultipart(
       '/app/payments/',
       file: file,
-      additionalData: {
-        'package': package,
-        'method': paymentMethod,
-        'device': device,
-        'amount': amount,
-      },
+      additionalData: additionalData,
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {

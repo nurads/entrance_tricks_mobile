@@ -19,6 +19,7 @@ class PaymentController extends GetxController {
   List<Package> packages = <Package>[];
   PaymentMethod? selectedPaymentMethod;
   File? selectedReceiptImage;
+  String? referralCode;
 
   bool isLoading = false;
   bool isLoadingPayments = false;
@@ -169,7 +170,7 @@ class PaymentController extends GetxController {
   }
 
   // Create payment
-  Future<bool> createPayment(int packageId, int amount) async {
+  Future<bool> createPayment(int packageId, int amount, {String? referralCode}) async {
     isCreatingPayment = true;
     update();
 
@@ -203,6 +204,7 @@ class PaymentController extends GetxController {
         paymentMethod: selectedPaymentMethod!.id,
         amount: amount,
         device: device.id,
+        referralCode: referralCode,
       );
 
       Get.snackbar(
@@ -216,6 +218,7 @@ class PaymentController extends GetxController {
       // Reset form
       selectedPaymentMethod = null;
       selectedReceiptImage = null;
+      referralCode = null;
 
       // Refresh user payments
       loadUserPayments();
@@ -241,6 +244,13 @@ class PaymentController extends GetxController {
   void clearSelection() {
     selectedPaymentMethod = null;
     selectedReceiptImage = null;
+    referralCode = null;
+    update();
+  }
+  
+  // Set referral code
+  void setReferralCode(String? code) {
+    referralCode = code?.trim().toUpperCase();
     update();
   }
 

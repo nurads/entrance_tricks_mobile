@@ -25,6 +25,8 @@ class Agent {
   final String? bankAccountNumber;
   @JsonKey(name: 'account_name')
   final String? accountName;
+  @JsonKey(name: 'referral_code')
+  final String? referralCode;
   @JsonKey(name: 'created_at')
   final DateTime createdAt;
   @JsonKey(name: 'updated_at')
@@ -43,6 +45,7 @@ class Agent {
     this.bankName,
     this.bankAccountNumber,
     this.accountName,
+    this.referralCode,
     required this.createdAt,
     required this.updatedAt,
   });

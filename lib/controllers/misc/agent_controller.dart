@@ -55,10 +55,7 @@ class AgentController extends GetxController {
     } catch (e) {
       logger.e('Error loading agent status: $e');
       if (e is! ApiException || !e.message.contains('404')) {
-        AppSnackbar.showError(
-          'Error',
-          'Failed to load agent status',
-        );
+        AppSnackbar.showError('Error', 'Failed to load agent status');
       }
     } finally {
       _isLoading = false;
@@ -168,10 +165,7 @@ class AgentController extends GetxController {
   /// Submit agent application
   Future<void> submitApplication() async {
     if (_selectedIdDocument == null) {
-      AppSnackbar.showError(
-        'Validation Error',
-        'Please select an ID document',
-      );
+      AppSnackbar.showError('Validation Error', 'Please select an ID document');
       return;
     }
 
@@ -233,18 +227,12 @@ class AgentController extends GetxController {
   /// Redeem all coins
   Future<void> redeemCoins() async {
     if (_agentStatus == null) {
-      AppSnackbar.showError(
-        'Error',
-        'Agent status not found',
-      );
+      AppSnackbar.showError('Error', 'Agent status not found');
       return;
     }
 
     if (_agentStatus!.coins <= 0) {
-      AppSnackbar.showError(
-        'No Coins',
-        'You don\'t have any coins to redeem',
-      );
+      AppSnackbar.showError('No Coins', 'You don\'t have any coins to redeem');
       return;
     }
 
@@ -278,10 +266,7 @@ class AgentController extends GetxController {
   /// Show redeem coins dialog
   void showRedeemDialog() {
     if (_agentStatus == null || _agentStatus!.coins <= 0) {
-      AppSnackbar.showError(
-        'No Coins',
-        'You don\'t have any coins to redeem',
-      );
+      AppSnackbar.showError('No Coins', 'You don\'t have any coins to redeem');
       return;
     }
 
@@ -291,8 +276,8 @@ class AgentController extends GetxController {
           title: const Text('Redeem All Coins'),
           content: SingleChildScrollView(
             child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -318,11 +303,8 @@ class AgentController extends GetxController {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'coins will be redeemed',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.blue[700],
-                        ),
+                        'coins will be withdrawn',
+                        style: TextStyle(fontSize: 14, color: Colors.blue[700]),
                       ),
                     ],
                   ),
@@ -336,12 +318,15 @@ class AgentController extends GetxController {
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.info_outline,
-                          color: Colors.orange[700], size: 20),
+                      Icon(
+                        Icons.info_outline,
+                        color: Colors.orange[700],
+                        size: 20,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'All your coins will be redeemed. Redemption requests will be reviewed by admin.',
+                          'All your coins will be withdrawn. Withdrawal requests will be reviewed by admin. if successful, you will receive the withdrawal amount in your bank account.',
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.orange[900],
@@ -376,11 +361,10 @@ class AgentController extends GetxController {
                       height: 16,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(Colors.white),
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     )
-                  : const Text('Redeem All'),
+                  : const Text('Withdraw All'),
             ),
           ],
         ),
@@ -388,4 +372,3 @@ class AgentController extends GetxController {
     );
   }
 }
-

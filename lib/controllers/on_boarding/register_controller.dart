@@ -15,15 +15,11 @@ class RegisterController extends GetxController {
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
   final otpController = TextEditingController();
-  final agentIdController = TextEditingController();
 
   Grade? _selectedGrade;
   Grade? get selectedGrade => _selectedGrade;
   bool _isLoading = false;
   bool get isLoading => _isLoading;
-  
-  int? _agentId;
-  int? get agentId => _agentId;
 
   bool _isPasswordVisible = false;
   bool get isPasswordVisible => _isPasswordVisible;
@@ -108,26 +104,11 @@ class RegisterController extends GetxController {
       _setLoading(true);
 
       try {
-        // Get agent ID from text field (user input takes priority)
-        int? agentId;
-        if (agentIdController.text.trim().isNotEmpty) {
-          agentId = int.tryParse(agentIdController.text.trim());
-          if (agentId != null && agentId > 0) {
-            _agentId = agentId; // Update stored value
-          } else {
-            agentId = null; // Invalid input, ignore it
-          }
-        } else {
-          // Use pre-filled agent ID if text field is empty
-          agentId = _agentId;
-        }
-        
         final response = await UserService().registerUser(
           nameController.text,
           phoneController.text,
           passwordController.text,
           selectedGrade?.id ?? 0,
-          agentId: agentId,
         );
 
         logger.i(response);
@@ -190,39 +171,12 @@ class RegisterController extends GetxController {
     update();
   }
 
-  void setAgentId(int? agentId) {
-    _agentId = agentId;
-    if (agentId != null) {
-      agentIdController.text = agentId.toString();
-    } else {
-      agentIdController.clear();
-    }
-    update();
-  }
-
   @override
   void onInit() {
     super.onInit();
     // Recreate formKey to avoid GlobalKey conflicts when widget rebuilds
     formKey = GlobalKey<FormState>();
     loadGrades();
-    
-    // Check for agent_id from route arguments
-    final args = Get.arguments;
-    if (args != null && args is Map<String, dynamic>) {
-      if (args.containsKey('agent_id')) {
-        final agentId = args['agent_id'];
-        if (agentId is int) {
-          _agentId = agentId;
-          agentIdController.text = agentId.toString();
-        } else if (agentId is String) {
-          _agentId = int.tryParse(agentId);
-          if (_agentId != null) {
-            agentIdController.text = _agentId.toString();
-          }
-        }
-      }
-    }
   }
 
   @override
@@ -231,7 +185,6 @@ class RegisterController extends GetxController {
     phoneController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
-    agentIdController.dispose();
     super.onClose();
   }
 }

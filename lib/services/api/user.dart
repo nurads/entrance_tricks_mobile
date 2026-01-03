@@ -31,9 +31,8 @@ class UserService extends GetxController {
     String name,
     String phone,
     String password,
-    int grade, {
-    int? agentId,
-  }) async {
+    int grade,
+  ) async {
     name = name.trim();
     final lastName = name.split(' ').lastOrNull;
     final firstName = name.split(' ').first;
@@ -44,11 +43,6 @@ class UserService extends GetxController {
       'password': password,
       'gradeId': grade,
     };
-    
-    // Add agent_id if provided
-    if (agentId != null) {
-      data['agent_id'] = agentId;
-    }
     
     final response = await apiClient.post(
       '/auth/register/',
@@ -74,9 +68,6 @@ class UserService extends GetxController {
     }
     if (response.data['last_name'] != null) {
       error = "Last Name: ${response.data['last_name'][0]}";
-    }
-    if (response.data['agent_id'] != null) {
-      error = "Agent ID: ${response.data['agent_id'][0]}";
     }
     logger.e(response.data);
     throw ApiException(error ?? "Failed to register user");

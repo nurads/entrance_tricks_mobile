@@ -28,6 +28,8 @@ class Payment {
   final int package;
   @JsonKey(name: 'payment_method')
   final PaymentMethod? paymentMethod;
+  @JsonKey(name: 'referral_code')
+  final String? referralCode;
 
   @JsonKey(name: 'created_at')
   final DateTime createdAt;
@@ -39,6 +41,7 @@ class Payment {
     required this.receipt,
     required this.package,
     this.paymentMethod,
+    this.referralCode,
     required this.createdAt,
   });
 
@@ -64,6 +67,8 @@ class PaymentCreateRequest {
   final String device;
   final int amount;
   final String receipt; // Changed from String to int (file ID)
+  @JsonKey(name: 'referral_code')
+  final String? referralCode;
 
   PaymentCreateRequest({
     required this.package,
@@ -71,6 +76,7 @@ class PaymentCreateRequest {
     required this.device,
     required this.amount,
     required this.receipt,
+    this.referralCode,
   });
 
   factory PaymentCreateRequest.fromJson(Map<String, dynamic> json) =>

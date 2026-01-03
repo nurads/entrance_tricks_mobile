@@ -23,6 +23,7 @@ Agent _$AgentFromJson(Map<String, dynamic> json) => Agent(
   bankName: json['bank_name'] as String?,
   bankAccountNumber: json['bank_account_number'] as String?,
   accountName: json['account_name'] as String?,
+  referralCode: json['referral_code'] as String?,
   createdAt: DateTime.parse(json['created_at'] as String),
   updatedAt: DateTime.parse(json['updated_at'] as String),
 );
@@ -40,6 +41,7 @@ Map<String, dynamic> _$AgentToJson(Agent instance) => <String, dynamic>{
   'bank_name': instance.bankName,
   'bank_account_number': instance.bankAccountNumber,
   'account_name': instance.accountName,
+  'referral_code': instance.referralCode,
   'created_at': instance.createdAt.toIso8601String(),
   'updated_at': instance.updatedAt.toIso8601String(),
 };

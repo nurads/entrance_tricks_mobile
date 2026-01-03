@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:vector_academy/controllers/controllers.dart';
@@ -909,6 +910,40 @@ class _ReceiptUploadPageState extends State<_ReceiptUploadPage> {
 
               const SizedBox(height: 24),
 
+              // Referral Code Input (Optional)
+              const Text(
+                'Referral Code (Optional)',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Enter a 5-character referral code if you have one',
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                initialValue: controller.referralCode,
+                decoration: InputDecoration(
+                  hintText: 'ABC12',
+                  prefixIcon: const Icon(Icons.local_offer),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey.shade50,
+                ),
+                textCapitalization: TextCapitalization.characters,
+                maxLength: 5,
+                onChanged: (value) {
+                  controller.setReferralCode(value);
+                },
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[A-Z0-9]')),
+                ],
+              ),
+
+              const SizedBox(height: 24),
+
               // Submit Button
               SizedBox(
                 height: 48,
@@ -990,6 +1025,7 @@ class _ReceiptUploadPageState extends State<_ReceiptUploadPage> {
     await controller.createPayment(
       widget.package.id,
       widget.package.price.toInt(),
+      referralCode: controller.referralCode,
     );
   }
 }

@@ -29,8 +29,8 @@ class AgentStatusPage extends StatelessWidget {
         body: controller.isLoading
             ? const Center(child: CircularProgressIndicator())
             : controller.agentStatus == null
-                ? _buildNotAppliedView(controller)
-                : _buildStatusView(controller, context),
+            ? _buildNotAppliedView(controller)
+            : _buildStatusView(controller, context),
       ),
     );
   }
@@ -42,27 +42,17 @@ class AgentStatusPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.person_add_outlined,
-              size: 80,
-              color: Colors.grey[400],
-            ),
+            Icon(Icons.person_add_outlined, size: 80, color: Colors.grey[400]),
             const SizedBox(height: 24),
             const Text(
               'You haven\'t applied yet',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
             const Text(
               'Apply to become an agent and start earning coins',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.grey),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
@@ -166,10 +156,7 @@ class AgentStatusPage extends StatelessWidget {
                   children: [
                     const Text(
                       'Total Earnings',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey,
-                      ),
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
                     ),
                     const SizedBox(height: 8),
                     Row(
@@ -185,10 +172,7 @@ class AgentStatusPage extends StatelessWidget {
                         const SizedBox(width: 8),
                         const Text(
                           'ETB',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.grey,
-                          ),
+                          style: TextStyle(fontSize: 18, color: Colors.grey),
                         ),
                       ],
                     ),
@@ -201,7 +185,11 @@ class AgentStatusPage extends StatelessWidget {
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.attach_money, color: Colors.green[700], size: 20),
+                          Icon(
+                            Icons.attach_money,
+                            color: Colors.green[700],
+                            size: 20,
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -235,10 +223,7 @@ class AgentStatusPage extends StatelessWidget {
                 children: [
                   const Text(
                     'Your Coins',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
-                    ),
+                    style: TextStyle(fontSize: 14, color: Colors.grey),
                   ),
                   const SizedBox(height: 8),
                   Row(
@@ -254,10 +239,7 @@ class AgentStatusPage extends StatelessWidget {
                       const SizedBox(width: 8),
                       const Text(
                         'coins',
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.grey,
-                        ),
+                        style: TextStyle(fontSize: 18, color: Colors.grey),
                       ),
                     ],
                   ),
@@ -270,7 +252,11 @@ class AgentStatusPage extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.info_outline, color: Colors.blue[700], size: 20),
+                        Icon(
+                          Icons.info_outline,
+                          color: Colors.blue[700],
+                          size: 20,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -293,7 +279,7 @@ class AgentStatusPage extends StatelessWidget {
                             ? null
                             : () => controller.showRedeemDialog(),
                         icon: const Icon(Icons.monetization_on),
-                        label: const Text('Redeem Coins'),
+                        label: const Text('Request Withdrawal'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green[600],
                           foregroundColor: Colors.white,
@@ -324,30 +310,21 @@ class AgentStatusPage extends StatelessWidget {
                 children: [
                   const Text(
                     'Application Details',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
-                  _buildCopiableDetailRow(
-                    'Agent ID',
-                    '${agent.id}',
-                    Icons.badge,
-                    context,
-                  ),
+                  if (agent.referralCode != null) ...[
+                    _buildCopiableDetailRow(
+                      'Referral Code',
+                      agent.referralCode!,
+                      Icons.local_offer,
+                      context,
+                    ),
+                    const Divider(),
+                  ],
+                  _buildDetailRow('Name', agent.userName, Icons.person),
                   const Divider(),
-                  _buildDetailRow(
-                    'Name',
-                    agent.userName,
-                    Icons.person,
-                  ),
-                  const Divider(),
-                  _buildDetailRow(
-                    'Phone',
-                    agent.userPhone,
-                    Icons.phone,
-                  ),
+                  _buildDetailRow('Phone', agent.userPhone, Icons.phone),
                   if (agent.bankName != null) ...[
                     const Divider(),
                     _buildDetailRow(
@@ -480,10 +457,7 @@ class AgentStatusPage extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
               ),
               const SizedBox(height: 4),
               Text(
@@ -540,10 +514,7 @@ class AgentStatusPage extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                   const SizedBox(height: 4),
                   Row(
@@ -557,11 +528,7 @@ class AgentStatusPage extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Icon(
-                        Icons.copy,
-                        size: 16,
-                        color: Colors.blue[600],
-                      ),
+                      Icon(Icons.copy, size: 16, color: Colors.blue[600]),
                     ],
                   ),
                 ],
@@ -597,4 +564,3 @@ class AgentStatusPage extends StatelessWidget {
     return 'Waiting for admin approval';
   }
 }
-

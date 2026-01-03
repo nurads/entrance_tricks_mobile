@@ -8,28 +8,8 @@ import 'package:vector_academy/components/components.dart';
 class Register extends StatelessWidget {
   const Register({super.key});
 
-  static final Set<RegisterController> _initializedControllers = {};
-
-  int? _parseAgentIdFromArguments() {
-    final args = Get.arguments;
-    if (args != null && args is Map<String, dynamic>) {
-      if (args.containsKey('agent_id')) {
-        final agentId = args['agent_id'];
-        if (agentId is int) {
-          return agentId;
-        } else if (agentId is String) {
-          return int.tryParse(agentId);
-        }
-      }
-    }
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
-    // Read agent_id from arguments
-    final agentId = _parseAgentIdFromArguments();
-
     // Controller will be created by binding's lazyPut when GetBuilder accesses it
     return Scaffold(
       backgroundColor: Color(0xffefefef),
@@ -43,17 +23,6 @@ class Register extends StatelessWidget {
         padding: EdgeInsets.all(20),
         child: GetBuilder<RegisterController>(
           builder: (controller) {
-            // Set agent_id from arguments once per controller instance
-            if (agentId != null &&
-                !_initializedControllers.contains(controller) &&
-                controller.agentId != agentId) {
-              _initializedControllers.add(controller);
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (controller.agentId != agentId) {
-                  controller.setAgentId(agentId);
-                }
-              });
-            }
             return Form(
               key: controller.formKey,
               autovalidateMode: AutovalidateMode.onUnfocus,
@@ -61,7 +30,7 @@ class Register extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset('assets/images/logo.png'),
+                  // Image.asset('assets/images/logo.png'),
                   Text(
                     'Welcome',
                     style: Theme.of(context).textTheme.titleLarge,
@@ -236,76 +205,6 @@ class Register extends StatelessWidget {
                       textInputAction: TextInputAction.next,
                     ),
                   ),
-                  // Agent ID field (optional)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 10,
-                    ),
-                    child: TextFormField(
-                      controller: controller.agentIdController,
-                      decoration: InputDecoration(
-                        labelText: 'Agent ID (Optional)',
-                        hintText: 'Enter agent referral ID if you have one',
-                        prefixIcon: Icon(Icons.person_outline),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value != null && value.isNotEmpty) {
-                          final agentId = int.tryParse(value.trim());
-                          if (agentId == null || agentId <= 0) {
-                            return 'Please enter a valid agent ID';
-                          }
-                        }
-                        return null;
-                      },
-                      textInputAction: TextInputAction.done,
-                    ),
-                  ),
-                  // Show message if agent ID is pre-filled from deep link
-                  if (controller.agentId != null)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 5,
-                      ),
-                      child: Container(
-                        padding: EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.primary.withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.info_outline,
-                              color: Theme.of(context).colorScheme.primary,
-                              size: 20,
-                            ),
-                            SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                'Agent referral ID detected: ${controller.agentId}',
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onPrimaryContainer,
-                                    ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
                   SizedBox(height: 10),
                   // Privacy Policy Consent Checkbox
                   Padding(

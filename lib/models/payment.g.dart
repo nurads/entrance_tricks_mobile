@@ -15,6 +15,7 @@ Payment _$PaymentFromJson(Map<String, dynamic> json) => Payment(
   paymentMethod: json['payment_method'] == null
       ? null
       : PaymentMethod.fromJson(json['payment_method'] as Map<String, dynamic>),
+  referralCode: json['referral_code'] as String?,
   createdAt: DateTime.parse(json['created_at'] as String),
 );
 
@@ -25,6 +26,7 @@ Map<String, dynamic> _$PaymentToJson(Payment instance) => <String, dynamic>{
   'receipt': instance.receipt,
   'package': instance.package,
   'payment_method': instance.paymentMethod,
+  'referral_code': instance.referralCode,
   'created_at': instance.createdAt.toIso8601String(),
 };
 
@@ -36,6 +38,7 @@ PaymentCreateRequest _$PaymentCreateRequestFromJson(
   device: json['device'] as String,
   amount: (json['amount'] as num).toInt(),
   receipt: json['receipt'] as String,
+  referralCode: json['referral_code'] as String?,
 );
 
 Map<String, dynamic> _$PaymentCreateRequestToJson(
@@ -46,4 +49,5 @@ Map<String, dynamic> _$PaymentCreateRequestToJson(
   'device': instance.device,
   'amount': instance.amount,
   'receipt': instance.receipt,
+  'referral_code': instance.referralCode,
 };
