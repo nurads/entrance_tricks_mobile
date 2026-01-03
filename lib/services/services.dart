@@ -5,6 +5,7 @@ export 'api/grades.dart';
 export 'api/chapters.dart';
 export 'api/exams.dart';
 export 'api/payments.dart';
+export 'api/agent.dart';
 export 'auth.dart';
 export 'core.dart';
 export 'api/news.dart';

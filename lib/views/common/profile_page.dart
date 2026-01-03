@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vector_academy/controllers/controllers.dart';
+import 'package:vector_academy/views/views.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -162,6 +163,27 @@ class ProfilePage extends StatelessWidget {
             Icons.phone_outlined,
             "Phone Number",
             controller.user?.phoneNumber ?? '',
+          ),
+
+          SizedBox(height: 40),
+
+          // Agent Section
+          Text(
+            'Become an Agent',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[800],
+            ),
+          ),
+          SizedBox(height: 20),
+
+          _buildActionButton(
+            context,
+            Icons.business_center,
+            "Agent Program",
+            "Apply to become an agent and earn coins",
+            () => Get.toNamed(VIEWS.agentStatus.path),
           ),
 
           SizedBox(height: 40),

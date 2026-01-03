@@ -7,7 +7,7 @@ class Package {
   final int id;
   final String name;
   final String description;
-  final String price;
+  final double price;
   @JsonKey(name: 'duration_days')
   final int durationDays;
   final List<int> exams;

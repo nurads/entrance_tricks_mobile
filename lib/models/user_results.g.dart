@@ -31,6 +31,7 @@ UserLeaderboardResult _$UserLeaderboardResultFromJson(
       .toList(),
   competitionId: (json['competition_id'] as num).toInt(),
   averageScore: (json['average_score'] as num).toDouble(),
+  totalQuestions: (json['total_questions'] as num).toInt(),
 );
 
 Map<String, dynamic> _$UserLeaderboardResultToJson(
@@ -41,5 +42,6 @@ Map<String, dynamic> _$UserLeaderboardResultToJson(
   'has_user_attempted': instance.hasUserAttempted,
   'exams': instance.exams,
   'competition_id': instance.competitionId,
+  'total_questions': instance.totalQuestions,
   'average_score': instance.averageScore,
 };

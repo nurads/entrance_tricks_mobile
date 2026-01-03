@@ -989,7 +989,7 @@ class _ReceiptUploadPageState extends State<_ReceiptUploadPage> {
     final controller = widget.controller;
     await controller.createPayment(
       widget.package.id,
-      double.parse(widget.package.price).toInt(),
+      widget.package.price.toInt(),
     );
   }
 }

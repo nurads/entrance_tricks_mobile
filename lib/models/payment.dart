@@ -21,7 +21,7 @@ extension PaymentStatusExtension on PaymentStatus {
 @JsonSerializable()
 class Payment {
   final int id;
-  final String amount;
+  final double amount;
   @JsonKey(name: 'successful')
   final bool successful;
   final String receipt;

@@ -121,6 +121,20 @@ class MyApp extends StatelessWidget {
             Get.put(UserScoreController());
           }),
         ),
+        GetPage(
+          name: VIEWS.agentApply.path,
+          page: () => const AgentApplyPage(),
+          binding: BindingsBuilder(() {
+            Get.put(AgentController());
+          }),
+        ),
+        GetPage(
+          name: VIEWS.agentStatus.path,
+          page: () => const AgentStatusPage(),
+          binding: BindingsBuilder(() {
+            Get.put(AgentController());
+          }),
+        ),
 
         GetPage(
           name: '/add-plan',

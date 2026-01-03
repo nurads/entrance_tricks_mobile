@@ -393,6 +393,12 @@ class UserScorePage extends StatelessWidget {
     final averageScore = result.averageScore;
     final examCount = result.exams.length;
 
+    final totalScore = result.totalScore;
+
+    final totalQuestions = result.totalQuestions;
+
+    final percentage = totalScore / totalQuestions * 100;
+
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
@@ -474,8 +480,8 @@ class UserScorePage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildSummaryItem(
-                  'Average Score',
-                  averageScore.toStringAsFixed(1),
+                  'Percentage',
+                  percentage.toStringAsFixed(1),
                   Icons.star,
                 ),
                 Container(

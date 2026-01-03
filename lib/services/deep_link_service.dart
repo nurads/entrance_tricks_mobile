@@ -73,7 +73,21 @@ class DeepLinkService {
           break;
 
         case '/register':
-          _navigateToRoute(VIEWS.register.path);
+          // Extract agent_id from query parameters if present
+          logger.d('queryParams: $queryParams');
+          if (queryParams.containsKey('agent_id')) {
+            final agentId = int.tryParse(queryParams['agent_id'] ?? '');
+            if (agentId != null) {
+              Get.toNamed(
+                VIEWS.register.path,
+                arguments: {'agent_id': agentId},
+              );
+            } else {
+              _navigateToRoute(VIEWS.register.path);
+            }
+          } else {
+            _navigateToRoute(VIEWS.register.path);
+          }
           break;
 
         case '/subjects':
@@ -292,6 +306,8 @@ class DeepLinkService {
     if (authService.user.value == null && route != VIEWS.login.path) {
       // User not logged in, navigate to login first
       Get.offAllNamed(VIEWS.login.path);
+    } else if (route == VIEWS.register.path) {
+      Get.offAllNamed(route);
     } else {
       // User is logged in or navigating to login, proceed with navigation
       if (route == VIEWS.home.path) {

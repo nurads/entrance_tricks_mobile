@@ -8,7 +8,7 @@ part of 'payment.dart';
 
 Payment _$PaymentFromJson(Map<String, dynamic> json) => Payment(
   id: (json['id'] as num).toInt(),
-  amount: json['amount'] as String,
+  amount: (json['amount'] as num).toDouble(),
   successful: json['successful'] as bool,
   receipt: json['receipt'] as String,
   package: (json['package'] as num).toInt(),

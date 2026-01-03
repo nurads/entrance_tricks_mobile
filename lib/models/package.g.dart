@@ -10,7 +10,7 @@ Package _$PackageFromJson(Map<String, dynamic> json) => Package(
   id: (json['id'] as num).toInt(),
   name: json['name'] as String,
   description: json['description'] as String,
-  price: json['price'] as String,
+  price: (json['price'] as num).toDouble(),
   durationDays: (json['duration_days'] as num).toInt(),
   exams: (json['exams'] as List<dynamic>)
       .map((e) => (e as num).toInt())
