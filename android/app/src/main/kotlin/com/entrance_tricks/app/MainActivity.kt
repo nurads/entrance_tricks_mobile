@@ -1,4 +1,4 @@
-package com.ethio_entrance_tricks.app
+package com.entrance_tricks.app
 
 import io.flutter.embedding.android.FlutterActivity
 
