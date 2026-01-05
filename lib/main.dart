@@ -27,7 +27,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'Ethio Entrance, Freshman Tricks',
+      title: const String.fromEnvironment(
+        'APP_TITLE',
+        defaultValue: 'Ethio Entrance, Freshman Tricks',
+      ),
       theme: lightTheme(context),
       debugShowCheckedModeBanner: true, // Remove debug banner
       getPages: [
