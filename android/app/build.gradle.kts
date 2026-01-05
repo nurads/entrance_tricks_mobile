@@ -15,7 +15,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.ethio_entrance_tricks.app"
+    namespace = "com.ministry_tricks.app"
     compileSdk = flutter.targetSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -29,7 +29,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.ethio_entrance_tricks.app"
+        applicationId = "com.ministry_tricks.app"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
