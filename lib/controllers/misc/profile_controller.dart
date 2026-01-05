@@ -1,4 +1,5 @@
 import 'package:vector_academy/utils/storages/storages.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:get/get.dart';
 import 'package:vector_academy/views/views.dart';
 import 'package:vector_academy/services/services.dart';
@@ -107,7 +108,9 @@ class ProfileController extends GetxController {
   Future<void> loadGrades() async {
     try {
       final gradeService = Get.find<GradeService>();
-      _availableGrades = await gradeService.getGrades();
+      final packageInfo = await PackageInfo.fromPlatform();
+      final appPackage = packageInfo.packageName;
+      _availableGrades = await gradeService.getGrades(appPackage);
       _selectedGrade = user?.grade;
       update();
     } catch (e) {

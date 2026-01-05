@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:vector_academy/models/models.dart';
 import 'package:vector_academy/services/services.dart';
 import 'package:vector_academy/services/api/exceptions.dart';
@@ -69,7 +70,9 @@ class RegisterController extends GetxController {
 
   void loadGrades() async {
     try {
-      gradeOptions = await GradeService().getGrades();
+      final packageInfo = await PackageInfo.fromPlatform();
+      final appPackage = packageInfo.packageName;
+      gradeOptions = await GradeService().getGrades(appPackage);
       gradeOptions.sort((a, b) => a.name.compareTo(b.name));
       update();
     } catch (e) {

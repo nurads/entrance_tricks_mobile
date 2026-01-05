@@ -7,10 +7,10 @@ import '../../utils/utils.dart';
 class GradeService extends GetxController {
   final ApiClient apiClient = ApiClient();
 
-  Future<List<Grade>> getGrades() async {
+  Future<List<Grade>> getGrades(String appPackage) async {
     try {
       final response = await apiClient.get(
-        '/app/grades/',
+        '/app/grades/?app_package=$appPackage',
         authenticated: false,
       );
 

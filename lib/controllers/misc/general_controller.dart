@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:vector_academy/models/models.dart';
 import 'package:vector_academy/services/services.dart';
 
@@ -14,7 +15,9 @@ class GeneralController extends GetxController {
     update();
 
     try {
-      _grades = await GradeService().getGrades();
+      final packageInfo = await PackageInfo.fromPlatform();
+      final appPackage = packageInfo.packageName;
+      _grades = await GradeService().getGrades(appPackage);
       _grades.sort((a, b) => a.name.compareTo(b.name));
     } catch (e) {
       Get.snackbar('Error', 'Failed to load grades');
