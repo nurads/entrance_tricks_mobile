@@ -5,7 +5,6 @@ import "package:vector_academy/models/models.dart";
 import "package:vector_academy/utils/utils.dart";
 import "package:vector_academy/services/services.dart";
 import 'package:vector_academy/views/views.dart';
-import 'package:vector_academy/views/common/profile_page.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 

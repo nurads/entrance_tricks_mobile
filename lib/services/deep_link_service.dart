@@ -7,7 +7,6 @@ import 'package:vector_academy/services/services.dart';
 import 'package:vector_academy/utils/device/device.dart';
 import 'package:vector_academy/utils/storages/storages.dart';
 import 'package:vector_academy/utils/utils.dart';
-import 'package:vector_academy/views/exam/exam_detail_page.dart';
 import 'package:vector_academy/views/views.dart';
 
 class DeepLinkService {

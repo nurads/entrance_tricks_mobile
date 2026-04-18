@@ -7,7 +7,6 @@ import 'package:vector_academy/controllers/misc/downloads_controller.dart';
 import 'package:vector_academy/models/models.dart';
 import 'package:vector_academy/services/services.dart';
 import 'package:vector_academy/utils/device/device.dart';
-import 'package:vector_academy/utils/share_utils.dart';
 import 'package:vector_academy/utils/storages/storages.dart';
 import 'package:vector_academy/utils/utils.dart';
 import 'package:vector_academy/views/exam/exam_result_page.dart';
@@ -127,8 +126,10 @@ class _ExamDetailPageState extends State<ExamDetailPage> {
     });
 
     try {
-      final questions =
-          await _resolveQuestionsForMode(selectedMode, resume: resume);
+      final questions = await _resolveQuestionsForMode(
+        selectedMode,
+        resume: resume,
+      );
       if (questions.isEmpty) {
         AppSnackbar.showInfo(
           'No Questions Available',
@@ -143,10 +144,7 @@ class _ExamDetailPageState extends State<ExamDetailPage> {
           initialTimeMinutes: _exam.duration,
           questions: questions,
           onComplete: (answers, _) {
-            final correctAnswers = _calculateCorrectAnswers(
-              answers,
-              questions,
-            );
+            final correctAnswers = _calculateCorrectAnswers(answers, questions);
             final score = questions.isEmpty
                 ? 0
                 : (correctAnswers / questions.length * 100).round();
@@ -247,8 +245,9 @@ class _ExamDetailPageState extends State<ExamDetailPage> {
             device.id,
             _exam.id,
           );
-          final filtered =
-              allQuestions.where((question) => !question.hasUserAnswered).toList();
+          final filtered = allQuestions
+              .where((question) => !question.hasUserAnswered)
+              .toList();
 
           if (filtered.isNotEmpty) {
             questionsToShow = filtered;
@@ -394,7 +393,8 @@ class _ExamDetailPageState extends State<ExamDetailPage> {
           child: _HighlightTile(
             icon: Icons.help_center,
             label: 'Questions',
-            value: _exam.totalQuestions?.toString() ??
+            value:
+                _exam.totalQuestions?.toString() ??
                 (_exam.questions.isNotEmpty
                     ? '${_exam.questions.length}'
                     : 'Unknown'),
@@ -427,8 +427,9 @@ class _ExamDetailPageState extends State<ExamDetailPage> {
                 _StatusChip(
                   icon: Icons.download_done,
                   label: _isDownloaded ? 'Downloaded' : 'Not downloaded',
-                  color:
-                      _isDownloaded ? Colors.green : theme.colorScheme.secondary,
+                  color: _isDownloaded
+                      ? Colors.green
+                      : theme.colorScheme.secondary,
                 ),
                 if (_exam.year != null)
                   _StatusChip(
@@ -612,9 +613,7 @@ class _StatusChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: color.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -697,8 +696,10 @@ class _ModeCard extends StatelessWidget {
                     if (badgeText != null) ...[
                       SizedBox(height: 6),
                       Container(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: accent.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(20),
@@ -744,9 +745,7 @@ class _DisabledBanner extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.orange.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.orange.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -756,9 +755,9 @@ class _DisabledBanner extends StatelessWidget {
             child: Text(
               message,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.orange[900],
-                    fontWeight: FontWeight.w600,
-                  ),
+                color: Colors.orange[900],
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],

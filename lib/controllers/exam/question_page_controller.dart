@@ -266,7 +266,7 @@ class QuestionPageController extends GetxController {
       AlertDialog(
         title: Text('Submission Failed'),
         content: Text(
-          'Failed to submit your answers. Please check your internet connection and try again.\n\nError: ${errorMessage.length > 100 ? errorMessage.substring(0, 100) + "..." : errorMessage}',
+          'Failed to submit your answers. Please check your internet connection and try again.\n\nError: ${errorMessage.length > 100 ? "${errorMessage.substring(0, 100)}..." : errorMessage}',
         ),
         actions: [
           TextButton(

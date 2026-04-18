@@ -87,12 +87,8 @@ class AddPlanController extends GetxController {
         startTime?.minute ?? 0,
       );
       // Automatically set default times if not set
-      if (startTime == null) {
-        startTime = TimeOfDay(hour: 9, minute: 0);
-      }
-      if (endTime == null) {
-        endTime = TimeOfDay(hour: 10, minute: 0);
-      }
+      startTime ??= TimeOfDay(hour: 9, minute: 0);
+      endTime ??= TimeOfDay(hour: 10, minute: 0);
       update();
     }
   }

@@ -162,7 +162,7 @@ class AgentStatusPage extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          '${agent.earnings!.toStringAsFixed(2)}',
+                          agent.earnings!.toStringAsFixed(2),
                           style: const TextStyle(
                             fontSize: 36,
                             fontWeight: FontWeight.bold,

@@ -9,11 +9,11 @@ class PaymentMethodsScreen extends StatelessWidget {
   final String subjectTitle;
 
   const PaymentMethodsScreen({
-    Key? key,
+    super.key,
     required this.subjectId,
     required this.amount,
     required this.subjectTitle,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
