@@ -59,11 +59,11 @@ class ChapterDetailController extends GetxController {
     chapterId = Get.arguments?['chapterId'] ?? 1;
     subjectId = Get.arguments?['subjectId'] ?? 1;
     _user = await HiveUserStorage().getUser();
+    _registerDownloadCallbacks();
     loadChapterDetail();
     loadVideos();
     loadNotes();
     loadQuizzes();
-    _loadDownloadedNotes(); // Add this line
     HiveUserStorage().listen((event) {
       _user = event;
       loadChapterDetail();
@@ -72,6 +72,109 @@ class ChapterDetailController extends GetxController {
       loadQuizzes();
     }, 'user');
     super.onInit();
+  }
+
+  @override
+  void onClose() {
+    _clearDownloadCallbacks();
+    super.onClose();
+  }
+
+  /// Push live progress/completion events from the permanent DownloadsController
+  /// into this controller's model objects so the UI stays in sync.
+  void _registerDownloadCallbacks() {
+    _downloadsController.onVideoProgress = (videoId, progress) {
+      final v = _videos.firstWhereOrNull((v) => v.id == videoId);
+      if (v != null) {
+        v.isDownloading = true;
+        v.downloadProgress = progress;
+        update();
+      }
+    };
+    _downloadsController.onVideoCompleted = (videoId, filePath) {
+      final v = _videos.firstWhereOrNull((v) => v.id == videoId);
+      if (v != null) {
+        v.filePath = filePath;
+        v.isDownloaded = true;
+        v.isDownloading = false;
+        v.downloadProgress = 1.0;
+        update();
+      }
+    };
+    _downloadsController.onVideoError = (videoId) {
+      final v = _videos.firstWhereOrNull((v) => v.id == videoId);
+      if (v != null) {
+        v.isDownloading = false;
+        v.downloadProgress = 0.0;
+        update();
+      }
+    };
+    _downloadsController.onNoteProgress = (noteId, progress) {
+      final n = _notes.firstWhereOrNull((n) => n.id == noteId);
+      if (n != null) {
+        n.isDownloading = true;
+        n.downloadProgress = progress;
+        noteDownloadProgress[noteId] = {
+          'progress': progress,
+          'isDownloading': true,
+        };
+        update();
+      }
+    };
+    _downloadsController.onNoteCompleted = (noteId, filePath) {
+      final n = _notes.firstWhereOrNull((n) => n.id == noteId);
+      if (n != null) {
+        n.filePath = filePath;
+        n.isDownloaded = true;
+        n.isDownloading = false;
+        n.downloadProgress = 1.0;
+        noteDownloadProgress[noteId] = {
+          'progress': 1.0,
+          'isDownloading': false,
+        };
+        update();
+      }
+    };
+    _downloadsController.onNoteError = (noteId) {
+      final n = _notes.firstWhereOrNull((n) => n.id == noteId);
+      if (n != null) {
+        n.isDownloading = false;
+        n.downloadProgress = 0.0;
+        noteDownloadProgress.remove(noteId);
+        update();
+      }
+    };
+  }
+
+  void _clearDownloadCallbacks() {
+    _downloadsController.onVideoProgress = null;
+    _downloadsController.onVideoCompleted = null;
+    _downloadsController.onVideoError = null;
+    _downloadsController.onNoteProgress = null;
+    _downloadsController.onNoteCompleted = null;
+    _downloadsController.onNoteError = null;
+  }
+
+  /// Restores in-progress download state when navigating back to this page.
+  void _syncActiveDownloads() {
+    for (final v in _videos) {
+      final progress = _downloadsController.activeVideoDownloads[v.id];
+      if (progress != null) {
+        v.isDownloading = true;
+        v.downloadProgress = progress;
+      }
+    }
+    for (final n in _notes) {
+      final progress = _downloadsController.activeNoteDownloads[n.id];
+      if (progress != null) {
+        n.isDownloading = true;
+        n.downloadProgress = progress;
+        noteDownloadProgress[n.id] = {
+          'progress': progress,
+          'isDownloading': true,
+        };
+      }
+    }
   }
 
   void loadVideos() async {
@@ -90,6 +193,7 @@ class ChapterDetailController extends GetxController {
       logger.e('Error loading videos: $e');
       _videos = await _hiveVideoStorage.getVideos(chapterId);
     }
+    _syncActiveDownloads();
     _isVideosLoading = false;
     update();
   }
@@ -109,6 +213,7 @@ class ChapterDetailController extends GetxController {
       logger.e('Error loading notes: $e');
       _notes = await _hiveNoteStorage.getNotes(chapterId);
     }
+    _syncActiveDownloads();
     _isNotesLoading = false;
     update();
   }
@@ -283,152 +388,27 @@ class ChapterDetailController extends GetxController {
   }
 
   void downloadNote(int noteId) async {
-    try {
-      final note = _notes.firstWhereOrNull((n) => n.id == noteId);
-      if (note != null) {
-        // Check if already downloaded
-        if (note.isDownloaded &&
-            note.filePath != null &&
-            note.filePath!.isNotEmpty) {
-          // If it's a PDF, open it directly
-          if (note.content.toLowerCase() == 'pdf') {
-            openPDF(noteId);
-          } else {
-            // For other types, you could implement other viewers or just show success
-            Get.snackbar(
-              'Info',
-              'Note is already downloaded and available offline',
-            );
-          }
-          return;
-        }
-
-        // Check if already downloading
-        if (note.isDownloading) {
-          Get.snackbar(
-            'Already Downloading',
-            'This note is already being downloaded',
-            backgroundColor: Colors.orange,
-            colorText: Colors.white,
-          );
-          return;
-        }
-
-        // Start download process
-        note.isDownloading = true;
-        note.downloadProgress = 0.0;
-        noteDownloadProgress[noteId] = {'progress': 0.0, 'isDownloading': true};
-        update();
-
-        Get.snackbar(
-          'Downloading',
-          'Starting download of ${note.title}...',
-          backgroundColor: Colors.blue,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 2),
-        );
-
-        final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
-        await _noteApiService.downloadNote(
-          noteId,
-          deviceId: device.id,
-          onData: (data, progress) {
-            logger.d('Downloading note: $progress%');
-            // Update progress in real-time
-            note.downloadProgress = progress / 100.0;
-            noteDownloadProgress[noteId] = {
-              'progress': progress / 100.0,
-              'isDownloading': true,
-            };
-            update();
-          },
-          onDone: (path) {
-            logger.d('Downloaded note to: $path');
-
-            // Verify the file exists and has content
-            final file = File(path);
-            if (file.existsSync() && file.lengthSync() > 0) {
-              // Update note with download info
-              note.filePath = path;
-              note.isDownloaded = true;
-              note.isDownloading = false;
-              note.downloadProgress = 1.0;
-
-              // Update progress map
-              noteDownloadProgress[noteId] = {
-                'progress': 1.0,
-                'isDownloading': false,
-              };
-
-              // Save to storage
-              _hiveNoteStorage.addDownloadedNote(noteId, path);
-
-              // Update UI
-              update();
-
-              Get.snackbar(
-                'Download Complete',
-                'Note downloaded successfully',
-                backgroundColor: Colors.green,
-                colorText: Colors.white,
-                duration: const Duration(seconds: 3),
-              );
-
-              // If it's a PDF, offer to open it
-              if (note.content.toLowerCase() == 'pdf') {
-                Get.snackbar(
-                  'PDF Ready',
-                  'Tap the note to open the downloaded PDF',
-                  backgroundColor: Colors.green,
-                  colorText: Colors.white,
-                  duration: const Duration(seconds: 3),
-                );
-              }
-            } else {
-              logger.e('Downloaded file is empty or doesn\'t exist: $path');
-              // Reset download state on error
-              note.isDownloading = false;
-              note.downloadProgress = 0.0;
-              noteDownloadProgress.remove(noteId);
-              update();
-
-              Get.snackbar(
-                'Error',
-                'Downloaded file is corrupted or empty',
-                backgroundColor: Colors.red,
-                colorText: Colors.white,
-              );
-            }
-          },
-          onError: (error) {
-            logger.e('Error downloading note: $error');
-            // Reset download state on error
-            note.isDownloading = false;
-            note.downloadProgress = 0.0;
-            noteDownloadProgress.remove(noteId);
-            update();
-
-            Get.snackbar(
-              'Download Failed',
-              'Failed to download note: $error',
-              backgroundColor: Colors.red,
-              colorText: Colors.white,
-              duration: const Duration(seconds: 4),
-            );
-          },
-        );
-      } else {
-        Get.snackbar('Error', 'Note not found');
-      }
-    } catch (e) {
-      logger.e('Error downloading note: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to download note: $e',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+    final note = _notes.firstWhereOrNull((n) => n.id == noteId);
+    if (note == null) {
+      Get.snackbar('Error', 'Note not found');
+      return;
     }
+
+    // If already downloaded open it directly
+    if (note.isDownloaded &&
+        note.filePath != null &&
+        note.filePath!.isNotEmpty) {
+      if (note.content.toLowerCase() == 'pdf') {
+        openPDF(noteId);
+      } else {
+        Get.snackbar('Info', 'Note is already downloaded and available offline');
+      }
+      return;
+    }
+
+    // Delegate to the permanent DownloadsController so the download continues
+    // even after this page is popped.
+    await _downloadsController.downloadNote(note);
   }
 
   void startQuiz(Exam quiz) {
@@ -532,99 +512,15 @@ class ChapterDetailController extends GetxController {
   }
 
   void downloadVideo(int videoId) async {
-    try {
-      // // Check storage permission first
-
-      final video = _videos.firstWhereOrNull((v) => v.id == videoId);
-      if (video != null) {
-        // Set downloading state
-        video.isDownloading = true;
-        video.downloadProgress = 0.0;
-        update();
-
-        final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
-        VideoApiService().downloadVideo(
-          videoId,
-          deviceId: device.id,
-          onData: (data, progress) {
-            logger.d('Downloading video: $progress%');
-            // Update progress in real-time
-            video.downloadProgress = progress / 100.0;
-            update();
-          },
-          onDone: (path) {
-            logger.d('Downloaded video to: $path');
-
-            // Verify the file exists and has content
-            final file = File(path);
-            if (file.existsSync() && file.lengthSync() > 0) {
-              HiveVideoStorage().addDownloadedVideo(videoId, path);
-              video.filePath = path;
-              video.isDownloaded = true;
-              video.isDownloading = false;
-              video.downloadProgress = 1.0;
-              update();
-
-              Get.snackbar(
-                'Download Complete',
-                'Video downloaded successfully',
-                backgroundColor: Colors.green,
-                colorText: Colors.white,
-              );
-            } else {
-              logger.e('Downloaded file is empty or doesn\'t exist: $path');
-              video.isDownloading = false;
-              video.downloadProgress = 0.0;
-              update();
-              Get.snackbar('Error', 'Downloaded file is corrupted or empty');
-            }
-          },
-          onError: (error) {
-            logger.e('Error downloading video: $error');
-            // Reset downloading state on error
-            video.isDownloading = false;
-            video.downloadProgress = 0.0;
-            update();
-            Get.snackbar('Error', 'Failed to download video: $error');
-          },
-        );
-      } else {
-        Get.snackbar('Error', 'Video not found');
-      }
-    } catch (e) {
-      logger.e('Error downloading video: $e');
-      Get.snackbar('Error', 'Failed to download video: $e');
+    final video = _videos.firstWhereOrNull((v) => v.id == videoId);
+    if (video == null) {
+      Get.snackbar('Error', 'Video not found');
+      return;
     }
+
+    // Delegate to the permanent DownloadsController so the download continues
+    // even after this page is popped.
+    await _downloadsController.downloadVideo(video);
   }
 
-  // Add this method to load downloaded notes on init
-  void _loadDownloadedNotes() async {
-    try {
-      final downloadedNotes = await _hiveNoteStorage.getDownloadedNotes();
-
-      for (final downloadedNote in downloadedNotes) {
-        final noteId = downloadedNote['id'] as int;
-        final filePath = downloadedNote['file_path'] as String;
-
-        // Find the note in current notes list
-        final note = _notes.firstWhereOrNull((n) => n.id == noteId);
-        if (note != null) {
-          // Verify file still exists
-          final file = File(filePath);
-          if (file.existsSync()) {
-            note.isDownloaded = true;
-            note.filePath = filePath;
-          } else {
-            // File doesn't exist, remove from downloaded list
-            downloadedNotes.removeWhere((n) => n['id'] == noteId);
-            _hiveNoteStorage.setDownloadedNotes(downloadedNotes);
-          }
-        }
-      }
-
-      update();
-    } catch (e) {
-      logger.e('Error loading downloaded notes: $e');
-    }
-  }
 }
