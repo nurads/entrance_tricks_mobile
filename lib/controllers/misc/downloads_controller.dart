@@ -161,6 +161,8 @@ class DownloadsController extends GetxController {
       // Mirror state on the allVideos entry if different object
       _mirrorVideoState(video);
       update();
+      // Notify listeners (e.g. ChapterDetailController) so UI rebuilds before first file progress event.
+      onVideoProgress?.call(video.id, 0.0);
 
       final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
 
@@ -168,6 +170,8 @@ class DownloadsController extends GetxController {
         video.id,
         deviceId: device.id,
         onData: (data, progress) {
+          // Skip flutter_file_downloader's first callback (download queue id, no filename).
+          if (data == null) return;
           final p = progress / 100.0;
           video.downloadProgress = p;
           activeVideoDownloads[video.id] = p;
@@ -261,6 +265,8 @@ class DownloadsController extends GetxController {
 
       _mirrorNoteState(note);
       update();
+      // Notify listeners (e.g. ChapterDetailController) so UI rebuilds before first file progress event.
+      onNoteProgress?.call(note.id, 0.0);
 
       final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
 
@@ -268,6 +274,8 @@ class DownloadsController extends GetxController {
         note.id,
         deviceId: device.id,
         onData: (data, progress) {
+          // Skip flutter_file_downloader's first callback (download queue id, no filename).
+          if (data == null) return;
           final p = progress / 100.0;
           note.downloadProgress = p;
           activeNoteDownloads[note.id] = p;
