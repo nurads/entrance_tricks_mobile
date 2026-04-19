@@ -31,6 +31,19 @@ class DownloadsController extends GetxController {
   bool isLoadingExams = false;
   bool isLoadingNotes = false;
 
+  // Tracks active download progress by ID so it survives page navigation
+  final Map<int, double> activeVideoDownloads = {};
+  final Map<int, double> activeNoteDownloads = {};
+
+  // Callbacks set by ChapterDetailController so progress can be pushed back
+  // without creating a circular import.
+  void Function(int videoId, double progress)? onVideoProgress;
+  void Function(int videoId, String filePath)? onVideoCompleted;
+  void Function(int videoId)? onVideoError;
+  void Function(int noteId, double progress)? onNoteProgress;
+  void Function(int noteId, String filePath)? onNoteCompleted;
+  void Function(int noteId)? onNoteError;
+
   User? _user;
 
   @override
@@ -135,7 +148,7 @@ class DownloadsController extends GetxController {
       return;
     }
 
-    if (video.isDownloading) {
+    if (video.isDownloading || activeVideoDownloads.containsKey(video.id)) {
       Get.snackbar('Info', 'Video is already being downloaded');
       return;
     }
@@ -143,6 +156,10 @@ class DownloadsController extends GetxController {
     try {
       video.isDownloading = true;
       video.downloadProgress = 0.0;
+      activeVideoDownloads[video.id] = 0.0;
+
+      // Mirror state on the allVideos entry if different object
+      _mirrorVideoState(video);
       update();
 
       final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
@@ -151,7 +168,12 @@ class DownloadsController extends GetxController {
         video.id,
         deviceId: device.id,
         onData: (data, progress) {
-          video.downloadProgress = progress / 100.0;
+          final p = progress / 100.0;
+          video.downloadProgress = p;
+          activeVideoDownloads[video.id] = p;
+
+          _mirrorVideoState(video);
+          onVideoProgress?.call(video.id, p);
           update();
         },
         onDone: (path) {
@@ -159,8 +181,11 @@ class DownloadsController extends GetxController {
           video.isDownloaded = true;
           video.isDownloading = false;
           video.downloadProgress = 1.0;
+          activeVideoDownloads.remove(video.id);
 
+          _mirrorVideoState(video);
           _videoStorage.addDownloadedVideo(video.id, path);
+          onVideoCompleted?.call(video.id, path);
           update();
 
           Get.snackbar(
@@ -173,6 +198,10 @@ class DownloadsController extends GetxController {
         onError: (error) {
           video.isDownloading = false;
           video.downloadProgress = 0.0;
+          activeVideoDownloads.remove(video.id);
+
+          _mirrorVideoState(video);
+          onVideoError?.call(video.id);
           update();
 
           Get.snackbar('Error', 'Failed to download video');
@@ -181,9 +210,35 @@ class DownloadsController extends GetxController {
     } catch (e) {
       video.isDownloading = false;
       video.downloadProgress = 0.0;
+      activeVideoDownloads.remove(video.id);
+
+      _mirrorVideoState(video);
+      onVideoError?.call(video.id);
       update();
 
       Get.snackbar('Error', 'Failed to download video');
+    }
+  }
+
+  /// Keeps the matching entry in [allVideos] in sync when the download was
+  /// started from ChapterDetailController using a different object instance.
+  void _mirrorVideoState(Video source) {
+    final mirror = allVideos.firstWhereOrNull((v) => v.id == source.id);
+    if (mirror != null && mirror != source) {
+      mirror.isDownloading = source.isDownloading;
+      mirror.isDownloaded = source.isDownloaded;
+      mirror.downloadProgress = source.downloadProgress;
+      mirror.filePath = source.filePath;
+    }
+  }
+
+  void _mirrorNoteState(Note source) {
+    final mirror = allNotes.firstWhereOrNull((n) => n.id == source.id);
+    if (mirror != null && mirror != source) {
+      mirror.isDownloading = source.isDownloading;
+      mirror.isDownloaded = source.isDownloaded;
+      mirror.downloadProgress = source.downloadProgress;
+      mirror.filePath = source.filePath;
     }
   }
 
@@ -194,7 +249,7 @@ class DownloadsController extends GetxController {
       return;
     }
 
-    if (note.isDownloading) {
+    if (note.isDownloading || activeNoteDownloads.containsKey(note.id)) {
       Get.snackbar('Info', 'Note is already being downloaded');
       return;
     }
@@ -202,6 +257,9 @@ class DownloadsController extends GetxController {
     try {
       note.isDownloading = true;
       note.downloadProgress = 0.0;
+      activeNoteDownloads[note.id] = 0.0;
+
+      _mirrorNoteState(note);
       update();
 
       final device = await UserDevice.getDeviceInfo(_user?.phoneNumber ?? '');
@@ -210,7 +268,12 @@ class DownloadsController extends GetxController {
         note.id,
         deviceId: device.id,
         onData: (data, progress) {
-          note.downloadProgress = progress / 100.0;
+          final p = progress / 100.0;
+          note.downloadProgress = p;
+          activeNoteDownloads[note.id] = p;
+
+          _mirrorNoteState(note);
+          onNoteProgress?.call(note.id, p);
           update();
         },
         onDone: (path) {
@@ -218,8 +281,11 @@ class DownloadsController extends GetxController {
           note.isDownloaded = true;
           note.isDownloading = false;
           note.downloadProgress = 1.0;
+          activeNoteDownloads.remove(note.id);
 
+          _mirrorNoteState(note);
           _noteStorage.addDownloadedNote(note.id, path);
+          onNoteCompleted?.call(note.id, path);
           update();
 
           Get.snackbar(
@@ -232,6 +298,10 @@ class DownloadsController extends GetxController {
         onError: (error) {
           note.isDownloading = false;
           note.downloadProgress = 0.0;
+          activeNoteDownloads.remove(note.id);
+
+          _mirrorNoteState(note);
+          onNoteError?.call(note.id);
           update();
 
           Get.snackbar('Error', 'Failed to download note');
@@ -240,6 +310,10 @@ class DownloadsController extends GetxController {
     } catch (e) {
       note.isDownloading = false;
       note.downloadProgress = 0.0;
+      activeNoteDownloads.remove(note.id);
+
+      _mirrorNoteState(note);
+      onNoteError?.call(note.id);
       update();
 
       Get.snackbar('Error', 'Failed to download note');
